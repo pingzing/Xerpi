@@ -5,7 +5,7 @@ using Xamarin.Forms;
 
 namespace Xerpi.ViewModels
 {
-    public class AboutViewModel : BaseViewModel
+    public class AboutViewModel : BasePageViewModel
     {
         public override string Url => "about";
 

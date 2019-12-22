@@ -8,6 +8,9 @@ using System.Text.Json.Serialization;
 
 namespace Xerpi.Converters
 {
+    /// <summary>
+    /// Honors [EnumMember] attributes and can handle nullable enums.
+    /// </summary>
     public class EnhancedJsonStringEnumConverter : JsonConverterFactory
     {
         private readonly JsonNamingPolicy? _namingPolicy;
@@ -40,7 +43,7 @@ namespace Xerpi.Converters
             {
                 return _baseConverter.CreateConverter(typeToConvert, options);
             }
-        }
+        }        
 
         public class JsonNamingPolicyDecorator : JsonNamingPolicy
         {

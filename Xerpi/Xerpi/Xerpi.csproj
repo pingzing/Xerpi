@@ -31,12 +31,18 @@
     <Compile Update="Views\ImagesPage.xaml.cs">
       <DependentUpon>ImagesPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\ImageDetailPage.xaml.cs">
-      <DependentUpon>ImageDetailPage.xaml</DependentUpon>
+    <Compile Update="Views\ImageGalleyPage.xaml.cs">
+      <DependentUpon>ImageGalleyPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Extensions\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Controls\PostInfoBottomPanel.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

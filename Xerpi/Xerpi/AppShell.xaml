@@ -5,10 +5,9 @@
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        mc:Ignorable="d"
        xmlns:local="clr-namespace:Xerpi.Views"
-       Title="Xerpi"
        x:Class="Xerpi.AppShell"
        
-       FlyoutIcon="flyout_icon.png">
+       Title="Xerpi">
 
     <!-- 
         Styles and Resources 
@@ -31,15 +30,19 @@
         </ResourceDictionary>
     </Shell.Resources>
 
-    <!-- Your Pages -->
-    <TabBar>
-        <Tab Title="Browse" Icon="tab_feed.png">
-            <ShellContent Route="images" ContentTemplate="{DataTemplate local:ImagesPage}" />
-        </Tab>
-        <Tab Title="About" Icon="tab_about.png">
-            <ShellContent Route="about" ContentTemplate="{DataTemplate local:AboutPage}" />
-        </Tab>
-    </TabBar>
+    <Shell.Items>
+        <ShellContent Title="Browse" 
+                      Icon="tab_feed.png"
+                      Route="images"
+                      ContentTemplate="{DataTemplate local:ImagesPage}">
+        </ShellContent>
+        <ShellContent Title="About" 
+                      Icon="tab_about.png"
+                      Route="about"
+                      ContentTemplate="{DataTemplate local:AboutPage}">
+        </ShellContent>
+    </Shell.Items>
+        
 
     <!-- Optional Templates 
     // These may be provided inline as below or as separate classes.

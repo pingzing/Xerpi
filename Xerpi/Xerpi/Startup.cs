@@ -56,12 +56,12 @@ namespace Xerpi
                 x.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 x.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("pingzing-Xerpi", "1.0"));
             });
-            //services.AddTransient<IDerpiNetworkService, DerpiNetworkService>();
 
             // ViewModel singletons
             services.AddSingleton<INavigationService, NavigationService>()
+                .AddSingleton<IImageService, ImageService>()
                 .AddSingleton<ImagesViewModel>()
-                .AddSingleton<ImageDetailViewModel>()
+                .AddSingleton<ImageGalleryViewModel>()
                 .AddSingleton<AboutViewModel>();
         }
 
@@ -69,7 +69,7 @@ namespace Xerpi
         {
             var navService = services.GetRequiredService<INavigationService>();
             navService.RegisterViewModel<ImagesViewModel, ImagesPage>("images");
-            navService.RegisterViewModel<ImageDetailViewModel, ImageDetailPage>("imagedetails");
+            navService.RegisterViewModel<ImageGalleryViewModel, ImageGalleryPage>("imagegallery");
             navService.RegisterViewModel<AboutViewModel, AboutPage>("about");
         }
 

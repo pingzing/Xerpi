@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             
+             x:Class="Xerpi.Views.ImageGalleryPage"
+             
+             xmlns:converters="clr-namespace:Xerpi.Converters"
+             xmlns:viewmodels="clr-namespace:Xerpi.ViewModels"
+             xmlns:views="clr-namespace:Xerpi.Views"
+             xmlns:controls="clr-namespace:Xerpi.Controls"
+             Title="{Binding CurrentImage.BackingImage.Id}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:DerpiCdnConverter x:Key="DerpiCdnConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <CarouselView ItemsSource="{Binding Images}"
+                      CurrentItem="{Binding CurrentImage, Mode=TwoWay}"
+                      CurrentItemChangedCommand="{Binding CurrentImageChangedCommand}"
+                      CurrentItemChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=CurrentItem}">
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
+                    <views:ZoomPanContainer>
+                        <Image Source="{Binding BackingImage.Representations.Large, Converter={StaticResource DerpiCdnConverter}}"/>
+                    </views:ZoomPanContainer>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+        <controls:PostInfoBottomPanel VerticalOptions="End" Tags="{Binding CurrentImage.Tags}"/>
+    </Grid>
+
+</ContentPage>

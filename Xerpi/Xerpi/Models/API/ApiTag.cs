@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
+using Xerpi.Converters;
 
 namespace Xerpi.Models.API
 {
@@ -18,23 +19,27 @@ namespace Xerpi.Models.API
         public string NameInNamespace { get; set; }
         public string[] ImpliedTags { get; set; }
         public uint[] ImpliedTagIds { get; set; }
-        public TagCategory? Category { get; set; }
+
+        [JsonConverter(typeof(TagCategoryConverter))]
+        public TagCategory Category { get; set; }
+
+        [JsonIgnore]
+        public string TagString => $"{Name} ({Images})";
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
     public enum TagCategory
     {
-        Rating = 0,
-        Origin = 1,
-        Character = 2,
-        Species = 3,
+        None = 0,
+        Rating = 1,
+        Origin = 2,
+        Character = 3,
+        Species = 4,
+        ContentOfficial = 5,
+        ContentFanmade = 6,
+        Spoiler = 7,
+        OC = 8,
 
-        [EnumMember(Value = "content-official")]
-        ContentOfficial = 4,
-
-        [EnumMember(Value = "content-fanmade")]
-        ContentFanmade = 5,
-
-        Spoiler = 6,
+        Unmapped = 99,
     }
 }

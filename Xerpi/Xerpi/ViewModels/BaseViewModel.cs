@@ -2,27 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 namespace Xerpi.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
-        public virtual string Url => throw new ArgumentException("BaseViewModel cannot be navigated to.");
-
-        public object? NavigationParameter { get; set; }
-
-        string title = string.Empty;
-        public string Title
-        {
-            get { return title; }
-            set { SetProperty(ref title, value); }
-        }
-
-        public virtual Task NavigatedTo() { return Task.CompletedTask; }
-        public virtual Task NavigatedFrom() { return Task.CompletedTask; }
-
-        protected bool SetProperty<T>(ref T backingStore, T value,
+        protected bool Set<T>(ref T backingStore, T value,
             [CallerMemberName]string propertyName = "",
             Action? onChanged = null)
         {
@@ -35,7 +20,6 @@ namespace Xerpi.ViewModels
             return true;
         }
 
-        #region INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
@@ -45,6 +29,5 @@ namespace Xerpi.ViewModels
 
             changed.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        #endregion
     }
 }

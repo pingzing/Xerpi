@@ -16,17 +16,20 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <CollectionView ItemsSource="{Binding Images}"
-                    SelectionChanged="CollectionView_SelectionChanged"
-                    SelectionMode="Single">
-        <CollectionView.ItemsLayout>
-            <GridItemsLayout Orientation="Vertical" Span="2"/>
-        </CollectionView.ItemsLayout>
-        <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="api:ApiImage">
-                <Image Source="{Binding Representations.Thumb, Converter={StaticResource DerpiCdnConverter}}"/>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+    <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                 Command="{Binding RefreshCommand}">
+        <CollectionView ItemsSource="{Binding Images}"
+                        SelectionChanged="CollectionView_SelectionChanged"
+                        SelectionMode="Single">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="2"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="api:ApiImage">
+                    <Image Source="{Binding Representations.Thumb, Converter={StaticResource DerpiCdnConverter}}"/>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
 
 </ContentPage>

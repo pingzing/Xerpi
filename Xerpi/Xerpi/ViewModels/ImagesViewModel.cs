@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
-
+using DynamicData;
+using DynamicData.Binding;
 using Xamarin.Forms;
 
 using Xerpi.Models;
@@ -13,48 +14,60 @@ using Xerpi.Views;
 
 namespace Xerpi.ViewModels
 {
-    public class ImagesViewModel : BaseViewModel
+    public class ImagesViewModel : BasePageViewModel
     {
-        private readonly IDerpiNetworkService _derpiNetworkService;
+        private readonly IImageService _imageService;
         private readonly INavigationService _navigationService;
-        private readonly IDerpiNetworkService _networkService;
 
         public override string Url => "images";
 
-        public ObservableCollection<ApiImage> Images { get; set; }
-        public Command LoadItemsCommand { get; set; }
+        private ReadOnlyObservableCollection<ApiImage> _images;
+        public ReadOnlyObservableCollection<ApiImage> Images
+        {
+            get => _images;
+            set => Set(ref _images, value);
+        }
 
-        public ImagesViewModel(IDerpiNetworkService derpiNetworkService,
+        private bool _isRefreshing = false;
+        public bool IsRefreshing
+        {
+            get => _isRefreshing;
+            set => Set(ref _isRefreshing, value);
+        }
+
+        public Command RefreshCommand { get; set; }
+
+        public ImagesViewModel(IImageService imageService,
             INavigationService navigationService)
         {
             Title = "Browse";
-            Images = new ObservableCollection<ApiImage>();
-            LoadItemsCommand = new Command(async () => await LoadMoreItems());
-            _derpiNetworkService = derpiNetworkService;
+            RefreshCommand = new Command(async () => await Refresh());
+            _imageService = imageService;
             _navigationService = navigationService;
+
+            var operation = _imageService.CurrentImages.Connect()
+                .Sort(SortExpressionComparer<ApiImage>.Descending(x => x.Id))
+                .Bind(out _images)
+                .DisposeMany()
+                .Subscribe();
+
+            _imageService.UpdateFrontPage();
         }
 
         public override async Task NavigatedTo()
         {
-            var first15Images = await _derpiNetworkService.GetImages();
-            if (first15Images != null)
-            {
-                Images.Clear();
-                foreach (var image in first15Images.Images)
-                {
-                    Images.Add(image);
-                }
-            }
+
         }
 
-        async Task LoadMoreItems()
+        private async Task Refresh()
         {
-
+            await _imageService.UpdateFrontPage();
+            IsRefreshing = false;
         }
 
         public void ImageSelected(ApiImage selectedImage)
         {
-            _navigationService.NavigateToViewModel<ImageDetailViewModel, ApiImage>(selectedImage);
+            _navigationService.NavigateToViewModel<ImageGalleryViewModel, ApiImage>(selectedImage);
         }
     }
 }

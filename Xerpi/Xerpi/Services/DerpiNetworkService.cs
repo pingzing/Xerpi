@@ -25,7 +25,7 @@ namespace Xerpi.Services
             _jsonOptions.Converters.Add(new EnhancedJsonStringEnumConverter(allowIntegerValues: true));
         }
 
-        public async Task<ImagesResponse>? GetImages(uint page = 1, uint perPage = 15)
+        public async Task<ImagesResponse?> GetImages(uint page = 1, uint perPage = 15)
         {
             var response = await _httpClient.GetAsync($"images.json?page={page}&perpage={perPage}");
             if (!response.IsSuccessStatusCode)
@@ -37,7 +37,7 @@ namespace Xerpi.Services
             return await JsonSerializer.DeserializeAsync<ImagesResponse>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
         }
 
-        public async Task<TagsResponse>? GetTags(uint[] ids)
+        public async Task<TagsResponse?> GetTags(uint[] ids)
         {
             string idQueryParams = string.Join("&", ids.Select(x => $"ids[]={x}"));
             string url = $"api/v2/tags/fetch_many.json?{idQueryParams}";
@@ -48,7 +48,17 @@ namespace Xerpi.Services
                 return null;
             }
 
-            return await JsonSerializer.DeserializeAsync<TagsResponse>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
+            var stream = await response.Content.ReadAsStreamAsync();
+            try
+            {
+                TagsResponse tags = await JsonSerializer.DeserializeAsync<TagsResponse>(stream, _jsonOptions);
+                return tags;
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                Debug.WriteLine($"Unable to parse. {ex}. This content: {await response.Content.ReadAsStringAsync()}");
+                return null;
+            }
         }
     }
 }

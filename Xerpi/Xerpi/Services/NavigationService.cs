@@ -8,17 +8,16 @@ namespace Xerpi.Services
 {
     public interface INavigationService
     {
-        Task NavigateToViewModel<T>() where T : BaseViewModel;
-        Task NavigateToViewModel<TViewModel, TArgs>(TArgs args) where TViewModel : BaseViewModel;
+        Task NavigateToViewModel<T>() where T : BasePageViewModel;
+        Task NavigateToViewModel<TViewModel, TArgs>(TArgs args) where TViewModel : BasePageViewModel;
         void RegisterViewModel<TViewModel, TPage>(string routeUrl);
     }
-
 
     public class NavigationService : INavigationService
     {
         private Dictionary<Type, Type> _vmToPageMapping = new Dictionary<Type, Type>();
 
-        public async Task NavigateToViewModel<T>() where T : BaseViewModel
+        public async Task NavigateToViewModel<T>() where T : BasePageViewModel
         {
             if (!(Startup.ServiceProvider.GetService(typeof(T)) is T vmInstance))
             {
@@ -28,7 +27,7 @@ namespace Xerpi.Services
             await Shell.Current.GoToAsync(new ShellNavigationState(vmInstance.Url));
         }
 
-        public async Task NavigateToViewModel<TViewModel, TArgs>(TArgs args) where TViewModel : BaseViewModel
+        public async Task NavigateToViewModel<TViewModel, TArgs>(TArgs args) where TViewModel : BasePageViewModel
         {
             if (!(Startup.ServiceProvider.GetService(typeof(TViewModel)) is TViewModel vmInstance))
             {

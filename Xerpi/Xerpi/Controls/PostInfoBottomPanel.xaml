@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:api="clr-namespace:Xerpi.Models.API"
+             xmlns:converters="clr-namespace:Xerpi.Converters"
+             mc:Ignorable="d"
+             x:Class="Xerpi.Controls.PostInfoBottomPanel"
+             x:Name="thisPostInfoPanel"
+             
+             BackgroundColor="White"
+             HeightRequest="200">
+
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <converters:TagCategoryForegroundConverter x:Key="ForegroundConverter"/>
+            <converters:TagCategoryBackgroundConverter x:Key="BackgroundConverter"/>
+        </ResourceDictionary>
+    </ContentView.Resources>
+
+    <ScrollView>
+        <StackLayout>
+            <Label Text="Actually, maybe scores first"/>
+            <FlexLayout Direction="Row" 
+                        Wrap="Wrap"
+                        AlignItems="Start" 
+                        JustifyContent="SpaceAround"
+                        BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="api:ApiTag">
+                        <Frame BackgroundColor="{Binding Category, Converter={StaticResource BackgroundConverter}}" 
+                               Padding="10, 5, 10, 5" 
+                               Margin="0, 3, 0, 3">
+                            <Label Text="{Binding TagString}" TextColor="{Binding Category, Converter={StaticResource ForegroundConverter}}"/>
+                        </Frame>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            <Label Text="Then, comments"/>
+        </StackLayout>
+    </ScrollView>
+</ContentView>

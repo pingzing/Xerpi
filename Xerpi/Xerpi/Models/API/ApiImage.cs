@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Xerpi.Models.API
 {
@@ -10,7 +11,7 @@ namespace Xerpi.Models.API
         public DateTimeOffset UpdatedAt { get; set; }
         public DateTimeOffset FirstSeenAt { get; set; }
         public string Tags { get; set; }
-
+        [JsonPropertyName("tag_ids")]
         public uint[] TagIds { get; set; }
         public uint UploaderId { get; set; }
         public int Score { get; set; }
