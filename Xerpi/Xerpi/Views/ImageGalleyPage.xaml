@@ -11,6 +11,7 @@
              xmlns:viewmodels="clr-namespace:Xerpi.ViewModels"
              xmlns:views="clr-namespace:Xerpi.Views"
              xmlns:controls="clr-namespace:Xerpi.Controls"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              Title="{Binding CurrentImage.BackingImage.Id}">
 
     <ContentPage.Resources>
@@ -27,7 +28,7 @@
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
                     <views:ZoomPanContainer>
-                        <Image Source="{Binding BackingImage.Representations.Large, Converter={StaticResource DerpiCdnConverter}}"/>
+                        <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Large, Converter={StaticResource DerpiCdnConverter}}"/>
                     </views:ZoomPanContainer>
                 </DataTemplate>
             </CarouselView.ItemTemplate>

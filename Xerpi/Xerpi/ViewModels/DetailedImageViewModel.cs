@@ -1,15 +1,17 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Xerpi.Models.API;
 using Xerpi.Services;
+using DynamicData;
+using System.Linq;
+using Xerpi.Models;
 
 namespace Xerpi.ViewModels
 {
     public class DetailedImageViewModel : BaseViewModel
     {
         private ApiImage? _backingImage;
-        private readonly IDerpiNetworkService _networkService;
 
         public ApiImage BackingImage
         {
@@ -18,17 +20,25 @@ namespace Xerpi.ViewModels
         }
 
         private ReadOnlyObservableCollection<ApiTag> _tags;
+        private readonly IImageService _imageService;
+
         public ReadOnlyObservableCollection<ApiTag> Tags
         {
             get => _tags;
             set => Set(ref _tags, value);
         }
 
-        public DetailedImageViewModel(ApiImage backingImage,
-            IDerpiNetworkService networkService)
+        public DetailedImageViewModel(ApiImage backingImage, IImageService imageService)
         {
             BackingImage = backingImage;
-            _networkService = networkService;
+            _imageService = imageService;
+
+            var disposable = _imageService.Tags.Connect()
+                .Filter(x => BackingImage.TagIds.Contains(x.Id))
+                .Sort(new ApiTagComparer())
+                .Bind(out _tags)
+                .DisposeMany()
+                .Subscribe();
         }
 
         public async Task InitExternalData()
@@ -37,14 +47,10 @@ namespace Xerpi.ViewModels
 
             //TODO: Tags should come from a TagService that maintains an ID-based
             // cache. Should also sort by a) Category and b) Alphabetically
-            var tags = await _networkService.GetTags(BackingImage?.TagIds);
-            if (tags == null)
+            if (BackingImage?.TagIds != null)
             {
-                return;
+                await _imageService.UpdateTags(BackingImage.TagIds);
             }
-
-            Tags = new ReadOnlyObservableCollection<ApiTag>(
-                new ObservableCollection<ApiTag>(tags.Tags));
         }
     }
 }

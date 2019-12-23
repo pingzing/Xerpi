@@ -16,7 +16,6 @@ namespace Xerpi.ViewModels
     {
         public override string Url => "imagegallery";
         private readonly IImageService _imageService;
-        private readonly IDerpiNetworkService _networkService;
 
         private DetailedImageViewModel? _currentImage;
         public DetailedImageViewModel CurrentImage
@@ -35,25 +34,25 @@ namespace Xerpi.ViewModels
 
         public Command<DetailedImageViewModel> CurrentImageChangedCommand { get; private set; }
 
-        public ImageGalleryViewModel(IImageService imageService,
-            IDerpiNetworkService networkService)
+        public ImageGalleryViewModel(IImageService imageService)
         {
             _imageService = imageService;
-            _networkService = networkService;
+            _images = new ReadOnlyObservableCollection<DetailedImageViewModel>(new ObservableCollection<DetailedImageViewModel>());
 
             CurrentImageChangedCommand = new Command<DetailedImageViewModel>(CurrentImageChanged);
         }
 
-        private async void CurrentImageChanged(DetailedImageViewModel obj)
+        private async void CurrentImageChanged(DetailedImageViewModel newImage)
         {
-            await obj.InitExternalData();
+            await newImage.InitExternalData();
         }
 
-        public override async Task NavigatedTo()
+        public override Task NavigatedTo()
         {
             var operation = _imageService.CurrentImages.Connect()
+                .Filter(x => !x.Image.EndsWith(".webm"))
                 .Sort(SortExpressionComparer<ApiImage>.Descending(x => x.Id))
-                .Transform(x => new DetailedImageViewModel(x, _networkService))
+                .Transform(x => new DetailedImageViewModel(x, _imageService))
                 .Bind(out _images)
                 .DisposeMany()
                 .Subscribe();
@@ -68,6 +67,8 @@ namespace Xerpi.ViewModels
                     CurrentImage = foundImage;
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         public override Task NavigatedFrom()

@@ -41,6 +41,11 @@
                       Route="about"
                       ContentTemplate="{DataTemplate local:AboutPage}">
         </ShellContent>
+        <ShellContent Title="Settings"
+                      Icon="tab_about.png"
+                      Route="settings"
+                      ContentTemplate="{DataTemplate local:SettingsPage}">
+        </ShellContent>
     </Shell.Items>
         
 

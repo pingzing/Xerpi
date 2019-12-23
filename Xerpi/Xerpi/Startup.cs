@@ -59,10 +59,12 @@ namespace Xerpi
 
             // ViewModel singletons
             services.AddSingleton<INavigationService, NavigationService>()
+                .AddTransient<ISettingsService, SettingsService>()
                 .AddSingleton<IImageService, ImageService>()
                 .AddSingleton<ImagesViewModel>()
                 .AddSingleton<ImageGalleryViewModel>()
-                .AddSingleton<AboutViewModel>();
+                .AddSingleton<AboutViewModel>()
+                .AddSingleton<SettingsViewModel>();
         }
 
         private static void RegisterNavigationServiceRoutes(IServiceProvider services)
@@ -71,6 +73,7 @@ namespace Xerpi
             navService.RegisterViewModel<ImagesViewModel, ImagesPage>("images");
             navService.RegisterViewModel<ImageGalleryViewModel, ImageGalleryPage>("imagegallery");
             navService.RegisterViewModel<AboutViewModel, AboutPage>("about");
+            navService.RegisterViewModel<SettingsViewModel, SettingsPage>("settings");
         }
 
         private static string ExtractResource(string fileName, string location)

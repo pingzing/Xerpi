@@ -23,26 +23,14 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" />
+    <PackageReference Include="Xamarin.FFImageLoading" Version="2.4.11.982" />
+    <PackageReference Include="Xamarin.FFImageLoading.Forms" Version="2.4.11.982" />
     <PackageReference Include="Xamarin.Forms" Version="4.4.0.991265" />  
     <PackageReference Include="Xamarin.Essentials" Version="1.3.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Views\ImagesPage.xaml.cs">
-      <DependentUpon>ImagesPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\ImageGalleyPage.xaml.cs">
-      <DependentUpon>ImageGalleyPage.xaml</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Extensions\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Controls\PostInfoBottomPanel.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
 </Project>

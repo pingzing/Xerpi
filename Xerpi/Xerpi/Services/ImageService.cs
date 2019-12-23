@@ -1,7 +1,6 @@
 ﻿using DynamicData;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using Xerpi.Models.API;
 
@@ -9,38 +8,100 @@ namespace Xerpi.Services
 {
     public interface IImageService
     {
+        IObservableCache<ApiTag, uint> Tags { get; }
         IObservableCache<ApiImage, uint> CurrentImages { get; }
-        Task UpdateFrontPage(uint page = 1, uint itemsPerPage = 15);
+        Task SetImagesToFrontPage(uint page = 1, uint itemsPerPage = 15);
+        Task<uint> SetImagesToSearch(string query, uint page = 1, uint itemsPerPage = 15);
+        Task UpdateTags(uint[] tags);
     }
 
     public class ImageService : IImageService
     {
         private readonly IDerpiNetworkService _networkService;
+        private SearchType _lastSearchType = SearchType.HomePage;
 
         private SourceCache<ApiImage, uint> _currentImages = new SourceCache<ApiImage, uint>(x => x.Id);
         public IObservableCache<ApiImage, uint> CurrentImages { get; private set; }
 
+        private SourceCache<ApiTag, uint> _tags = new SourceCache<ApiTag, uint>(x => x.Id);
+        public IObservableCache<ApiTag, uint> Tags { get; private set; }
+
         public ImageService(IDerpiNetworkService networkService)
         {
             CurrentImages = _currentImages.AsObservableCache();
+            Tags = _tags.AsObservableCache();
             _networkService = networkService;
         }
 
-        public async Task UpdateFrontPage(uint page = 1, uint itemsPerPage = 15)
+        public async Task SetImagesToFrontPage(uint page = 1, uint itemsPerPage = 15)
         {
+            if (_lastSearchType != SearchType.HomePage)
+            {
+                _currentImages.Clear();
+            }
+
             var images = await _networkService.GetImages(page, itemsPerPage);
             if (images == null)
             {
                 return;
             }
 
+            // TODO: perf - can change this to EditDiff
             _currentImages.Edit(x =>
             {
-                foreach (var image in images.Images)
+                foreach (var image in images)
                 {
                     x.AddOrUpdate(image);
                 }
             });
+            _lastSearchType = SearchType.HomePage;
         }
+
+        public async Task<uint> SetImagesToSearch(string query, uint page = 1, uint itemsPerPage = 15)
+        {
+            if (_lastSearchType != SearchType.SearchQuery)
+            {
+                _currentImages.Clear();
+            }
+
+            var searchResult = await _networkService.SearchImages(query, page, itemsPerPage);
+            if (searchResult?.Search == null)
+            {
+                return 0;
+            }
+
+            // TODO: perf - can change this to EditDiff
+            _currentImages.Edit(x =>
+            {
+                foreach (var image in searchResult.Search)
+                {
+                    x.AddOrUpdate(image);
+                }
+            });
+
+            _lastSearchType = SearchType.SearchQuery;
+            return searchResult.Total;
+        }
+
+        public async Task UpdateTags(uint[] tags)
+        {
+            IEnumerable<uint> missingTags = tags.Except(_tags.Keys);
+            var newTags = await _networkService.GetTags(missingTags);
+            if (newTags == null)
+            {
+                return;
+            }
+
+            // TODO: perf - can change this to EditDiff
+            _tags.Edit(x =>
+            {
+                foreach (var tag in newTags)
+                {
+                    x.AddOrUpdate(tag);
+                }
+            });
+        }
+
+        private enum SearchType { HomePage, SearchQuery }
     }
 }

@@ -1,4 +1,7 @@
-﻿using Windows.ApplicationModel.Activation;
+﻿using FFImageLoading.Forms;
+using System.Collections.Generic;
+using System.Reflection;
+using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -21,8 +24,15 @@ namespace Xerpi.UWP
                 rootFrame = new Frame();
 
                 Xamarin.Forms.Forms.SetFlags("Shell_UWP_Experimental", "CollectionView_Experimental");
+                FFImageLoading.Forms.Platform.CachedImageRenderer.Init();
 
-                Xamarin.Forms.Forms.Init(e);
+                var assembliesToInclude = new List<Assembly>
+                {
+                    typeof(CachedImage).GetTypeInfo().Assembly,
+                    typeof(FFImageLoading.Forms.Platform.CachedImageRenderer).GetTypeInfo().Assembly
+                };
+
+                Xamarin.Forms.Forms.Init(e, assembliesToInclude);
 
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;

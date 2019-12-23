@@ -5,6 +5,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:api="clr-namespace:Xerpi.Models.API"
              xmlns:converters="clr-namespace:Xerpi.Converters"
+             xmlns:controls="clr-namespace:Xerpi.Controls"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              mc:Ignorable="d"
              x:Class="Xerpi.Views.ImagesPage"
              Title="{Binding Title}"
@@ -16,17 +18,28 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
+    <Shell.SearchHandler>
+        <controls:ImageSearchHandler x:Name="ImageSearchHandler" 
+                                     Command="{Binding SearchTriggeredCommand}"
+                                     CommandParameter="{Binding Source={x:Reference ImageSearchHandler}, Path=Query}"
+                                     SearchBoxVisibility="Collapsible"/>
+    </Shell.SearchHandler>
+
     <RefreshView IsRefreshing="{Binding IsRefreshing}"
                  Command="{Binding RefreshCommand}">
-        <CollectionView ItemsSource="{Binding Images}"
+        <CollectionView x:Name="ImageListCollectionView" ItemsSource="{Binding Images}"
                         SelectionChanged="CollectionView_SelectionChanged"
-                        SelectionMode="Single">
+                        SelectionMode="Single"
+                        RemainingItemsThreshold="4"
+                        RemainingItemsThresholdReachedCommand="{Binding GetNextPageCommand}"
+                        VerticalScrollBarVisibility="Always">
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Orientation="Vertical" Span="2"/>
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="api:ApiImage">
-                    <Image Source="{Binding Representations.Thumb, Converter={StaticResource DerpiCdnConverter}}"/>
+                    <ffimageloading:CachedImage Source="{Binding Representations.Thumb, Converter={StaticResource DerpiCdnConverter}}"
+                                                DownsampleToViewSize="True"/>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
