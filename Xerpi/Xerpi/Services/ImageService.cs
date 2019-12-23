@@ -11,14 +11,15 @@ namespace Xerpi.Services
         IObservableCache<ApiTag, uint> Tags { get; }
         IObservableCache<ApiImage, uint> CurrentImages { get; }
         Task SetImagesToFrontPage(uint page = 1, uint itemsPerPage = 15);
+        Task AddPageToFrontPage(uint page = 1, uint itemsPerPage = 15);
         Task<uint> SetImagesToSearch(string query, uint page = 1, uint itemsPerPage = 15);
+        Task<uint> AddPageToSearch(string query, uint page = 1, uint itemsPerPage = 15);
         Task UpdateTags(uint[] tags);
     }
 
     public class ImageService : IImageService
     {
         private readonly IDerpiNetworkService _networkService;
-        private SearchType _lastSearchType = SearchType.HomePage;
 
         private SourceCache<ApiImage, uint> _currentImages = new SourceCache<ApiImage, uint>(x => x.Id);
         public IObservableCache<ApiImage, uint> CurrentImages { get; private set; }
@@ -35,11 +36,17 @@ namespace Xerpi.Services
 
         public async Task SetImagesToFrontPage(uint page = 1, uint itemsPerPage = 15)
         {
-            if (_lastSearchType != SearchType.HomePage)
-            {
-                _currentImages.Clear();
-            }
+            _currentImages.Clear();
+            await AddToFrontPage(page, itemsPerPage);
+        }
 
+        public async Task AddPageToFrontPage(uint page = 1, uint itemsPerPage = 15)
+        {
+            await AddToFrontPage(page, itemsPerPage);
+        }
+
+        private async Task AddToFrontPage(uint page = 1, uint itemsPerPage = 15)
+        {
             var images = await _networkService.GetImages(page, itemsPerPage);
             if (images == null)
             {
@@ -54,16 +61,21 @@ namespace Xerpi.Services
                     x.AddOrUpdate(image);
                 }
             });
-            _lastSearchType = SearchType.HomePage;
         }
 
         public async Task<uint> SetImagesToSearch(string query, uint page = 1, uint itemsPerPage = 15)
         {
-            if (_lastSearchType != SearchType.SearchQuery)
-            {
-                _currentImages.Clear();
-            }
+            _currentImages.Clear();
+            return await Search(query, page, itemsPerPage);
+        }
 
+        public async Task<uint> AddPageToSearch(string query, uint page = 1, uint itemsPerPage = 15)
+        {
+            return await Search(query, page, itemsPerPage);
+        }
+
+        private async Task<uint> Search(string query, uint page = 1, uint itemsPerPage = 15)
+        {
             var searchResult = await _networkService.SearchImages(query, page, itemsPerPage);
             if (searchResult?.Search == null)
             {
@@ -79,7 +91,6 @@ namespace Xerpi.Services
                 }
             });
 
-            _lastSearchType = SearchType.SearchQuery;
             return searchResult.Total;
         }
 
@@ -101,7 +112,5 @@ namespace Xerpi.Services
                 }
             });
         }
-
-        private enum SearchType { HomePage, SearchQuery }
     }
 }

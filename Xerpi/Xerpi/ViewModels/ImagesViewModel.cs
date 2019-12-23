@@ -80,6 +80,14 @@ namespace Xerpi.ViewModels
 
         private async Task SearchTriggered(string query)
         {
+            if (String.IsNullOrWhiteSpace(query))
+            {
+                _currentSearchQuery = null;
+                Title = "Browse";
+                await Refresh();
+                return;
+            }
+
             _currentSearchQuery = query;
             Title = query;
             _currentPage = 1;
@@ -97,11 +105,11 @@ namespace Xerpi.ViewModels
             _gettingNextPage = true;
             if (_currentSearchQuery == null)
             {
-                await _imageService.SetImagesToFrontPage(_currentPage + 1, 50);
+                await _imageService.AddPageToFrontPage(_currentPage + 1, 50);
             }
             else
             {
-                await _imageService.SetImagesToSearch(_currentSearchQuery, _currentPage + 1, 50);
+                await _imageService.AddPageToSearch(_currentSearchQuery, _currentPage + 1, 50);
             }
             _currentPage += 1;
             _gettingNextPage = false;
