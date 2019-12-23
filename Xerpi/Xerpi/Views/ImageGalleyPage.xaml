@@ -28,12 +28,16 @@
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
                     <views:ZoomPanContainer>
-                        <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Large, Converter={StaticResource DerpiCdnConverter}}"/>
+                        <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Large, Converter={StaticResource DerpiCdnConverter}}">
+                            <ffimageloading:CachedImage.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                            </ffimageloading:CachedImage.GestureRecognizers>
+                        </ffimageloading:CachedImage>
                     </views:ZoomPanContainer>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
-        <controls:PostInfoBottomPanel VerticalOptions="End" Tags="{Binding CurrentImage.Tags}"/>
+        <controls:PostInfoBottomPanel x:Name="BottomPanel" VerticalOptions="End" Tags="{Binding CurrentImage.Tags}"/>
     </Grid>
 
 </ContentPage>

@@ -9,7 +9,8 @@ namespace Xerpi.Views
     [DesignTimeVisible(false)]
     public partial class ImageGalleryPage : ContentPage
     {
-        ImageGalleryViewModel _viewModel;
+        private ImageGalleryViewModel _viewModel;
+        private bool _bottomPanelShown = true;
 
         public ImageGalleryPage()
         {
@@ -27,6 +28,24 @@ namespace Xerpi.Views
         {
             base.OnDisappearing();
             await _viewModel.NavigatedFrom();
+        }
+
+        private async void TapGestureRecognizer_Tapped(object sender, System.EventArgs e)
+        {
+            if (_bottomPanelShown)
+            {
+                double hiddenHeight = BottomPanel.Y + BottomPanel.Height;
+                await BottomPanel.TranslateTo(BottomPanel.X, hiddenHeight, 333, Easing.CubicIn);
+                BottomPanel.IsVisible = false;
+                _bottomPanelShown = false;
+            }
+            else
+            {
+                BottomPanel.IsVisible = true;
+                BottomPanel.TranslationY = BottomPanel.Y + BottomPanel.Height;
+                await BottomPanel.TranslateTo(BottomPanel.X, 0, 333, Easing.CubicOut);
+                _bottomPanelShown = true;
+            }
         }
     }
 }
