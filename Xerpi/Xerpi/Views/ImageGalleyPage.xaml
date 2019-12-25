@@ -21,23 +21,33 @@
     </ContentPage.Resources>
 
     <Grid>
-        <CarouselView ItemsSource="{Binding Images}"
+        <CarouselView x:Name="ImagesCarousel" 
+                      ItemsSource="{Binding Images}"
                       CurrentItem="{Binding CurrentImage, Mode=TwoWay}"
                       CurrentItemChangedCommand="{Binding CurrentImageChangedCommand}"
                       CurrentItemChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=CurrentItem}">
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
-                    <views:ZoomPanContainer>
-                        <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Large, Converter={StaticResource DerpiCdnConverter}}">
-                            <ffimageloading:CachedImage.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-                            </ffimageloading:CachedImage.GestureRecognizers>
-                        </ffimageloading:CachedImage>
-                    </views:ZoomPanContainer>
+                    <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Large, Converter={StaticResource DerpiCdnConverter}}"
+                                                DownsampleToViewSize="True">
+                        <ffimageloading:CachedImage.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                        </ffimageloading:CachedImage.GestureRecognizers>
+                    </ffimageloading:CachedImage>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
         <controls:PostInfoBottomPanel x:Name="BottomPanel" VerticalOptions="End" Tags="{Binding CurrentImage.Tags}"/>
+        <ScrollView x:Name="ImageViewer" 
+                    IsVisible="False" 
+                    BackgroundColor="#C7000000"                    
+                    Orientation="Both">
+            <views:ZoomPanContainer>
+                <ffimageloading:CachedImage Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}"
+                                            HeightRequest="{Binding CurrentImage.BackingImage.Height}"
+                                            WidthRequest="{Binding CurrentImage.BackingImage.Width}"/>
+            </views:ZoomPanContainer>
+        </ScrollView>
     </Grid>
 
 </ContentPage>

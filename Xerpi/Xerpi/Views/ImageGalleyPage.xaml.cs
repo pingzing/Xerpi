@@ -46,6 +46,10 @@ namespace Xerpi.Views
                 await BottomPanel.TranslateTo(BottomPanel.X, 0, 333, Easing.CubicOut);
                 _bottomPanelShown = true;
             }
+
+            ImagesCarousel.IsEnabled = false;
+            ImagesCarousel.InputTransparent = true;
+            ImageViewer.IsVisible = true;
         }
     }
 }
