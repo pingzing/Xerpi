@@ -38,16 +38,14 @@
             </CarouselView.ItemTemplate>
         </CarouselView>
         <controls:PostInfoBottomPanel x:Name="BottomPanel" VerticalOptions="End" Tags="{Binding CurrentImage.Tags}"/>
-        <ScrollView x:Name="ImageViewer" 
-                    IsVisible="False" 
-                    BackgroundColor="#C7000000"                    
-                    Orientation="Both">
-            <views:ZoomPanContainer>
-                <ffimageloading:CachedImage Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}"
-                                            HeightRequest="{Binding CurrentImage.BackingImage.Height}"
-                                            WidthRequest="{Binding CurrentImage.BackingImage.Width}"/>
-            </views:ZoomPanContainer>
-        </ScrollView>
+        <AbsoluteLayout x:Name="ImageViewer" 
+                        IsVisible="False"
+                        BackgroundColor="#C7000000">
+            <controls:PanZoomImage Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}"
+                                   HeightRequest="{Binding CurrentImage.BackingImage.Height}"
+                                   WidthRequest="{Binding CurrentImage.BackingImage.Width}"/>
+        </AbsoluteLayout>
+
     </Grid>
 
 </ContentPage>

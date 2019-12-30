@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using FFImageLoading.Forms;
 using Xamarin.Forms;
 using Xerpi.ViewModels;
 
@@ -47,6 +49,7 @@ namespace Xerpi.Views
                 _bottomPanelShown = true;
             }
 
+            // Show the zoomy/panny imgae viewer
             ImagesCarousel.IsEnabled = false;
             ImagesCarousel.InputTransparent = true;
             ImageViewer.IsVisible = true;
