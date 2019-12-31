@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using FFImageLoading.Forms;
 using Xamarin.Forms;
@@ -14,14 +15,16 @@ namespace Xerpi.Controls
         private bool _initialScaleSet = false;
 
         private double _minScale;
-        private double _maxScale = 4.0;
+        private double _maxScale = 2.0;
 
         private double _zoomStartScale;
         private double _lastTargetScale;
-        private double _lastX;
-        private double _lastY;
+        private double _currentX;
+        private double _currentY;
 
         private DateTime _tapHeardTime;
+        private DateTime _lastPinchHeard = DateTime.MinValue;
+        private List<double> _lastThreeScaleDecimals = new List<double>(3) { 0, 0, 0 };
 
         public PanZoomImage()
         {
@@ -73,25 +76,53 @@ namespace Xerpi.Controls
             if (e.Status == GestureStatus.Started)
             {
                 _zoomStartScale = Scale;
-                _lastTargetScale = e.Scale;
-                AnchorX = e.ScaleOrigin.X * Scale;
-                AnchorY = e.ScaleOrigin.Y * Scale;
             }
             else if (e.Status == GestureStatus.Running)
             {
-                if (e.Scale < 0 || Math.Abs(_lastTargetScale - e.Scale) > (_lastTargetScale * 1.3) - _lastTargetScale)
-                {
-                    // If new scale value varies too wildly, throw it away
-                    return;
-                }
                 _lastTargetScale = e.Scale;
-                double current = Scale + (e.Scale - 1) * _zoomStartScale;
+                double scaleDecimal = (e.Scale - 1) * .75; // .75 to smooth out zooming a bit
+
+                // Track the positiveness of the three most recent values. If we abruptly get something out of the ordinary,
+                // force it into the same positiveness as what we've been seeing.
+                // This is to account for what seem to be bogus values coming from the platform when zooming out slowly.
+                if (_lastThreeScaleDecimals[0] != 0 && _lastThreeScaleDecimals[1] != 0 && _lastThreeScaleDecimals[2] != 0)
+                {
+                    int negativeCount = _lastThreeScaleDecimals.Count(x => x <= 0);
+                    int positiveCount = _lastThreeScaleDecimals.Count(x => x > 0);
+                    scaleDecimal = positiveCount > negativeCount ? Math.Abs(scaleDecimal) : Math.Abs(scaleDecimal) * -1;
+                }
+                _lastThreeScaleDecimals.RemoveAt(0);
+                _lastThreeScaleDecimals.Add(scaleDecimal);
+
+                double current = Scale + scaleDecimal * .75;
                 double targetScale = Clamp(current, _minScale * (1 - Overshoot), _maxScale * (1 + Overshoot));
-                Debug.WriteLine($"'Current': {current}, Target: {targetScale}, e.Scale - 1: {e.Scale - 1}");
+
+                double relativeX = _currentX / Width;
+                // Delta width is multiplication factor that expresses the difference between true width, and currently-scaled width.
+                double deltaWidth = Width / (Width * _zoomStartScale);
+                double originX = (e.ScaleOrigin.X + relativeX) * deltaWidth;
+
+                double relativeY = _currentY / Height;
+                double deltaHeight = Height / (Height * _zoomStartScale);
+                double originY = (e.ScaleOrigin.Y + relativeY) * deltaHeight;
+
+                //double targetX = _currentX - (originX * Width) * (targetScale - _zoomStartScale);
+                //double targetY = _currentY - (originY * Height) * (targetScale - _zoomStartScale);
                 Scale = targetScale;
+                // Note: Translation is relative to the top-left of the image: 0,0.
+                // Translation coordinates use container (i.e. DIP) coordinates, NOT real pixel coordinates.
+                UpdateTranslation(originX, originY);
+
+                Debug.WriteLine($"'Current': {current}, Target: {targetScale}, Scale Decimal: {scaleDecimal}, Raw Scale: {e.Scale}, X: {originX}, Y:{originY}");
+                _lastPinchHeard = DateTime.Now;
             }
             else
             {
+                _lastPinchHeard = DateTime.Now;
+                for (int i = 0; i < 3; i++)
+                {
+                    _lastThreeScaleDecimals[i] = 0;
+                }
                 if (Scale > _maxScale)
                 {
                     await this.ScaleTo(_maxScale, 250, Easing.SpringOut);
@@ -101,32 +132,44 @@ namespace Xerpi.Controls
                     await this.ScaleTo(_minScale, 250, Easing.SpringOut);
                 }
 
-                Debug.WriteLine($"New scale: {Scale}, TransX: {TranslationX}, TransY: {TranslationY}");
+                //Debug.WriteLine($"New scale: {Scale}, TransX: {TranslationX}, TransY: {TranslationY}");
             }
         }
 
         private void OnPanUpdated(object sender, PanUpdatedEventArgs e)
         {
+            var now = DateTime.Now;
+            if (now - _lastPinchHeard < TimeSpan.FromMilliseconds(200))
+            {
+                return; // Ignore panning too soon after a pinch, so we don't teleport the image around after pinching
+            }
+
             if (e.StatusType == GestureStatus.Started)
             {
-
+                _currentX = TranslationX;
+                _currentY = TranslationY;
+                Debug.WriteLine($"Pan started at X: {TranslationX}, Y: {TranslationY}");
             }
             else if (e.StatusType == GestureStatus.Running)
             {
-                var now = DateTime.Now;
                 if (now - _tapHeardTime <= TimeSpan.FromMilliseconds(200))
                 {
                     // Quickzoom mode
                 }
                 else
                 {
-                    double currXAnchor = _lastX + (e.TotalX * Scale / WidthRequest);
-                    double currYAnchor = _lastY + (e.TotalY * Scale / HeightRequest);
-                    _lastX = AnchorX = currXAnchor;
-                    _lastY = AnchorY = currYAnchor;
-                    Debug.WriteLine($"New Anchor - X: {AnchorX}, Y: {AnchorY}");
+                    UpdateTranslation(_currentX + e.TotalX * Scale, _currentY + e.TotalY * Scale);
+                    Debug.WriteLine($"Panned to: X: {TranslationX}, Y: {TranslationY}");
                 }
             }
+        }
+
+        private void UpdateTranslation(double x, double y)
+        {
+            TranslationX = Clamp(x, (-Width / 2) * Scale, (Width / 2) * Scale);
+            TranslationY = Clamp(y, (-Height / 2) * Scale, (Height / 2) * Scale);
+            _currentX = TranslationX;
+            _currentY = TranslationY;
         }
 
         private void OnTapped(object sender, EventArgs e)

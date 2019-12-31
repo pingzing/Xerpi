@@ -41,11 +41,11 @@
         <AbsoluteLayout x:Name="ImageViewer" 
                         IsVisible="False"
                         BackgroundColor="#C7000000">
-            <controls:PanZoomImage Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}"
-                                   HeightRequest="{Binding CurrentImage.BackingImage.Height}"
-                                   WidthRequest="{Binding CurrentImage.BackingImage.Width}"/>
-        </AbsoluteLayout>
+                <controls:PanZoomImage x:Name="PanZoomImage" Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}"
+                                       HeightRequest="{Binding CurrentImage.BackingImage.Height}"
+                                       WidthRequest="{Binding CurrentImage.BackingImage.Width}"/>
+            </AbsoluteLayout>
 
-    </Grid>
+        </Grid>
 
 </ContentPage>
