@@ -22,7 +22,7 @@ namespace Xerpi.Droid
 
             base.OnCreate(savedInstanceState);
 
-            Forms.SetFlags("CollectionView_Experimental");
+            Forms.SetFlags("CollectionView_Experimental", "UseLegacyRenderers"); // Using legacy renderers until the Label FastRenderer crashes are fixed.
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
             Forms.Init(this, savedInstanceState);

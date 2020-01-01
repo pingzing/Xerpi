@@ -48,11 +48,6 @@ namespace Xerpi.Views
                 await BottomPanel.TranslateTo(BottomPanel.X, 0, 333, Easing.CubicOut);
                 _bottomPanelShown = true;
             }
-
-            // Show the zoomy/panny imgae viewer
-            ImagesCarousel.IsEnabled = false;
-            ImagesCarousel.InputTransparent = true;
-            ImageViewer.IsVisible = true;
         }
     }
 }

@@ -18,5 +18,11 @@ namespace Xerpi.ViewModels
 
         public virtual Task NavigatedTo() { return Task.CompletedTask; }
         public virtual Task NavigatedFrom() { return Task.CompletedTask; }
+
+        /// <summary>
+        /// Function to return just before going back. Return false if back navigation should be suppressed.
+        /// </summary>
+        /// <returns>True if back navigation should be suppressed, false otherwise.</returns>
+        public virtual bool OnBack() { return false; }
     }
 }

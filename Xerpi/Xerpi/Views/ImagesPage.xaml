@@ -7,6 +7,7 @@
              xmlns:converters="clr-namespace:Xerpi.Converters"
              xmlns:controls="clr-namespace:Xerpi.Controls"
              xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:extensions="clr-namespace:Xerpi.Extensions"
              mc:Ignorable="d"
              x:Class="Xerpi.Views.ImagesPage"             
              x:Name="BrowseItemsPage">
@@ -28,6 +29,7 @@
     <RefreshView IsRefreshing="{Binding IsRefreshing}"
                  Command="{Binding RefreshCommand}">
         <CollectionView x:Name="ImageListCollectionView" ItemsSource="{Binding Images}"
+                        ItemSizingStrategy="MeasureFirstItem"                        
                         SelectionChanged="CollectionView_SelectionChanged"
                         SelectionMode="Single"
                         RemainingItemsThreshold="4"
@@ -39,7 +41,13 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="api:ApiImage">
                     <ffimageloading:CachedImage Source="{Binding Representations.Thumb, Converter={StaticResource DerpiCdnConverter}}"
-                                                DownsampleToViewSize="True"/>
+                                                WidthRequest="150"
+                                                HeightRequest="150"
+                                                DownsampleToViewSize="True">
+                        <ffimageloading:CachedImage.CacheKeyFactory>
+                            <extensions:ImageCacheKeyFactory ImageType="Thumbnail" />
+                        </ffimageloading:CachedImage.CacheKeyFactory>
+                    </ffimageloading:CachedImage>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

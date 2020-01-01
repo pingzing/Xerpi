@@ -16,6 +16,7 @@ namespace Xerpi.ViewModels
     {
         public override string Url => "imagegallery";
         private readonly IImageService _imageService;
+        private readonly INavigationService _navigationService;
 
         private DetailedImageViewModel? _currentImage;
         public DetailedImageViewModel CurrentImage
@@ -32,19 +33,48 @@ namespace Xerpi.ViewModels
             set => Set(ref _images, value);
         }
 
-        public Command<DetailedImageViewModel> CurrentImageChangedCommand { get; private set; }
+        private bool _isImageViewerOpen = false;
+        public bool IsImageViewerOpen
+        {
+            get => _isImageViewerOpen;
+            set => Set(ref _isImageViewerOpen, value);
+        }
 
-        public ImageGalleryViewModel(IImageService imageService)
+        public Command<DetailedImageViewModel> CurrentImageChangedCommand { get; private set; }
+        public Command SoftBackPressedCommand { get; private set; }
+        public Command FullSizeButtonCommand { get; private set; }
+
+        public ImageGalleryViewModel(IImageService imageService,
+            INavigationService navigationService)
         {
             _imageService = imageService;
+            _navigationService = navigationService;
             _images = new ReadOnlyObservableCollection<DetailedImageViewModel>(new ObservableCollection<DetailedImageViewModel>());
 
             CurrentImageChangedCommand = new Command<DetailedImageViewModel>(CurrentImageChanged);
+            SoftBackPressedCommand = new Command(SoftBackPressed);
+            FullSizeButtonCommand = new Command(FullSizeButtonPressed);
         }
 
         private async void CurrentImageChanged(DetailedImageViewModel newImage)
         {
             await newImage.InitExternalData();
+        }
+
+        public override bool OnBack()
+        {
+            if (IsImageViewerOpen)
+            {
+                IsImageViewerOpen = false;
+                return false;
+            }
+
+            return true;
+        }
+
+        private void FullSizeButtonPressed(object obj)
+        {
+            IsImageViewerOpen = true;
         }
 
         public override Task NavigatedTo()
@@ -69,6 +99,11 @@ namespace Xerpi.ViewModels
             }
 
             return Task.CompletedTask;
+        }
+
+        private void SoftBackPressed()
+        {
+            _navigationService.Back();
         }
 
         public override Task NavigatedFrom()

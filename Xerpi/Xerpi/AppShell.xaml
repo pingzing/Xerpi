@@ -6,7 +6,7 @@
        mc:Ignorable="d"
        xmlns:local="clr-namespace:Xerpi.Views"
        x:Class="Xerpi.AppShell"
-       
+              
        Title="Xerpi">
 
     <!-- 

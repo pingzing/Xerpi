@@ -12,16 +12,38 @@
              xmlns:views="clr-namespace:Xerpi.Views"
              xmlns:controls="clr-namespace:Xerpi.Controls"
              xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
-             Title="{Binding CurrentImage.BackingImage.Id}">
+             xmlns:extensions="clr-namespace:Xerpi.Extensions">
 
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:DerpiCdnConverter x:Key="DerpiCdnConverter"/>
+            <converters:InvertBoolConverter x:Key="InvertBoolConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior Command="{Binding SoftBackPressedCommand}"/>
+    </Shell.BackButtonBehavior>
+
+    <Shell.TitleView>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Text="{Binding CurrentImage.BackingImage.Id}"
+                   Style="{StaticResource TitleStyle}"/>
+            <Button Grid.Column="1"                     
+                    Style="{StaticResource IconButtonStyle}"
+                    Text="&#xF34B;"
+                    Command="{Binding FullSizeButtonCommand}"/>
+        </Grid>
+    </Shell.TitleView>
+
     <Grid>
         <CarouselView x:Name="ImagesCarousel" 
+                      IsEnabled="{Binding IsImageViewerOpen, Converter={StaticResource InvertBoolConverter}}"
+                      InputTransparent="{Binding IsImageViewerOpen}"
                       ItemsSource="{Binding Images}"
                       CurrentItem="{Binding CurrentImage, Mode=TwoWay}"
                       CurrentItemChangedCommand="{Binding CurrentImageChangedCommand}"
@@ -33,19 +55,33 @@
                         <ffimageloading:CachedImage.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
                         </ffimageloading:CachedImage.GestureRecognizers>
+                        <ffimageloading:CachedImage.CacheKeyFactory>
+                            <extensions:ImageCacheKeyFactory ImageType="Full" />
+                        </ffimageloading:CachedImage.CacheKeyFactory>
                     </ffimageloading:CachedImage>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
         <controls:PostInfoBottomPanel x:Name="BottomPanel" VerticalOptions="End" Tags="{Binding CurrentImage.Tags}"/>
         <AbsoluteLayout x:Name="ImageViewer" 
-                        IsVisible="False"
+                        IsVisible="{Binding IsImageViewerOpen}"
                         BackgroundColor="#C7000000">
-                <controls:PanZoomImage x:Name="PanZoomImage" Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}"
-                                       HeightRequest="{Binding CurrentImage.BackingImage.Height}"
-                                       WidthRequest="{Binding CurrentImage.BackingImage.Width}"/>
-            </AbsoluteLayout>
+            <controls:PanZoomImage x:Name="PanZoomImage"                                    
+                                   Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}"
+                                   HeightRequest="{Binding CurrentImage.BackingImage.Height}"
+                                   WidthRequest="{Binding CurrentImage.BackingImage.Width}">
+                <ffimageloading:CachedImage.CacheKeyFactory>
+                    <extensions:ImageCacheKeyFactory ImageType="Full" />
+                    </ffimageloading:CachedImage.CacheKeyFactory>
+            </controls:PanZoomImage>
+        </AbsoluteLayout>
+        <ActivityIndicator HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           WidthRequest="50"
+                           HeightRequest="50"
+                           IsVisible="{Binding Source={x:Reference ImageViewer}, Path=IsVisible}"
+                           IsRunning="{Binding Source={x:Reference PanZoomImage}, Path=IsLoading}"/>
 
-        </Grid>
+    </Grid>
 
 </ContentPage>
