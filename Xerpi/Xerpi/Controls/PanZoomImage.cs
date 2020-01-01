@@ -17,12 +17,9 @@ namespace Xerpi.Controls
         private double _minScale;
         private double _maxScale = 1.5;
 
-        private double _zoomStartScale;
-        private double _currentX;
-        private double _currentY;
-
         private DateTime _tapHeardTime;
         private DateTime _lastPinchHeard = DateTime.MinValue;
+        private DateTime _lastPanStartTime;
         private List<double> _lastThreeScaleDecimals = new List<double>(3) { 0, 0, 0 };
 
         public PanZoomImage()
@@ -74,7 +71,7 @@ namespace Xerpi.Controls
         {
             if (e.Status == GestureStatus.Started)
             {
-                _zoomStartScale = Scale;
+                // We used to do stuff here
             }
             else if (e.Status == GestureStatus.Running)
             {
@@ -96,33 +93,24 @@ namespace Xerpi.Controls
                 double current = Scale + adjustedScaleDecimal * .5625; // Smooth out zooming motion a bit with the .5625
                 double targetScale = Clamp(current, _minScale * (1 - Overshoot), _maxScale * (1 + Overshoot));
 
-                string debugInfo = "";
                 // Skip translating if we're banging against the min or max thresholds.
                 if (!(targetScale <= _minScale || targetScale >= _maxScale))
                 {
-                    double relativeX = _currentX / Width; // ScaleOrigin comes in relative [0.0, 1.0] coordinates, so get current Translation in relative coords
-                    double deltaWidth = Width / (Width * _zoomStartScale); // Multiplication factor that expresses the difference between true width, and currently-scaled width.                    
-                    // The X-coordinate of the pinch's anchor point, in terms of the image's current, scaled width.
-                    double pinchX = (e.ScaleOrigin.X + relativeX) * Width * targetScale;
+                    double actualWidth = Width * Scale;
+                    double projectedNextWidth = Width * targetScale;
+                    double changeInWidth = -(projectedNextWidth - actualWidth);
 
-                    // See above.
-                    double relativeY = _currentY / Height;
-                    double deltaHeight = Height / (Height * _zoomStartScale);
-                    double pinchY = (e.ScaleOrigin.Y + relativeY) * Height * targetScale;
+                    double actualHeight = Height * Scale;
+                    double projectedNextHeight = Height * targetScale;
+                    double changeInHeight = -(projectedNextHeight - actualHeight);
 
-                    // We multiple by '1 / e.Scale' instead of just 'e.Scale' because as the image INCREASES in size, the anchor point
-                    // coordinates need to DECREASE (and vice-versa)
-
-                    // TODO: These aren't large enough. I think we're calculating "change in image size from new scale" incorrectly.
-                    double targetX = TranslationX + (pinchX * 1 / e.Scale - pinchX);
-                    double targetY = TranslationY + (pinchY * 1 / e.Scale - pinchY);
+                    double targetX = TranslationX + (changeInWidth * e.ScaleOrigin.X);
+                    double targetY = TranslationY + (changeInHeight * e.ScaleOrigin.Y);
                     // Note: Translation is relative to the top-left of the image: 0,0.
                     // Translation coordinates use container (i.e. DIP) coordinates, NOT real pixel coordinates.
                     UpdateTranslation(targetX, targetY);
-                    //debugInfo = $"PinchTranslate to: X: {targetX}, Y: {targetY}. Pinch coords: X: {pinchX}, Y: {pinchY}. DeltaHeight: {deltaHeight}, DeltaWidth: {deltaWidth}, StartScale: {_zoomStartScale}";
                 }
 
-                Debug.WriteLine($"Scaling to: {targetScale}. {debugInfo}");
                 Scale = targetScale;
 
                 _lastPinchHeard = DateTime.Now;
@@ -155,20 +143,18 @@ namespace Xerpi.Controls
 
             if (e.StatusType == GestureStatus.Started)
             {
-                _currentX = TranslationX;
-                _currentY = TranslationY;
-                Debug.WriteLine($"Pan started at X: {TranslationX}, Y: {TranslationY}");
+                _lastPanStartTime = DateTime.Now;
             }
             else if (e.StatusType == GestureStatus.Running)
             {
                 if (now - _tapHeardTime <= TimeSpan.FromMilliseconds(200))
                 {
-                    // Quickzoom mode
+                    // Quickzoom mode, pretend we're a pinch anchored at pan starting location
+                    // TODO: Can't be done without using a better gesture library (MRGestures?) or until the Xamarin pan event includes location info
                 }
                 else
                 {
-                    UpdateTranslation(_currentX + e.TotalX * Scale, _currentY + e.TotalY * Scale);
-                    Debug.WriteLine($"Panned to: X: {TranslationX}, Y: {TranslationY}");
+                    UpdateTranslation(TranslationX + e.TotalX * Scale, TranslationY + e.TotalY * Scale);
                 }
             }
         }
@@ -179,16 +165,34 @@ namespace Xerpi.Controls
             double viewportHeight = (Parent as View)!.Height;
             TranslationX = Clamp(x, (-Width * Scale) + viewportWidth / 2, (Width * _minScale / 2));
             TranslationY = Clamp(y, (-Height * Scale) + viewportHeight / 2, (Height * _minScale / 2));
-            _currentX = TranslationX;
-            _currentY = TranslationY;
         }
 
         private void OnTapped(object sender, EventArgs e)
         {
+            var now = DateTime.Now;
+            if (now - _tapHeardTime <= TimeSpan.FromMilliseconds(200)
+                && now - _lastPanStartTime > TimeSpan.FromMilliseconds(200))
+            {
+                // This is a double-tap.
+                if (Scale <= _minScale)
+                {
+                    this.ScaleTo(1, 250, Easing.CubicOut);
+                    // Argh, why no tap location x.x. Cannot translate to smart place.
+                    this.TranslateTo(0, 0, 250, Easing.CubicOut);
+                }
+                else
+                {
+                    this.ScaleTo(_minScale, 250, Easing.CubicOut);
+                    // Argh, why no tap location x.x. Cannot translate to smart place.
+                    this.TranslateTo(0, 0, 250, Easing.CubicOut);
+                }
+            }
+            else
+            {
+                // Just a single-tap. 
+            }
+
             _tapHeardTime = DateTime.Now;
-            // Possible TODO: Listen to see if a) This is the second tap within 
-            // ~200ms AND we haven't heard a PanStart within that timeout.
-            // If so, scale us back to our _minScale.
         }
 
         private T Clamp<T>(T value, T minimum, T maximum) where T : IComparable
