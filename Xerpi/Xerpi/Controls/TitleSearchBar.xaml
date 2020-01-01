@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Xerpi.Controls.TitleSearchBar"
+             
+             x:Name="ThisTitleSearchBar">
+
+    <Grid BackgroundColor="{StaticResource NavigationPrimary}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Label x:Name="TitleLabel" 
+               Grid.Column="0" 
+               Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Title}"
+               VerticalOptions="Center"
+               VerticalTextAlignment="Center"
+               FontSize="20"               
+               MaxLines="1"
+               LineBreakMode="TailTruncation"
+               TextColor="White"/>
+        <Button x:Name="ToggleSearchButton" 
+                Grid.Column="1"
+                BackgroundColor="Transparent"
+                BorderColor="Transparent"
+                FontFamily="{StaticResource MaterialFontFamily}"
+                FontSize="24"
+                Text="&#xF349;" 
+                TextColor="White"
+                Clicked="ToggleSearchButton_Clicked"/>
+        <SearchBar x:Name="SearchBar" 
+                   Grid.Column="0" Grid.ColumnSpan="2"
+                   Margin="5"
+                   BackgroundColor="White"
+                   IsVisible="False" 
+                   Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
+                   SearchButtonPressed="SearchBar_SearchButtonPressed"/>
+    </Grid>
+</ContentView>

@@ -55,7 +55,15 @@ namespace Xerpi.Services
                 return null;
             }
 
-            return await JsonSerializer.DeserializeAsync<SearchResponse?>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
+            try
+            {
+                return await JsonSerializer.DeserializeAsync<SearchResponse?>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
+            }
+            catch (JsonException e)
+            {
+                Debug.WriteLine(e);
+                return null;
+            }
         }
 
         public async Task<IEnumerable<ApiTag>?> GetTags(IEnumerable<uint> ids)

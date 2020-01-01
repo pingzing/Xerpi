@@ -8,22 +8,22 @@
              xmlns:controls="clr-namespace:Xerpi.Controls"
              xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              mc:Ignorable="d"
-             x:Class="Xerpi.Views.ImagesPage"
-             Title="{Binding Title}"
+             x:Class="Xerpi.Views.ImagesPage"             
              x:Name="BrowseItemsPage">
+
+    <Shell.TitleView>
+        <controls:TitleSearchBar x:Name="TitleSearch" 
+                                 Title="{Binding Title}"
+                                 Query="{Binding CurrentSearchQuery}"
+                                 SearchCommand="{Binding SearchTriggeredCommand}"
+                                 SearchCommandParameter="{Binding Source={x:Reference TitleSearch}, Path=Query}"/>
+    </Shell.TitleView>
 
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:DerpiCdnConverter x:Key="DerpiCdnConverter"/>
         </ResourceDictionary>
     </ContentPage.Resources>
-
-    <Shell.SearchHandler>
-        <controls:ImageSearchHandler x:Name="ImageSearchHandler" 
-                                     Command="{Binding SearchTriggeredCommand}"
-                                     CommandParameter="{Binding Source={x:Reference ImageSearchHandler}, Path=Query}"
-                                     SearchBoxVisibility="Collapsible"/>
-    </Shell.SearchHandler>
 
     <RefreshView IsRefreshing="{Binding IsRefreshing}"
                  Command="{Binding RefreshCommand}">

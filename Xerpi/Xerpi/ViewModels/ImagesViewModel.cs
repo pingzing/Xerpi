@@ -15,10 +15,16 @@ namespace Xerpi.ViewModels
         private readonly IImageService _imageService;
         private readonly INavigationService _navigationService;
 
-        private string? _currentSearchQuery = null;
         private uint _currentPage = 1;
 
         public override string Url => "images";
+
+        private string? _currentSearchQuery = null;
+        public string? CurrentSearchQuery
+        {
+            get => _currentSearchQuery;
+            set => Set(ref _currentSearchQuery, value);
+        }
 
         private ReadOnlyObservableCollection<ApiImage> _images;
         public ReadOnlyObservableCollection<ApiImage> Images
@@ -67,13 +73,13 @@ namespace Xerpi.ViewModels
 
         private async Task Refresh()
         {
-            if (_currentSearchQuery == null)
+            if (CurrentSearchQuery == null)
             {
                 await _imageService.SetImagesToFrontPage();
             }
             else
             {
-                await _imageService.SetImagesToSearch(_currentSearchQuery, 1, 50);
+                await _imageService.SetImagesToSearch(CurrentSearchQuery, 1, 50);
             }
             IsRefreshing = false;
         }
@@ -82,13 +88,13 @@ namespace Xerpi.ViewModels
         {
             if (String.IsNullOrWhiteSpace(query))
             {
-                _currentSearchQuery = null;
+                CurrentSearchQuery = null;
                 Title = "Browse";
                 await Refresh();
                 return;
             }
 
-            _currentSearchQuery = query;
+            CurrentSearchQuery = query;
             Title = query;
             _currentPage = 1;
             await _imageService.SetImagesToSearch(query, 1, 50);
@@ -103,13 +109,13 @@ namespace Xerpi.ViewModels
             }
 
             _gettingNextPage = true;
-            if (_currentSearchQuery == null)
+            if (CurrentSearchQuery == null)
             {
                 await _imageService.AddPageToFrontPage(_currentPage + 1, 50);
             }
             else
             {
-                await _imageService.AddPageToSearch(_currentSearchQuery, _currentPage + 1, 50);
+                await _imageService.AddPageToSearch(CurrentSearchQuery, _currentPage + 1, 50);
             }
             _currentPage += 1;
             _gettingNextPage = false;
