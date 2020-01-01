@@ -15,10 +15,9 @@ namespace Xerpi.Controls
         private bool _initialScaleSet = false;
 
         private double _minScale;
-        private double _maxScale = 2.0;
+        private double _maxScale = 1.5;
 
         private double _zoomStartScale;
-        private double _lastTargetScale;
         private double _currentX;
         private double _currentY;
 
@@ -51,7 +50,7 @@ namespace Xerpi.Controls
         {
             if (!_initialScaleSet)
             {
-                double targetScale = 1.0;
+                double targetScale;
                 if (Math.Abs(widthConstraint - WidthRequest) > Math.Abs(heightConstraint - HeightRequest))
                 {
                     // Greater diff in needed vs given WIDTH
@@ -79,8 +78,8 @@ namespace Xerpi.Controls
             }
             else if (e.Status == GestureStatus.Running)
             {
-                _lastTargetScale = e.Scale;
-                double scaleDecimal = (e.Scale - 1) * .75; // .75 to smooth out zooming a bit
+                double rawScaleDecimal = (e.Scale - 1);
+                double adjustedScaleDecimal = rawScaleDecimal;
 
                 // Track the positiveness of the three most recent values. If we abruptly get something out of the ordinary,
                 // force it into the same positiveness as what we've been seeing.
@@ -89,31 +88,43 @@ namespace Xerpi.Controls
                 {
                     int negativeCount = _lastThreeScaleDecimals.Count(x => x <= 0);
                     int positiveCount = _lastThreeScaleDecimals.Count(x => x > 0);
-                    scaleDecimal = positiveCount > negativeCount ? Math.Abs(scaleDecimal) : Math.Abs(scaleDecimal) * -1;
+                    adjustedScaleDecimal = positiveCount > negativeCount ? Math.Abs(rawScaleDecimal) : Math.Abs(rawScaleDecimal) * -1;
                 }
                 _lastThreeScaleDecimals.RemoveAt(0);
-                _lastThreeScaleDecimals.Add(scaleDecimal);
+                _lastThreeScaleDecimals.Add(rawScaleDecimal);
 
-                double current = Scale + scaleDecimal * .75;
+                double current = Scale + adjustedScaleDecimal * .5625; // Smooth out zooming motion a bit with the .5625
                 double targetScale = Clamp(current, _minScale * (1 - Overshoot), _maxScale * (1 + Overshoot));
 
-                double relativeX = _currentX / Width;
-                // Delta width is multiplication factor that expresses the difference between true width, and currently-scaled width.
-                double deltaWidth = Width / (Width * _zoomStartScale);
-                double originX = (e.ScaleOrigin.X + relativeX) * deltaWidth;
+                string debugInfo = "";
+                // Skip translating if we're banging against the min or max thresholds.
+                if (!(targetScale <= _minScale || targetScale >= _maxScale))
+                {
+                    double relativeX = _currentX / Width; // ScaleOrigin comes in relative [0.0, 1.0] coordinates, so get current Translation in relative coords
+                    double deltaWidth = Width / (Width * _zoomStartScale); // Multiplication factor that expresses the difference between true width, and currently-scaled width.                    
+                    // The X-coordinate of the pinch's anchor point, in terms of the image's current, scaled width.
+                    double pinchX = (e.ScaleOrigin.X + relativeX) * Width * targetScale;
 
-                double relativeY = _currentY / Height;
-                double deltaHeight = Height / (Height * _zoomStartScale);
-                double originY = (e.ScaleOrigin.Y + relativeY) * deltaHeight;
+                    // See above.
+                    double relativeY = _currentY / Height;
+                    double deltaHeight = Height / (Height * _zoomStartScale);
+                    double pinchY = (e.ScaleOrigin.Y + relativeY) * Height * targetScale;
 
-                //double targetX = _currentX - (originX * Width) * (targetScale - _zoomStartScale);
-                //double targetY = _currentY - (originY * Height) * (targetScale - _zoomStartScale);
+                    // We multiple by '1 / e.Scale' instead of just 'e.Scale' because as the image INCREASES in size, the anchor point
+                    // coordinates need to DECREASE (and vice-versa)
+
+                    // TODO: These aren't large enough. I think we're calculating "change in image size from new scale" incorrectly.
+                    double targetX = TranslationX + (pinchX * 1 / e.Scale - pinchX);
+                    double targetY = TranslationY + (pinchY * 1 / e.Scale - pinchY);
+                    // Note: Translation is relative to the top-left of the image: 0,0.
+                    // Translation coordinates use container (i.e. DIP) coordinates, NOT real pixel coordinates.
+                    UpdateTranslation(targetX, targetY);
+                    //debugInfo = $"PinchTranslate to: X: {targetX}, Y: {targetY}. Pinch coords: X: {pinchX}, Y: {pinchY}. DeltaHeight: {deltaHeight}, DeltaWidth: {deltaWidth}, StartScale: {_zoomStartScale}";
+                }
+
+                Debug.WriteLine($"Scaling to: {targetScale}. {debugInfo}");
                 Scale = targetScale;
-                // Note: Translation is relative to the top-left of the image: 0,0.
-                // Translation coordinates use container (i.e. DIP) coordinates, NOT real pixel coordinates.
-                UpdateTranslation(originX, originY);
 
-                Debug.WriteLine($"'Current': {current}, Target: {targetScale}, Scale Decimal: {scaleDecimal}, Raw Scale: {e.Scale}, X: {originX}, Y:{originY}");
                 _lastPinchHeard = DateTime.Now;
             }
             else
@@ -131,8 +142,6 @@ namespace Xerpi.Controls
                 {
                     await this.ScaleTo(_minScale, 250, Easing.SpringOut);
                 }
-
-                //Debug.WriteLine($"New scale: {Scale}, TransX: {TranslationX}, TransY: {TranslationY}");
             }
         }
 
@@ -166,8 +175,10 @@ namespace Xerpi.Controls
 
         private void UpdateTranslation(double x, double y)
         {
-            TranslationX = Clamp(x, (-Width / 2) * Scale, (Width / 2) * Scale);
-            TranslationY = Clamp(y, (-Height / 2) * Scale, (Height / 2) * Scale);
+            double viewportWidth = (Parent as View)!.Width;
+            double viewportHeight = (Parent as View)!.Height;
+            TranslationX = Clamp(x, (-Width * Scale) + viewportWidth / 2, (Width * _minScale / 2));
+            TranslationY = Clamp(y, (-Height * Scale) + viewportHeight / 2, (Height * _minScale / 2));
             _currentX = TranslationX;
             _currentY = TranslationY;
         }
