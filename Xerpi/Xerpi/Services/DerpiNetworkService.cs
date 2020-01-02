@@ -18,6 +18,7 @@ namespace Xerpi.Services
         private readonly HttpClient _httpClient;
         private readonly ISettingsService _settingsService;
 
+        // TODO: Handle exceptions when network adapters kerplode.
         public DerpiNetworkService(HttpClient httpClient, ISettingsService settingsService)
         {
             _httpClient = httpClient;
