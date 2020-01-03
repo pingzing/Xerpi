@@ -21,18 +21,58 @@
 
     <ScrollView>
         <StackLayout>
-            <Label Text="Actually, maybe scores first"/>
+            
+            <Grid BackgroundColor="{StaticResource NavigationPrimary}" HeightRequest="30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackLayout Orientation="Horizontal" Spacing="4">
+                    <Label Text="&#xF514;" 
+                           FontFamily="{StaticResource MaterialFontFamily}"
+                           TextColor="White"
+                           FontSize="20"
+                           VerticalTextAlignment="Center"/>
+                    <Label Text="{Binding Source={x:Reference thisPostInfoPanel}, Path=Upvotes}"
+                           TextColor="White"
+                           VerticalTextAlignment="Center"
+                           FontSize="20"/>
+                </StackLayout>
+                <Label Grid.Column="1" 
+                       Text="{Binding Source={x:Reference thisPostInfoPanel}, Path=Score}"
+                       TextColor="White"
+                       FontSize="20"
+                       HorizontalOptions="Center"
+                       VerticalTextAlignment="Center"/>
+                <StackLayout Grid.Column="2" 
+                             Orientation="Horizontal" 
+                             Spacing="4"
+                             HorizontalOptions="End">
+                    <Label Text="&#xF512;"
+                           TextColor="White"
+                           FontFamily="{StaticResource MaterialFontFamily}"
+                           FontSize="20"
+                           VerticalTextAlignment="Center"/>
+                    <Label Text="{Binding Source={x:Reference thisPostInfoPanel}, Path=Downvotes}"                           
+                           TextColor="White"
+                           FontSize="20"
+                           VerticalOptions="Center"/>
+                </StackLayout>
+            </Grid>
+            
             <FlexLayout Direction="Row" 
+                        BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}"
                         Wrap="Wrap"
                         AlignItems="Start" 
-                        JustifyContent="SpaceAround"
-                        BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}">
+                        JustifyContent="SpaceAround">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="api:ApiTag">
                         <Frame BackgroundColor="{Binding Category, Converter={StaticResource BackgroundConverter}}" 
                                Padding="10, 5, 10, 5" 
                                Margin="0, 3, 0, 3">
-                            <Label Text="{Binding TagString}" TextColor="{Binding Category, Converter={StaticResource ForegroundConverter}}"/>
+                            <Label Text="{Binding TagString}" 
+                                   TextColor="{Binding Category, Converter={StaticResource ForegroundConverter}}"/>
                         </Frame>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>

@@ -10,5 +10,13 @@ namespace Xerpi.Services
         Task<IEnumerable<ApiTag>?> GetTags(IEnumerable<uint> ids);
         Task<SearchResponse?> SearchImages(string query, uint page, uint itemsPerPage);
         Task<IEnumerable<ApiFilter>?> GetDefaultFilters();
+
+        /// <summary>
+        /// Seems to return up to 30 comments.
+        /// </summary>
+        /// <param name="imageId"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        Task<CommentsResponse?> GetComments(uint imageId, uint page = 1);
     }
 }

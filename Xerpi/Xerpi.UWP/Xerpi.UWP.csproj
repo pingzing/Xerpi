@@ -164,7 +164,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Xerpi\Xerpi.csproj">
+    <ProjectReference Include="..\Xerpi\Xerpi.csproj">
       <Project>{ea79d6de-30fc-4125-8d64-be279e705ff2}</Project>
       <Name>Xerpi</Name>
     </ProjectReference>

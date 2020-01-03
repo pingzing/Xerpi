@@ -75,7 +75,8 @@ namespace Xerpi.Controls
             }
             else if (e.Status == GestureStatus.Running)
             {
-                double rawScaleDecimal = (e.Scale - 1);
+                double rawScaleDecimal = Clamp((e.Scale - 1), -0.15, 1.15);
+                Debug.WriteLine($"Raw scale decimal: {rawScaleDecimal}");
                 double adjustedScaleDecimal = rawScaleDecimal;
 
                 // Track the positiveness of the three most recent values. If we abruptly get something out of the ordinary,
@@ -90,7 +91,7 @@ namespace Xerpi.Controls
                 _lastThreeScaleDecimals.RemoveAt(0);
                 _lastThreeScaleDecimals.Add(rawScaleDecimal);
 
-                double current = Scale + adjustedScaleDecimal * .5625; // Smooth out zooming motion a bit with the .5625
+                double current = Scale + adjustedScaleDecimal * .75; // Smooth out zooming motion a bit with the .75
                 double targetScale = Clamp(current, _minScale * (1 - Overshoot), _maxScale * (1 + Overshoot));
 
                 // Skip translating if we're banging against the min or max thresholds.
@@ -147,15 +148,7 @@ namespace Xerpi.Controls
             }
             else if (e.StatusType == GestureStatus.Running)
             {
-                if (now - _tapHeardTime <= TimeSpan.FromMilliseconds(200))
-                {
-                    // Quickzoom mode, pretend we're a pinch anchored at pan starting location
-                    // TODO: Can't be done without using a better gesture library (MRGestures?) or until the Xamarin pan event includes location info
-                }
-                else
-                {
-                    UpdateTranslation(TranslationX + e.TotalX * Scale, TranslationY + e.TotalY * Scale);
-                }
+                UpdateTranslation(TranslationX + e.TotalX * Scale, TranslationY + e.TotalY * Scale);
             }
         }
 
@@ -173,19 +166,22 @@ namespace Xerpi.Controls
             if (now - _tapHeardTime <= TimeSpan.FromMilliseconds(200)
                 && now - _lastPanStartTime > TimeSpan.FromMilliseconds(200))
             {
+                // Commmenting this out for now because it seems like the Android pinch handler actually implements quickzoom.
+                // TODO: What about the other platforms?
+
                 // This is a double-tap.
-                if (Scale <= _minScale)
-                {
-                    this.ScaleTo(1, 250, Easing.CubicOut);
-                    // Argh, why no tap location x.x. Cannot translate to smart place.
-                    this.TranslateTo(0, 0, 250, Easing.CubicOut);
-                }
-                else
-                {
-                    this.ScaleTo(_minScale, 250, Easing.CubicOut);
-                    // Argh, why no tap location x.x. Cannot translate to smart place.
-                    this.TranslateTo(0, 0, 250, Easing.CubicOut);
-                }
+                //if (Scale <= _minScale)
+                //{
+                //    this.ScaleTo(1, 250, Easing.CubicOut);
+                //    // Argh, why no tap location x.x. Cannot translate to smart place.
+                //    this.TranslateTo(0, 0, 250, Easing.CubicOut);
+                //}
+                //else
+                //{
+                //    this.ScaleTo(_minScale, 250, Easing.CubicOut);
+                //    // Argh, why no tap location x.x. Cannot translate to smart place.
+                //    this.TranslateTo(0, 0, 250, Easing.CubicOut);
+                //}
             }
             else
             {

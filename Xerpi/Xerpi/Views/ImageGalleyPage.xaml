@@ -33,15 +33,12 @@
             </Grid.ColumnDefinitions>
             <Label Text="{Binding CurrentImage.BackingImage.Id}"
                    Style="{StaticResource TitleStyle}"/>
-            <Button Grid.Column="1"                     
-                    Style="{StaticResource IconButtonStyle}"
-                    Text="&#xF34B;"
-                    Command="{Binding FullSizeButtonCommand}"/>
         </Grid>
     </Shell.TitleView>
 
     <Grid>
         <CarouselView x:Name="ImagesCarousel" 
+                      Margin="0, 0, 0, 30"
                       IsEnabled="{Binding IsImageViewerOpen, Converter={StaticResource InvertBoolConverter}}"
                       InputTransparent="{Binding IsImageViewerOpen}"
                       ItemsSource="{Binding Images}"
@@ -62,7 +59,7 @@
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
-        <controls:PostInfoBottomPanel x:Name="BottomPanel" VerticalOptions="End" Tags="{Binding CurrentImage.Tags}"/>
+
         <AbsoluteLayout x:Name="ImageViewer" 
                         IsVisible="{Binding IsImageViewerOpen}"
                         BackgroundColor="#C7000000">
@@ -81,6 +78,13 @@
                            HeightRequest="50"
                            IsVisible="{Binding Source={x:Reference ImageViewer}, Path=IsVisible}"
                            IsRunning="{Binding Source={x:Reference PanZoomImage}, Path=IsLoading}"/>
+
+        <controls:PostInfoBottomPanel x:Name="BottomPanel" 
+                                      VerticalOptions="End" 
+                                      Upvotes="{Binding CurrentImage.BackingImage.Upvotes}"
+                                      Score="{Binding CurrentImage.BackingImage.Score}"
+                                      Downvotes="{Binding CurrentImage.BackingImage.Downvotes}"
+                                      Tags="{Binding CurrentImage.Tags}"/>
 
     </Grid>
 

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
-using FFImageLoading.Forms;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xerpi.ViewModels;
 
@@ -11,8 +10,9 @@ namespace Xerpi.Views
     [DesignTimeVisible(false)]
     public partial class ImageGalleryPage : ContentPage
     {
+        private readonly IMessagingCenter _messenger;
         private ImageGalleryViewModel _viewModel;
-        private bool _bottomPanelShown = true;
+        private bool _bottomPanelMaximized = true;
 
         public ImageGalleryPage()
         {
@@ -34,19 +34,31 @@ namespace Xerpi.Views
 
         private async void TapGestureRecognizer_Tapped(object sender, System.EventArgs e)
         {
-            if (_bottomPanelShown)
+            if (_bottomPanelMaximized)
             {
-                double hiddenHeight = BottomPanel.Y + BottomPanel.Height;
-                await BottomPanel.TranslateTo(BottomPanel.X, hiddenHeight, 333, Easing.CubicIn);
-                BottomPanel.IsVisible = false;
-                _bottomPanelShown = false;
+                await ToggleBottomPanel();
             }
             else
             {
-                BottomPanel.IsVisible = true;
-                BottomPanel.TranslationY = BottomPanel.Y + BottomPanel.Height;
+                if (_viewModel?.FullSizeButtonCommand?.CanExecute(null) == true)
+                {
+                    _viewModel.FullSizeButtonCommand.Execute(null);
+                }
+            }
+        }
+
+
+        private async Task ToggleBottomPanel()
+        {
+            if (_bottomPanelMaximized)
+            {
+                await BottomPanel.TranslateTo(BottomPanel.X, 170, 333, Easing.CubicIn);
+                _bottomPanelMaximized = false;
+            }
+            else
+            {
                 await BottomPanel.TranslateTo(BottomPanel.X, 0, 333, Easing.CubicOut);
-                _bottomPanelShown = true;
+                _bottomPanelMaximized = true;
             }
         }
     }

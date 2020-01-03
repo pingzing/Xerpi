@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi.Android", "Xerpi\Xerp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi", "Xerpi\Xerpi\Xerpi.csproj", "{EA79D6DE-30FC-4125-8D64-BE279E705FF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi.UWP", "Xerpi\Xerpi.UWP\Xerpi.UWP\Xerpi.UWP.csproj", "{E838A485-8DA7-4BC2-8E0B-B4525B2CC8CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi.UWP", "Xerpi\Xerpi.UWP\Xerpi.UWP.csproj", "{E838A485-8DA7-4BC2-8E0B-B4525B2CC8CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

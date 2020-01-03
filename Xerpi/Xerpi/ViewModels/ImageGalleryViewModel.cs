@@ -2,11 +2,9 @@
 using DynamicData.Binding;
 using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms;
-using Xerpi.Models;
 using Xerpi.Models.API;
 using Xerpi.Services;
 
@@ -72,7 +70,7 @@ namespace Xerpi.ViewModels
             return true;
         }
 
-        private void FullSizeButtonPressed(object obj)
+        private void FullSizeButtonPressed()
         {
             IsImageViewerOpen = true;
         }

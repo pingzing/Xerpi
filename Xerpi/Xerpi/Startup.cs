@@ -10,6 +10,7 @@ using Xerpi.Services;
 using Xerpi.ViewModels;
 using System.Net.Http.Headers;
 using Xerpi.Views;
+using Xamarin.Forms;
 
 namespace Xerpi
 {
@@ -61,6 +62,7 @@ namespace Xerpi
             services.AddSingleton<INavigationService, NavigationService>()
                 .AddTransient<ISettingsService, SettingsService>()
                 .AddSingleton<IImageService, ImageService>()
+                .AddSingleton<IMessagingCenter, MessagingCenter>(_ => (MessagingCenter)MessagingCenter.Instance)
                 .AddSingleton<ImagesViewModel>()
                 .AddSingleton<ImageGalleryViewModel>()
                 .AddSingleton<AboutViewModel>()
