@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using FFImageLoading.Forms;
 using Xamarin.Forms;
 
@@ -11,8 +11,6 @@ namespace Xerpi.Controls
     public class PanZoomImage : CachedImage
     {
         private const double Overshoot = 0.15;
-
-        private bool _initialScaleSet = false;
 
         private double _minScale;
         private double _maxScale = 1.5;
@@ -36,44 +34,69 @@ namespace Xerpi.Controls
             tap.Tapped += OnTapped;
             GestureRecognizers.Add(tap);
 
-            Scale = 1.0;
-            TranslationX = 0;
-            TranslationY = 0;
             AnchorX = 0;
             AnchorY = 0;
+
+            this.PropertyChanged += PanZoomImage_PropertyChanged;
         }
 
+        bool _initialMeasurePerformed = false;
         protected override SizeRequest OnMeasure(double widthConstraint, double heightConstraint)
         {
-            if (!_initialScaleSet)
+            ResetScale(widthConstraint, heightConstraint);
+            _initialMeasurePerformed = true;
+            return base.OnMeasure(widthConstraint, heightConstraint);
+        }
+
+        private void PanZoomImage_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(this.IsVisible) && IsVisible)
             {
-                double targetScale;
-                if (Math.Abs(widthConstraint - WidthRequest) > Math.Abs(heightConstraint - HeightRequest))
-                {
-                    // Greater diff in needed vs given WIDTH
-                    targetScale = widthConstraint / WidthRequest;
-                }
-                else
-                {
-                    // Greater diff in needed vs given HEIGHT
-                    targetScale = heightConstraint / HeightRequest;
-                }
-                targetScale = Math.Min(targetScale, 1.0); // If the image's full size is so small we'd have to scale it up, just leave it as-is.
-                Scale = targetScale;
-                _minScale = targetScale;
-                _initialScaleSet = true;
+                // ForceLayout does nothing unless the element is actually visible.
+                (this.Parent as Layout)!.ForceLayout();
             }
 
-            return base.OnMeasure(widthConstraint, heightConstraint);
+            // Order matters here. Properties change in the order they're declared...
+            if (!(e.PropertyName == nameof(this.Source)))
+            {
+                return;
+            }
+
+            TranslationX = 0;
+            TranslationY = 0;
+
+            // ...so we should find a way to wait for HeightRequest, WidthRequest and Source to all change without 
+            // forcing consumers to order their properties correctly.
+            if (_initialMeasurePerformed)
+            {
+                ResetScale((this.Parent as View)!.Width, (this.Parent as View)!.Height);
+            }
+        }
+
+        private void ResetScale(double widthConstraint, double heightConstraint)
+        {
+            double targetScale;
+            if (WidthRequest - widthConstraint > HeightRequest - heightConstraint)
+            {
+                // Greater diff in needed vs given WIDTH
+                targetScale = widthConstraint / WidthRequest;
+            }
+            else
+            {
+                // Greater diff in needed vs given HEIGHT
+                targetScale = heightConstraint / HeightRequest;
+            }
+
+            // If this is never reset, the image takes the dimensions of the first image loaded, then never changes.
+            AbsoluteLayout.SetLayoutBounds(this, new Rectangle(0, 0, WidthRequest, HeightRequest));
+            targetScale = Math.Min(targetScale, 1.0); // If the image's full size is so small we'd have to scale it up, just leave it as-is.
+            Scale = targetScale;
+            _minScale = targetScale;
         }
 
         private async void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
         {
-            if (e.Status == GestureStatus.Started)
-            {
-                // We used to do stuff here
-            }
-            else if (e.Status == GestureStatus.Running)
+            if (e.Status == GestureStatus.Running)
             {
                 double rawScaleDecimal = Clamp((e.Scale - 1), -0.15, 1.15);
                 Debug.WriteLine($"Raw scale decimal: {rawScaleDecimal}");

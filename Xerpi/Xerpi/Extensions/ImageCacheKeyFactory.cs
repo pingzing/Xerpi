@@ -15,7 +15,13 @@ namespace Xerpi.Extensions
             {
                 string suffix = ImageType switch
                 {
+                    ImageType.ThumbTiny => image.Representations.ThumbTiny,
+                    ImageType.ThumbSmall => image.Representations.ThumbSmall,
                     ImageType.Thumbnail => image.Representations.Thumb,
+                    ImageType.Small => image.Representations.Small,
+                    ImageType.Medium => image.Representations.Medium,
+                    ImageType.Large => image.Representations.Large,
+                    ImageType.Tall => image.Representations.Tall,
                     ImageType.Full => image.Representations.Full,
                     _ => image.Representations.Thumb,
                 };
@@ -32,7 +38,13 @@ namespace Xerpi.Extensions
 
     public enum ImageType
     {
+        ThumbTiny,
+        ThumbSmall,
         Thumbnail,
+        Small,
+        Medium,
+        Large,
+        Tall,
         Full
     }
 }

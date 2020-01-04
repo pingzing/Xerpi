@@ -23,7 +23,7 @@ namespace Xerpi.UWP
 
                 rootFrame = new Frame();
 
-                Xamarin.Forms.Forms.SetFlags("Shell_UWP_Experimental", "CollectionView_Experimental");
+                Xamarin.Forms.Forms.SetFlags("Shell_UWP_Experimental", "CollectionView_Experimental", "CarouselView_Experimental");
                 FFImageLoading.Forms.Platform.CachedImageRenderer.Init();
 
                 var assembliesToInclude = new List<Assembly>

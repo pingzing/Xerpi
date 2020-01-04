@@ -18,6 +18,7 @@
         <ResourceDictionary>
             <converters:DerpiCdnConverter x:Key="DerpiCdnConverter"/>
             <converters:InvertBoolConverter x:Key="InvertBoolConverter"/>
+            <converters:PixelsToDipsConverter x:Key="PixelsToDips"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -47,13 +48,13 @@
                       CurrentItemChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=CurrentItem}">
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
-                    <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Large, Converter={StaticResource DerpiCdnConverter}}"
+                    <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Medium, Converter={StaticResource DerpiCdnConverter}}"
                                                 DownsampleToViewSize="True">
                         <ffimageloading:CachedImage.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
                         </ffimageloading:CachedImage.GestureRecognizers>
                         <ffimageloading:CachedImage.CacheKeyFactory>
-                            <extensions:ImageCacheKeyFactory ImageType="Full" />
+                            <extensions:ImageCacheKeyFactory ImageType="Medium" />
                         </ffimageloading:CachedImage.CacheKeyFactory>
                     </ffimageloading:CachedImage>
                 </DataTemplate>
@@ -62,11 +63,15 @@
 
         <AbsoluteLayout x:Name="ImageViewer" 
                         IsVisible="{Binding IsImageViewerOpen}"
-                        BackgroundColor="#C7000000">
-            <controls:PanZoomImage x:Name="PanZoomImage"                                    
-                                   Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}"
-                                   HeightRequest="{Binding CurrentImage.BackingImage.Height}"
-                                   WidthRequest="{Binding CurrentImage.BackingImage.Width}">
+                        BackgroundColor="#C7000000"
+                        HorizontalOptions="FillAndExpand"
+                        VerticalOptions="FillAndExpand">
+            <controls:PanZoomImage x:Name="PanZoomImage"
+                                   AbsoluteLayout.LayoutFlags="None"
+                                   IsVisible="{Binding IsImageViewerOpen}"
+                                   HeightRequest="{Binding CurrentImage.BackingImage.Height, Converter={StaticResource PixelsToDips}}"
+                                   WidthRequest="{Binding CurrentImage.BackingImage.Width, Converter={StaticResource PixelsToDips}}"
+                                   Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}">
                 <ffimageloading:CachedImage.CacheKeyFactory>
                     <extensions:ImageCacheKeyFactory ImageType="Full" />
                     </ffimageloading:CachedImage.CacheKeyFactory>
