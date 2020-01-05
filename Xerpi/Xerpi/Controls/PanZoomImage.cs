@@ -43,7 +43,7 @@ namespace Xerpi.Controls
         bool _initialMeasurePerformed = false;
         protected override SizeRequest OnMeasure(double widthConstraint, double heightConstraint)
         {
-            ResetScale(widthConstraint, heightConstraint);
+            ResetSize(widthConstraint, heightConstraint);
             _initialMeasurePerformed = true;
             return base.OnMeasure(widthConstraint, heightConstraint);
         }
@@ -69,11 +69,11 @@ namespace Xerpi.Controls
             // forcing consumers to order their properties correctly.
             if (_initialMeasurePerformed)
             {
-                ResetScale((this.Parent as View)!.Width, (this.Parent as View)!.Height);
+                ResetSize((this.Parent as View)!.Width, (this.Parent as View)!.Height);
             }
         }
 
-        private void ResetScale(double widthConstraint, double heightConstraint)
+        private void ResetSize(double widthConstraint, double heightConstraint)
         {
             double targetScale;
             if (WidthRequest - widthConstraint > HeightRequest - heightConstraint)
@@ -87,7 +87,7 @@ namespace Xerpi.Controls
                 targetScale = heightConstraint / HeightRequest;
             }
 
-            // If this is never reset, the image takes the dimensions of the first image loaded, then never changes.
+            // If LayoutBounds are never reset, the image takes the dimensions of the first image loaded, then never changes.
             AbsoluteLayout.SetLayoutBounds(this, new Rectangle(0, 0, WidthRequest, HeightRequest));
             targetScale = Math.Min(targetScale, 1.0); // If the image's full size is so small we'd have to scale it up, just leave it as-is.
             Scale = targetScale;

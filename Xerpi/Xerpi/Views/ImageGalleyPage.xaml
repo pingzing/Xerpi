@@ -61,6 +61,8 @@
             </CarouselView.ItemTemplate>
         </CarouselView>
 
+        <!--TODO: I should probably wrap this whole thing up into a Control. 
+        The PanZoomImage is pretty tightly bound to the AbsoluteLayout.-->
         <AbsoluteLayout x:Name="ImageViewer" 
                         IsVisible="{Binding IsImageViewerOpen}"
                         BackgroundColor="#C7000000"
