@@ -60,6 +60,7 @@ namespace Xerpi
 
             // ViewModel singletons
             services.AddSingleton<INavigationService, NavigationService>()
+                .AddSingleton<ISynchronizationContextService, SynchronizationContextService>()
                 .AddTransient<ISettingsService, SettingsService>()
                 .AddSingleton<IImageService, ImageService>()
                 .AddSingleton<IMessagingCenter, MessagingCenter>(_ => (MessagingCenter)MessagingCenter.Instance)

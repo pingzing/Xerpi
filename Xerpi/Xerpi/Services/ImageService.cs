@@ -97,7 +97,7 @@ namespace Xerpi.Services
         public async Task UpdateTags(uint[] tags)
         {
             IEnumerable<uint> missingTags = tags.Except(_tags.Keys);
-            var newTags = await _networkService.GetTags(missingTags);
+            var newTags = await _networkService.GetTags(missingTags).ConfigureAwait(false);
             if (newTags == null)
             {
                 return;

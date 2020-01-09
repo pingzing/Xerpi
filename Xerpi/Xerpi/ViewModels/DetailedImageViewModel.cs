@@ -6,6 +6,7 @@ using Xerpi.Services;
 using DynamicData;
 using System.Linq;
 using Xerpi.Models;
+using System.Reactive.Linq;
 
 namespace Xerpi.ViewModels
 {
@@ -21,6 +22,7 @@ namespace Xerpi.ViewModels
 
         private ReadOnlyObservableCollection<ApiTag> _tags;
         private readonly IImageService _imageService;
+        private readonly ISynchronizationContextService _syncContextService;
 
         public ReadOnlyObservableCollection<ApiTag> Tags
         {
@@ -28,14 +30,17 @@ namespace Xerpi.ViewModels
             set => Set(ref _tags, value);
         }
 
-        public DetailedImageViewModel(ApiImage backingImage, IImageService imageService)
+        public DetailedImageViewModel(ApiImage backingImage,
+            IImageService imageService,
+            ISynchronizationContextService syncContextService)
         {
             BackingImage = backingImage;
             _imageService = imageService;
-
+            _syncContextService = syncContextService;
             var disposable = _imageService.Tags.Connect()
                 .Filter(x => BackingImage.TagIds.Contains(x.Id))
                 .Sort(new ApiTagComparer())
+                .ObserveOn(_syncContextService.UIThread)
                 .Bind(out _tags)
                 .DisposeMany()
                 .Subscribe();
@@ -49,7 +54,7 @@ namespace Xerpi.ViewModels
             // cache. Should also sort by a) Category and b) Alphabetically
             if (BackingImage?.TagIds != null)
             {
-                await _imageService.UpdateTags(BackingImage.TagIds);
+                await _imageService.UpdateTags(BackingImage.TagIds).ConfigureAwait(false);                
             }
         }
     }
