@@ -48,7 +48,7 @@ namespace Xerpi.ViewModels
         public ImageGalleryViewModel(IImageService imageService,
             INavigationService navigationService,
             IDerpiNetworkService networkSerivce,
-            ISynchronizationContextService syncContextService))
+            ISynchronizationContextService syncContextService)
         {
             _imageService = imageService;
             _navigationService = navigationService;
@@ -87,7 +87,7 @@ namespace Xerpi.ViewModels
             var operation = _imageService.CurrentImages.Connect()
                 .Filter(x => !x.Image.EndsWith(".webm"))
                 .Sort(SortExpressionComparer<ApiImage>.Descending(x => x.Id))
-                .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))                
+                .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))
                 .ObserveOn(_syncContextService.UIThread)
                 .Bind(out _images)
                 .DisposeMany()

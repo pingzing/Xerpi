@@ -35,7 +35,7 @@ namespace Xerpi.ViewModels
         public DetailedImageViewModel(ApiImage backingImage,
             IImageService imageService,
             IDerpiNetworkService networkService,
-            ISynchronizationContextService syncContextService))
+            ISynchronizationContextService syncContextService)
         {
             BackingImage = backingImage;
             _imageService = imageService;
@@ -55,7 +55,7 @@ namespace Xerpi.ViewModels
             // Get tags and comments
             if (BackingImage?.TagIds != null)
             {
-                await _imageService.UpdateTags(BackingImage.TagIds).ConfigureAwait(false);                
+                await _imageService.UpdateTags(BackingImage.TagIds).ConfigureAwait(false);
             }
 
             if (BackingImage?.CommentCount > 0)
