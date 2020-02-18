@@ -18,5 +18,7 @@ namespace Xerpi.Services
         /// <param name="page"></param>
         /// <returns></returns>
         Task<CommentsResponse?> GetComments(uint imageId, uint page = 1);
+
+        Task<ApiUser?> GetUserProfile(string userName);
     }
 }

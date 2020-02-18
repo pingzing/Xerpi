@@ -9,6 +9,8 @@ using Android.OS;
 using Xamarin.Forms;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Android.Content;
+using FFImageLoading;
 
 namespace Xerpi.Droid
 {
@@ -40,6 +42,14 @@ namespace Xerpi.Droid
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        // Clear the FFImageLoading memory cache when we're low on memory.
+        public override void OnTrimMemory([GeneratedEnum] TrimMemory level)
+        {
+            ImageService.Instance.InvalidateMemoryCache();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+            base.OnTrimMemory(level);
         }
     }
 }

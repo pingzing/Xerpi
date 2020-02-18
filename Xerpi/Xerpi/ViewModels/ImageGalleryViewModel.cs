@@ -15,6 +15,7 @@ namespace Xerpi.ViewModels
         public override string Url => "imagegallery";
         private readonly IImageService _imageService;
         private readonly INavigationService _navigationService;
+        private readonly IDerpiNetworkService _networkService;
 
         private DetailedImageViewModel? _currentImage;
         public DetailedImageViewModel CurrentImage
@@ -43,10 +44,12 @@ namespace Xerpi.ViewModels
         public Command FullSizeButtonCommand { get; private set; }
 
         public ImageGalleryViewModel(IImageService imageService,
-            INavigationService navigationService)
+            INavigationService navigationService,
+            IDerpiNetworkService networkSerivce)
         {
             _imageService = imageService;
             _navigationService = navigationService;
+            _networkService = networkSerivce;
             _images = new ReadOnlyObservableCollection<DetailedImageViewModel>(new ObservableCollection<DetailedImageViewModel>());
 
             CurrentImageChangedCommand = new Command<DetailedImageViewModel>(CurrentImageChanged);
@@ -80,7 +83,7 @@ namespace Xerpi.ViewModels
             var operation = _imageService.CurrentImages.Connect()
                 .Filter(x => !x.Image.EndsWith(".webm"))
                 .Sort(SortExpressionComparer<ApiImage>.Descending(x => x.Id))
-                .Transform(x => new DetailedImageViewModel(x, _imageService))
+                .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService))
                 .Bind(out _images)
                 .DisposeMany()
                 .Subscribe();

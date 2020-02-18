@@ -115,5 +115,17 @@ namespace Xerpi.Services
 
             return await JsonSerializer.DeserializeAsync<CommentsResponse?>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
         }
+
+        public async Task<ApiUser?> GetUserProfile(string userName)
+        {
+            var response = await _httpClient.GetAsync($"profiles/{userName}.json");
+            if (!response.IsSuccessStatusCode)
+            {
+                Debug.WriteLine($"GetUserProfile failed for username: {userName}. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
+                return null;
+            }
+
+            return await JsonSerializer.DeserializeAsync<ApiUser?>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
+        }
     }
 }

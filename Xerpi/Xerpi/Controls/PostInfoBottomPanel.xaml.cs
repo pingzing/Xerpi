@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-
+using System.Diagnostics;
 using Xamarin.Forms;
 using Xerpi.Models.API;
+using Xerpi.ViewModels;
 
 namespace Xerpi.Controls
 {
@@ -52,17 +53,22 @@ namespace Xerpi.Controls
 
         public static BindableProperty CommentsProperty = BindableProperty.Create(
             nameof(Comments),
-            typeof(IEnumerable<ApiComment>),
+            typeof(IEnumerable<CommentViewModel>),
             typeof(PostInfoBottomPanel));
-        public IEnumerable<ApiComment> Comments
+        public IEnumerable<CommentViewModel> Comments
         {
-            get => (IEnumerable<ApiComment>)GetValue(CommentsProperty);
+            get => (IEnumerable<CommentViewModel>)GetValue(CommentsProperty);
             set => SetValue(CommentsProperty, value);
         }
 
         public PostInfoBottomPanel()
         {
             InitializeComponent();
+        }
+
+        private void ScrollView_Scrolled(object sender, ScrolledEventArgs e)
+        {
+            Debug.WriteLine("ScrollY: " + e.ScrollY);
         }
     }
 }

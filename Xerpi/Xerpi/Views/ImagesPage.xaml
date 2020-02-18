@@ -40,7 +40,7 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="api:ApiImage">
-                    <ffimageloading:CachedImage Source="{Binding Representations.Thumb, Converter={StaticResource DerpiCdnConverter}}"
+                    <ffimageloading:CachedImage Source="{Binding Representations.Thumb, Converter={StaticResource DerpiCdnConverter}, Mode=OneTime}"
                                                 WidthRequest="150"
                                                 HeightRequest="150"
                                                 DownsampleToViewSize="True">
