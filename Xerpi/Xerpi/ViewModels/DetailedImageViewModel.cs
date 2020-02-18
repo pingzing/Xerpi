@@ -7,6 +7,7 @@ using DynamicData;
 using System.Linq;
 using Xerpi.Models;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 
 namespace Xerpi.ViewModels
 {
@@ -14,6 +15,7 @@ namespace Xerpi.ViewModels
     {
         private readonly IImageService _imageService;
         private readonly IDerpiNetworkService _networkService;
+        private readonly ISynchronizationContextService _syncContextService;
 
         private ApiImage? _backingImage;
 
@@ -32,14 +34,17 @@ namespace Xerpi.ViewModels
 
         public DetailedImageViewModel(ApiImage backingImage,
             IImageService imageService,
-            IDerpiNetworkService networkService)
+            IDerpiNetworkService networkService,
+            ISynchronizationContextService syncContextService))
         {
             BackingImage = backingImage;
             _imageService = imageService;
             _networkService = networkService;
+            _syncContextService = syncContextService;
             var disposable = _imageService.Tags.Connect()
                 .Filter(x => BackingImage.TagIds.Contains(x.Id))
                 .Sort(new ApiTagComparer())
+                .ObserveOn(_syncContextService.UIThread)
                 .Bind(out _tags)
                 .DisposeMany()
                 .Subscribe();
@@ -50,7 +55,7 @@ namespace Xerpi.ViewModels
             // Get tags and comments
             if (BackingImage?.TagIds != null)
             {
-                await _imageService.UpdateTags(BackingImage.TagIds);
+                await _imageService.UpdateTags(BackingImage.TagIds).ConfigureAwait(false);                
             }
 
             if (BackingImage?.CommentCount > 0)

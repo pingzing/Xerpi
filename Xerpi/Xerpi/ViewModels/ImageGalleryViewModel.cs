@@ -3,6 +3,7 @@ using DynamicData.Binding;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xerpi.Models.API;
@@ -16,6 +17,7 @@ namespace Xerpi.ViewModels
         private readonly IImageService _imageService;
         private readonly INavigationService _navigationService;
         private readonly IDerpiNetworkService _networkService;
+        private readonly ISynchronizationContextService _syncContextService;
 
         private DetailedImageViewModel? _currentImage;
         public DetailedImageViewModel CurrentImage
@@ -45,11 +47,13 @@ namespace Xerpi.ViewModels
 
         public ImageGalleryViewModel(IImageService imageService,
             INavigationService navigationService,
-            IDerpiNetworkService networkSerivce)
+            IDerpiNetworkService networkSerivce,
+            ISynchronizationContextService syncContextService))
         {
             _imageService = imageService;
             _navigationService = navigationService;
             _networkService = networkSerivce;
+            _syncContextService = syncContextService;
             _images = new ReadOnlyObservableCollection<DetailedImageViewModel>(new ObservableCollection<DetailedImageViewModel>());
 
             CurrentImageChangedCommand = new Command<DetailedImageViewModel>(CurrentImageChanged);
@@ -83,21 +87,24 @@ namespace Xerpi.ViewModels
             var operation = _imageService.CurrentImages.Connect()
                 .Filter(x => !x.Image.EndsWith(".webm"))
                 .Sort(SortExpressionComparer<ApiImage>.Descending(x => x.Id))
-                .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService))
+                .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))                
+                .ObserveOn(_syncContextService.UIThread)
                 .Bind(out _images)
                 .DisposeMany()
-                .Subscribe();
+                .Subscribe(x =>
+                {
+                    if (NavigationParameter is ApiImage image)
+                    {
+                        var foundImage = Images.FirstOrDefault(x => x.BackingImage.Id == image.Id);
+                        if (foundImage != null)
+                        {
+                            CurrentImage = foundImage;
+                        }
+                        NavigationParameter = null;
+                    }
+                });
 
             OnPropertyChanged(nameof(Images));
-
-            if (NavigationParameter is ApiImage image)
-            {
-                var foundImage = Images.FirstOrDefault(x => x.BackingImage.Id == image.Id);
-                if (foundImage != null)
-                {
-                    CurrentImage = foundImage;
-                }
-            }
 
             return Task.CompletedTask;
         }

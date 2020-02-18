@@ -101,8 +101,8 @@ namespace Xerpi.Services
             {
                 return;
             }
-
-            var newTags = await _networkService.GetTags(missingTags);
+            
+            var newTags = await _networkService.GetTags(missingTags).ConfigureAwait(false);
             if (newTags == null)
             {
                 return;
