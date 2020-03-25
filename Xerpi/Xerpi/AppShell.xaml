@@ -45,6 +45,7 @@
                       Route="settings"
                       ContentTemplate="{DataTemplate local:SettingsPage}">
         </ShellContent>
+        <MenuItem Text="Clear image cache" Clicked="MenuItem_Clicked"/>
     </Shell.Items>
         
 

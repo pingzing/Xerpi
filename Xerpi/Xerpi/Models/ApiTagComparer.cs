@@ -5,6 +5,11 @@ namespace Xerpi.Models
 {
     public class ApiTagComparer : IComparer<ApiTag>
     {
+        public ApiTagComparer()
+        {
+
+        }
+
         public int Compare(ApiTag x, ApiTag y)
         {
             // Weight categories higher, as they take precedence in how tags are sorted

@@ -28,26 +28,17 @@ namespace Xerpi.Services
                 PropertyNameCaseInsensitive = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             };
-            _jsonOptions.Converters.Add(new EnhancedJsonStringEnumConverter(allowIntegerValues: true));
         }
 
-        public async Task<IEnumerable<ApiImage>?> GetImages(uint page = 1, uint perPage = 15)
+        public async Task<ImageSearchResponse?> GetImages(uint page = 1, uint perPage = 15)
         {
-            var response = await _httpClient.GetAsync($"images.json?page={page}&perpage={perPage}");
-            if (!response.IsSuccessStatusCode)
-            {
-                Debug.WriteLine("Sadness.");
-                return null;
-            }
-
-            var imagesResponse = await JsonSerializer.DeserializeAsync<ImagesResponse?>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
-            return imagesResponse?.Images;
+            return await SearchImages("*", page, perPage);
         }
 
         // Query is a comma-separated list, with spaces transformed into plusses. Everything else seems to get url-encoded.
-        public async Task<SearchResponse?> SearchImages(string query, uint page, uint itemsPerPage)
+        public async Task<ImageSearchResponse?> SearchImages(string query, uint page, uint itemsPerPage) // TODO: sd (sort direction), sf (sort field)
         {
-            string requestUrl = $"search.json?q={WebUtility.UrlEncode(query)}&page={page}&perpage={itemsPerPage}&filter_id={_settingsService.FilterId}";
+            string requestUrl = $"search/images?q={WebUtility.UrlEncode(query)}&page={page}&per_page={itemsPerPage}&filter_id={_settingsService.FilterId}";
             requestUrl = requestUrl.Replace("%20", "+"); // Because spaces are replaced with plusses ¯\_(ツ)_/¯
             var response = await _httpClient.GetAsync(requestUrl);
             if (!response.IsSuccessStatusCode)
@@ -58,7 +49,8 @@ namespace Xerpi.Services
 
             try
             {
-                return await JsonSerializer.DeserializeAsync<SearchResponse?>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
+                string jsonString = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ImageSearchResponse?>(jsonString, _jsonOptions);
             }
             catch (JsonException e)
             {
@@ -69,8 +61,8 @@ namespace Xerpi.Services
 
         public async Task<IEnumerable<ApiTag>?> GetTags(IEnumerable<uint> ids)
         {
-            string idQueryParams = string.Join("&", ids.Select(x => $"ids[]={x}"));
-            string url = $"api/v2/tags/fetch_many.json?{idQueryParams}";
+            string idQueryParams = string.Join("||", ids.Select(x => $"id:{x}"));
+            string url = $"search/tags?q={idQueryParams}";
             var response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
             {
@@ -93,7 +85,17 @@ namespace Xerpi.Services
 
         public async Task<IEnumerable<ApiFilter>?> GetDefaultFilters()
         {
-            var response = await _httpClient.GetAsync("filters.json");
+            // No replacement for this in the new API. 
+            // Default filters are:
+            /*
+             * 37431
+             * 37429
+             * 100073
+             * 56027
+             * 37432
+             * 37430
+             */
+            var response = await _httpClient.GetAsync("filters");
             if (!response.IsSuccessStatusCode)
             {
                 Debug.WriteLine($"GetDefaultFilters failed. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
@@ -106,7 +108,7 @@ namespace Xerpi.Services
 
         public async Task<CommentsResponse?> GetComments(uint imageId, uint page = 1)
         {
-            var response = await _httpClient.GetAsync($"images/{imageId}/comments.json?page={page}");
+            var response = await _httpClient.GetAsync($"search/comments?q=image_id:{imageId}&page={page}");
             if (!response.IsSuccessStatusCode)
             {
                 Debug.WriteLine($"GetComments failed for image ID {imageId}. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
@@ -116,12 +118,12 @@ namespace Xerpi.Services
             return await JsonSerializer.DeserializeAsync<CommentsResponse?>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
         }
 
-        public async Task<ApiUser?> GetUserProfile(string userName)
+        public async Task<ApiUser?> GetUserProfile(uint userId)
         {
-            var response = await _httpClient.GetAsync($"profiles/{userName}.json");
+            var response = await _httpClient.GetAsync($"profiles/{userId}");
             if (!response.IsSuccessStatusCode)
             {
-                Debug.WriteLine($"GetUserProfile failed for username: {userName}. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
+                Debug.WriteLine($"GetUserProfile failed for user ID: {userId}. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
                 return null;
             }
 

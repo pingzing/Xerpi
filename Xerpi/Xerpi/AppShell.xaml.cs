@@ -22,5 +22,11 @@ namespace Xerpi
             _navigationService.Back();
             return true; // Lie to the Shell--Nav service does all the work now.
         }
+
+        private void MenuItem_Clicked(object sender, EventArgs e)
+        {
+            FFImageLoading.ImageService.Instance.InvalidateMemoryCache();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+        }
     }
 }

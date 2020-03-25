@@ -1,4 +1,5 @@
 ﻿using DynamicData;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,8 @@ namespace Xerpi.Services
     public class ImageService : IImageService
     {
         private readonly IDerpiNetworkService _networkService;
+        private readonly IEqualityComparer<ApiImage> _imageComparer = EqualityComparer<ApiImage>.Default;
+        private readonly IEqualityComparer<ApiTag> _tagComparer = EqualityComparer<ApiTag>.Default;
 
         private SourceCache<ApiImage, uint> _currentImages = new SourceCache<ApiImage, uint>(x => x.Id);
         public IObservableCache<ApiImage, uint> CurrentImages { get; private set; }
@@ -30,6 +33,7 @@ namespace Xerpi.Services
         public ImageService(IDerpiNetworkService networkService)
         {
             CurrentImages = _currentImages.AsObservableCache();
+            _tags.LimitSizeTo(200).Subscribe();
             Tags = _tags.AsObservableCache();
             _networkService = networkService;
         }
@@ -47,8 +51,8 @@ namespace Xerpi.Services
 
         private async Task AddToFrontPage(uint page = 1, uint itemsPerPage = 15)
         {
-            var images = await _networkService.GetImages(page, itemsPerPage);
-            if (images == null)
+            var imageResponse = await _networkService.GetImages(page, itemsPerPage);
+            if (imageResponse == null && imageResponse?.Total == 0)
             {
                 return;
             }
@@ -56,9 +60,9 @@ namespace Xerpi.Services
             // TODO: perf - can change this to EditDiff
             _currentImages.Edit(x =>
             {
-                foreach (var image in images)
+                foreach (var image in imageResponse.Images)
                 {
-                    x.AddOrUpdate(image);
+                    x.AddOrUpdate(image, _imageComparer);
                 }
             });
         }
@@ -77,7 +81,7 @@ namespace Xerpi.Services
         private async Task<uint> Search(string query, uint page = 1, uint itemsPerPage = 15)
         {
             var searchResult = await _networkService.SearchImages(query, page, itemsPerPage);
-            if (searchResult?.Search == null)
+            if (searchResult?.Images == null)
             {
                 return 0;
             }
@@ -85,9 +89,9 @@ namespace Xerpi.Services
             // TODO: perf - can change this to EditDiff
             _currentImages.Edit(x =>
             {
-                foreach (var image in searchResult.Search)
+                foreach (var image in searchResult.Images)
                 {
-                    x.AddOrUpdate(image);
+                    x.AddOrUpdate(image, _imageComparer);
                 }
             });
 
@@ -101,7 +105,7 @@ namespace Xerpi.Services
             {
                 return;
             }
-            
+
             var newTags = await _networkService.GetTags(missingTags).ConfigureAwait(false);
             if (newTags == null)
             {
@@ -113,7 +117,7 @@ namespace Xerpi.Services
             {
                 foreach (var tag in newTags)
                 {
-                    x.AddOrUpdate(tag);
+                    x.AddOrUpdate(tag, _tagComparer);
                 }
             });
         }

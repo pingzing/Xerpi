@@ -20,12 +20,6 @@
                                  SearchCommandParameter="{Binding Source={x:Reference TitleSearch}, Path=Query}"/>
     </Shell.TitleView>
 
-    <ContentPage.Resources>
-        <ResourceDictionary>
-            <converters:DerpiCdnConverter x:Key="DerpiCdnConverter"/>
-        </ResourceDictionary>
-    </ContentPage.Resources>
-
     <RefreshView IsRefreshing="{Binding IsRefreshing}"
                  Command="{Binding RefreshCommand}">
         <CollectionView x:Name="ImageListCollectionView" ItemsSource="{Binding Images}"
@@ -40,7 +34,7 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="api:ApiImage">
-                    <ffimageloading:CachedImage Source="{Binding Representations.Thumb, Converter={StaticResource DerpiCdnConverter}, Mode=OneTime}"
+                    <ffimageloading:CachedImage Source="{Binding Representations.Thumb, Mode=OneTime}"
                                                 WidthRequest="150"
                                                 HeightRequest="150"
                                                 DownsampleToViewSize="True">

@@ -18,6 +18,7 @@ namespace Xerpi.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IDerpiNetworkService _networkService;
         private readonly ISynchronizationContextService _syncContextService;
+        private readonly SortExpressionComparer<ApiImage> _imageSorter = SortExpressionComparer<ApiImage>.Descending(x => x.Id);
 
         private DetailedImageViewModel? _currentImage;
         public DetailedImageViewModel CurrentImage
@@ -85,8 +86,8 @@ namespace Xerpi.ViewModels
         public override Task NavigatedTo()
         {
             var operation = _imageService.CurrentImages.Connect()
-                .Filter(x => !x.Image.EndsWith(".webm"))
-                .Sort(SortExpressionComparer<ApiImage>.Descending(x => x.Id))
+                .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle
+                .Sort(_imageSorter)
                 .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))
                 .ObserveOn(_syncContextService.UIThread)
                 .Bind(out _images)

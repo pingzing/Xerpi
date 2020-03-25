@@ -10,11 +10,11 @@ namespace Xerpi.Services
 
     public class SynchronizationContextService : ISynchronizationContextService
     {
-        public SynchronizationContext UIThread { get; set; }
+        public SynchronizationContext UIThread { get; set; } = null!;
 
         public SynchronizationContextService()
         {
-            Init();
+            Init().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         private async Task Init()

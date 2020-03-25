@@ -6,9 +6,9 @@ namespace Xerpi.Services
 {
     public interface IDerpiNetworkService
     {
-        Task<IEnumerable<ApiImage>?> GetImages(uint page = 1, uint perPage = 15);
+        Task<ImageSearchResponse?> GetImages(uint page = 1, uint perPage = 15);
         Task<IEnumerable<ApiTag>?> GetTags(IEnumerable<uint> ids);
-        Task<SearchResponse?> SearchImages(string query, uint page, uint itemsPerPage);
+        Task<ImageSearchResponse?> SearchImages(string query, uint page, uint itemsPerPage);
         Task<IEnumerable<ApiFilter>?> GetDefaultFilters();
 
         /// <summary>
@@ -19,6 +19,6 @@ namespace Xerpi.Services
         /// <returns></returns>
         Task<CommentsResponse?> GetComments(uint imageId, uint page = 1);
 
-        Task<ApiUser?> GetUserProfile(string userName);
+        Task<ApiUser?> GetUserProfile(uint userId);
     }
 }

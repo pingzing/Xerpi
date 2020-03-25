@@ -1,8 +1,8 @@
 ﻿namespace Xerpi.Models.API
 {
-    public class SearchResponse
+    public class ImageSearchResponse
     {
-        public ApiImage[] Search { get; set; }
+        public ApiImage[] Images { get; set; }
         public uint Total { get; set; }
     }
 }

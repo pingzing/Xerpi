@@ -1,10 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Xerpi.Converters;
 
 namespace Xerpi.Models.API
 {
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-    public class ApiTag
+    public class ApiTag : IEquatable<ApiTag>
     {
         public uint Id { get; set; }
         public string Name { get; set; }
@@ -41,6 +43,36 @@ namespace Xerpi.Models.API
 
         [JsonIgnore]
         public string TagString => $"{Name} ({Images})";
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as ApiTag);
+        }
+
+        public bool Equals(ApiTag other)
+        {
+            return other != null &&
+                   Id == other.Id &&
+                   Images == other.Images;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -1784744757;
+            hashCode = hashCode * -1521134295 + Id.GetHashCode();
+            hashCode = hashCode * -1521134295 + Images.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(ApiTag left, ApiTag right)
+        {
+            return EqualityComparer<ApiTag>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(ApiTag left, ApiTag right)
+        {
+            return !(left == right);
+        }
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 

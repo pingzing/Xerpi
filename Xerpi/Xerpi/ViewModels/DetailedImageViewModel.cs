@@ -16,6 +16,7 @@ namespace Xerpi.ViewModels
         private readonly IImageService _imageService;
         private readonly IDerpiNetworkService _networkService;
         private readonly ISynchronizationContextService _syncContextService;
+        private static readonly ApiTagComparer _tagComparer = new ApiTagComparer();
 
         private ApiImage? _backingImage;
 
@@ -43,7 +44,7 @@ namespace Xerpi.ViewModels
             _syncContextService = syncContextService;
             var disposable = _imageService.Tags.Connect()
                 .Filter(x => BackingImage.TagIds.Contains(x.Id))
-                .Sort(new ApiTagComparer())
+                .Sort(_tagComparer)
                 .ObserveOn(_syncContextService.UIThread)
                 .Bind(out _tags)
                 .DisposeMany()
@@ -69,11 +70,18 @@ namespace Xerpi.ViewModels
                 List<CommentViewModel> commentVms = new List<CommentViewModel>();
                 foreach (var comment in commentsResponse.Comments)
                 {
-                    var user = await _networkService.GetUserProfile(comment.Author);
-                    if (user != null)
+                    if (comment.UserId.HasValue)
                     {
-                        //TODO:  Use Comment User info to construct a commentVM
-                        commentVms.Add(new CommentViewModel());
+                        var user = await _networkService.GetUserProfile(comment.UserId.Value);
+                        if (user != null)
+                        {
+                            //TODO:  Use Comment User info to construct a commentVM
+                            commentVms.Add(new CommentViewModel());
+                        }
+                    }
+                    else
+                    {
+                        commentVms.Add(new CommentViewModel()); // need a secondary constructor, for anonymous comments
                     }
                 }
             }

@@ -14,6 +14,7 @@ namespace Xerpi.ViewModels
     {
         private readonly IImageService _imageService;
         private readonly INavigationService _navigationService;
+        private readonly SortExpressionComparer<ApiImage> _imageSorter = SortExpressionComparer<ApiImage>.Descending(x => x.Id);
 
         private uint _currentPage = 1;
 
@@ -56,8 +57,8 @@ namespace Xerpi.ViewModels
             GetNextPageCommand = new Command(async x => await GetNextPage());
 
             var operation = _imageService.CurrentImages.Connect()
-                .Filter(x => !x.Image.EndsWith(".webm"))
-                .Sort(SortExpressionComparer<ApiImage>.Descending(x => x.Id))
+                .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle
+                .Sort(_imageSorter)
                 .Bind(out _images, resetThreshold: 75)
                 .DisposeMany()
                 .Subscribe();

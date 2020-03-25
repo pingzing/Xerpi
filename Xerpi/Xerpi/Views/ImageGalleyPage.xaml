@@ -16,7 +16,6 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <converters:DerpiCdnConverter x:Key="DerpiCdnConverter"/>
             <converters:InvertBoolConverter x:Key="InvertBoolConverter"/>
             <converters:PixelsToDipsConverter x:Key="PixelsToDips"/>
         </ResourceDictionary>
@@ -48,7 +47,7 @@
                       CurrentItemChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=CurrentItem}">
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
-                    <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Medium, Converter={StaticResource DerpiCdnConverter}}"
+                    <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Medium}"
                                                 DownsampleToViewSize="True">
                         <ffimageloading:CachedImage.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
@@ -73,7 +72,7 @@
                                    IsVisible="{Binding IsImageViewerOpen}"
                                    HeightRequest="{Binding CurrentImage.BackingImage.Height, Converter={StaticResource PixelsToDips}}"
                                    WidthRequest="{Binding CurrentImage.BackingImage.Width, Converter={StaticResource PixelsToDips}}"
-                                   Source="{Binding CurrentImage.BackingImage.Representations.Full, Converter={StaticResource DerpiCdnConverter}}">
+                                   Source="{Binding CurrentImage.BackingImage.Representations.Full}">
                 <ffimageloading:CachedImage.CacheKeyFactory>
                     <extensions:ImageCacheKeyFactory ImageType="Full" />
                     </ffimageloading:CachedImage.CacheKeyFactory>
