@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Xamarin.Forms;
 using Xerpi.Models.API;
 using Xerpi.ViewModels;
@@ -54,11 +56,38 @@ namespace Xerpi.Controls
         public static BindableProperty CommentsProperty = BindableProperty.Create(
             nameof(Comments),
             typeof(IEnumerable<CommentViewModel>),
-            typeof(PostInfoBottomPanel));
+            typeof(PostInfoBottomPanel),
+            propertyChanged: CommentsPropertyChanged);
         public IEnumerable<CommentViewModel> Comments
         {
             get => (IEnumerable<CommentViewModel>)GetValue(CommentsProperty);
             set => SetValue(CommentsProperty, value);
+        }
+        private static void CommentsPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var _this = (PostInfoBottomPanel)bindable;
+            var oldList = (IEnumerable<CommentViewModel>)oldValue;
+            var newList = (IEnumerable<CommentViewModel>)newValue;
+
+            // null means "not loaded yet"
+            if (newList == null)
+            {
+                _this.CommentsLoadingPanel.IsVisible = true;
+                _this.CommentsPanel.IsVisible = false;
+                return;
+            }
+
+            // Non-null, but empty, means loaded, but no comments
+            if (newList?.Any() != true)
+            {
+                // TODO: Have a third state that says "No comments"?
+                _this.CommentsLoadingPanel.IsVisible = false;
+                _this.CommentsPanel.IsVisible = false;
+                return;
+            }
+
+            _this.CommentsLoadingPanel.IsVisible = false;
+            _this.CommentsPanel.IsVisible = true;
         }
 
         public PostInfoBottomPanel()

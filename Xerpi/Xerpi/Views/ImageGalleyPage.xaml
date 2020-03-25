@@ -90,7 +90,8 @@
                                       Upvotes="{Binding CurrentImage.BackingImage.Upvotes}"
                                       Score="{Binding CurrentImage.BackingImage.Score}"
                                       Downvotes="{Binding CurrentImage.BackingImage.Downvotes}"
-                                      Tags="{Binding CurrentImage.Tags}"/>
+                                      Tags="{Binding CurrentImage.Tags}"
+                                      Comments="{Binding CurrentImage.Comments}"/>
 
     </Grid>
 

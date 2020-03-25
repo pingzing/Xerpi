@@ -26,12 +26,16 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        
+        <!--Drag/Vote/Score bar-->
         <Grid Grid.Row="0" BackgroundColor="{StaticResource NavigationPrimary}" HeightRequest="30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
+
+            <!--Upvotes-->
             <StackLayout Orientation="Horizontal" Spacing="4">
                 <Label Text="&#xF514;" 
                                FontFamily="{StaticResource MaterialFontFamily}"
@@ -43,12 +47,16 @@
                                VerticalTextAlignment="Center"
                                FontSize="20"/>
             </StackLayout>
+            
+            <!--Score-->
             <Label Grid.Column="1" 
                            Text="{Binding Source={x:Reference thisPostInfoPanel}, Path=Score}"
                            TextColor="White"
                            FontSize="20"
                            HorizontalOptions="Center"
                            VerticalTextAlignment="Center"/>
+            
+            <!--Downvotes-->
             <StackLayout Grid.Column="2" 
                                  Orientation="Horizontal" 
                                  Spacing="4"
@@ -64,8 +72,12 @@
                                VerticalOptions="Center"/>
             </StackLayout>
         </Grid>
+        
+        <!--Description, tags, and comments-->
         <ScrollView Grid.Row="1" Scrolled="ScrollView_Scrolled">
             <StackLayout>
+
+                <!--Tags-->
                 <FlexLayout x:Name="TagsLayout" Direction="Row" 
                             BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}"
                             Wrap="Wrap"
@@ -82,22 +94,26 @@
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
-                <StackLayout Orientation="Horizontal" IsVisible="True" HorizontalOptions="Center">
+                
+                <!--Comments. Visibility controlled in code-behind.-->
+                <StackLayout x:Name="CommentsLoadingPanel" Orientation="Horizontal" IsVisible="True" HorizontalOptions="Center">
                     <ActivityIndicator IsRunning="True" HeightRequest="25"/>
                     <Label HorizontalOptions="Center" Text="Loading comments..." VerticalOptions="Center"/>
                 </StackLayout>
-                <StackLayout BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Comments}"
+                <StackLayout x:Name="CommentsPanel"
+                             BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Comments}"
                              IsVisible="False">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="viewmodels:CommentViewModel">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <ffi:CachedImage DownsampleToViewSize="True" 
-                                                 HeightRequest="50"
-                                                 WidthRequest="50"/>
+                            <Grid RowSpacing="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Label Grid.Row="0" FontAttributes="Bold" Text="{Binding Author}"/>
+                                <Label Grid.Row="1" Text="{Binding Body}" LineBreakMode="WordWrap"/>
+
                             </Grid>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>

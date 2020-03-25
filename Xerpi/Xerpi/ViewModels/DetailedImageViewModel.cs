@@ -8,6 +8,7 @@ using System.Linq;
 using Xerpi.Models;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using DynamicData.Binding;
 
 namespace Xerpi.ViewModels
 {
@@ -18,6 +19,7 @@ namespace Xerpi.ViewModels
         private readonly ISynchronizationContextService _syncContextService;
         private static readonly ApiTagComparer _tagComparer = new ApiTagComparer();
 
+        private bool _externalDataLoaded = false;
         private ApiImage? _backingImage;
 
         public ApiImage BackingImage
@@ -33,6 +35,13 @@ namespace Xerpi.ViewModels
             set => Set(ref _tags, value);
         }
 
+        private ObservableCollectionExtended<CommentViewModel> _comments;
+        public ObservableCollectionExtended<CommentViewModel> Comments
+        {
+            get => _comments;
+            set => Set(ref _comments, value);
+        }
+
         public DetailedImageViewModel(ApiImage backingImage,
             IImageService imageService,
             IDerpiNetworkService networkService,
@@ -42,7 +51,8 @@ namespace Xerpi.ViewModels
             _imageService = imageService;
             _networkService = networkService;
             _syncContextService = syncContextService;
-            var disposable = _imageService.Tags.Connect()
+
+            _ = _imageService.Tags.Connect()
                 .Filter(x => BackingImage.TagIds.Contains(x.Id))
                 .Sort(_tagComparer)
                 .ObserveOn(_syncContextService.UIThread)
@@ -53,12 +63,18 @@ namespace Xerpi.ViewModels
 
         public async Task InitExternalData()
         {
+            if (_externalDataLoaded)
+            {
+                return;
+            }
+
             // Get tags and comments
             if (BackingImage?.TagIds != null)
             {
                 await _imageService.UpdateTags(BackingImage.TagIds).ConfigureAwait(false);
             }
 
+            List<CommentViewModel> commentVms = new List<CommentViewModel>();
             if (BackingImage?.CommentCount > 0)
             {
                 var commentsResponse = await _networkService.GetComments(BackingImage.Id);
@@ -67,24 +83,12 @@ namespace Xerpi.ViewModels
                     return;
                 }
 
-                List<CommentViewModel> commentVms = new List<CommentViewModel>();
                 foreach (var comment in commentsResponse.Comments)
                 {
-                    if (comment.UserId.HasValue)
-                    {
-                        var user = await _networkService.GetUserProfile(comment.UserId.Value);
-                        if (user != null)
-                        {
-                            //TODO:  Use Comment User info to construct a commentVM
-                            commentVms.Add(new CommentViewModel());
-                        }
-                    }
-                    else
-                    {
-                        commentVms.Add(new CommentViewModel()); // need a secondary constructor, for anonymous comments
-                    }
+                    commentVms.Add(new CommentViewModel(comment));
                 }
             }
+            Comments = new ObservableCollectionExtended<CommentViewModel>(commentVms);
         }
     }
 }

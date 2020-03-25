@@ -98,9 +98,9 @@ namespace Xerpi.Services
             return searchResult.Total;
         }
 
-        public async Task UpdateTags(uint[] tags)
+        public async Task UpdateTags(uint[] tagIds)
         {
-            IEnumerable<uint> missingTags = tags.Except(_tags.Keys);
+            IEnumerable<uint> missingTags = tagIds.Except(_tags.Keys);
             if (!missingTags.Any())
             {
                 return;

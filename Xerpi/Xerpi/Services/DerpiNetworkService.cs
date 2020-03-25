@@ -85,7 +85,7 @@ namespace Xerpi.Services
 
         public async Task<IEnumerable<ApiFilter>?> GetDefaultFilters()
         {
-            // No replacement for this in the new API. 
+            // No replacement for this in the new API. Update: Damaged is working on it
             // Default filters are:
             /*
              * 37431
@@ -95,6 +95,7 @@ namespace Xerpi.Services
              * 37432
              * 37430
              */
+            return null; // TODO: Wait for the endpoint to exist.
             var response = await _httpClient.GetAsync("filters");
             if (!response.IsSuccessStatusCode)
             {
