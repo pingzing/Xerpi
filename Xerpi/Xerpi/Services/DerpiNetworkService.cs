@@ -95,8 +95,7 @@ namespace Xerpi.Services
              * 37432
              * 37430
              */
-            return null; // TODO: Wait for the endpoint to exist.
-            var response = await _httpClient.GetAsync("filters");
+            var response = await _httpClient.GetAsync("filters/system");
             if (!response.IsSuccessStatusCode)
             {
                 Debug.WriteLine($"GetDefaultFilters failed. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
