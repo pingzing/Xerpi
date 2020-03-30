@@ -5,14 +5,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:api="clr-namespace:Xerpi.Models.API"
              xmlns:converters="clr-namespace:Xerpi.Converters"
-             xmlns:ffi="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:ctls="clr-namespace:Xerpi.Controls"
              xmlns:viewmodels="clr-namespace:Xerpi.ViewModels"
              mc:Ignorable="d"
              x:Class="Xerpi.Controls.PostInfoBottomPanel"
              x:Name="thisPostInfoPanel"
              
              BackgroundColor="White"
-             HeightRequest="200">
+             HeightRequest="{x:Static ctls:PostInfoBottomPanel.PanelHeight}">
+    <ContentView.GestureRecognizers>
+        <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated"/>
+        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+    </ContentView.GestureRecognizers>
 
     <ContentView.Resources>
         <ResourceDictionary>
@@ -28,14 +32,14 @@
         </Grid.RowDefinitions>
         
         <!--Drag/Vote/Score bar-->
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource NavigationPrimary}" HeightRequest="30">
+        <Grid Grid.Row="0" BackgroundColor="{StaticResource NavigationPrimary}" HeightRequest="{x:Static ctls:PostInfoBottomPanel.MinimizedHeight}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!--Upvotes-->
+            <!--Upvotes-->            
             <StackLayout Orientation="Horizontal" Spacing="4">
                 <Label Text="&#xF514;" 
                                FontFamily="{StaticResource MaterialFontFamily}"

@@ -34,9 +34,9 @@ namespace Xerpi.Views
 
         private async void TapGestureRecognizer_Tapped(object sender, System.EventArgs e)
         {
-            if (_bottomPanelMaximized)
+            if (BottomPanel.IsOpen)
             {
-                await ToggleBottomPanel();
+                BottomPanel.IsOpen = false;
             }
             else
             {
@@ -44,21 +44,6 @@ namespace Xerpi.Views
                 {
                     _viewModel.FullSizeButtonCommand.Execute(null);
                 }
-            }
-        }
-
-
-        private async Task ToggleBottomPanel()
-        {
-            if (_bottomPanelMaximized)
-            {
-                await BottomPanel.TranslateTo(BottomPanel.X, 170, 333, Easing.CubicIn);
-                _bottomPanelMaximized = false;
-            }
-            else
-            {
-                await BottomPanel.TranslateTo(BottomPanel.X, 0, 333, Easing.CubicOut);
-                _bottomPanelMaximized = true;
             }
         }
     }

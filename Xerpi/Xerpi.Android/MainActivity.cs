@@ -24,7 +24,7 @@ namespace Xerpi.Droid
 
             base.OnCreate(savedInstanceState);
 
-            Forms.SetFlags("CollectionView_Experimental", "UseLegacyRenderers", "CarouselView_Experimental"); // Using legacy renderers until the Label FastRenderer crashes are fixed.
+            Forms.SetFlags("CollectionView_Experimental", "CarouselView_Experimental");
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
             Forms.Init(this, savedInstanceState);

@@ -103,7 +103,7 @@ namespace Xerpi.Services
             }
 
             var filtersResponse = await JsonSerializer.DeserializeAsync<FiltersResponse?>(await response.Content.ReadAsStreamAsync(), _jsonOptions);
-            return filtersResponse?.SystemFilters;
+            return filtersResponse?.Filters;
         }
 
         public async Task<CommentsResponse?> GetComments(uint imageId, uint page = 1)

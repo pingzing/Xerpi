@@ -40,6 +40,7 @@
         <CarouselView x:Name="ImagesCarousel" 
                       Margin="0, 0, 0, 30"
                       IsEnabled="{Binding IsImageViewerOpen, Converter={StaticResource InvertBoolConverter}}"
+                      IsScrollAnimated="False"
                       InputTransparent="{Binding IsImageViewerOpen}"
                       ItemsSource="{Binding Images}"
                       CurrentItem="{Binding CurrentImage, Mode=TwoWay}"

@@ -66,7 +66,7 @@ namespace Xerpi.Models.API
             return Equals(obj as ApiImage);
         }
 
-        public bool Equals(ApiImage other)
+        public bool Equals(ApiImage? other)
         {
             return other != null! &&
                    Id == other.Id &&
@@ -91,12 +91,12 @@ namespace Xerpi.Models.API
             return hashCode;
         }
 
-        public static bool operator ==(ApiImage left, ApiImage right)
+        public static bool operator ==(ApiImage? left, ApiImage? right)
         {
-            return EqualityComparer<ApiImage>.Default.Equals(left, right);
+            return EqualityComparer<ApiImage>.Default.Equals(left!, right!);
         }
 
-        public static bool operator !=(ApiImage left, ApiImage right)
+        public static bool operator !=(ApiImage? left, ApiImage? right)
         {
             return !(left == right);
         }
