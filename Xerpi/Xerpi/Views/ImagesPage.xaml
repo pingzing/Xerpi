@@ -22,7 +22,8 @@
 
     <RefreshView IsRefreshing="{Binding IsRefreshing}"
                  Command="{Binding RefreshCommand}">
-        <CollectionView x:Name="ImageListCollectionView" ItemsSource="{Binding Images}"
+        <CollectionView x:Name="ImageListCollectionView" 
+                        ItemsSource="{Binding Images}"
                         ItemSizingStrategy="MeasureFirstItem"                        
                         SelectionChanged="CollectionView_SelectionChanged"
                         SelectionMode="Single"
@@ -35,12 +36,10 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="api:ApiImage">
                     <ffimageloading:CachedImage Source="{Binding Representations.Thumb, Mode=OneTime}"
+                                                CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.ThumbnailCacheFactory}"
                                                 WidthRequest="150"
                                                 HeightRequest="150"
                                                 DownsampleToViewSize="True">
-                        <ffimageloading:CachedImage.CacheKeyFactory>
-                            <extensions:ImageCacheKeyFactory ImageType="Thumbnail" />
-                        </ffimageloading:CachedImage.CacheKeyFactory>
                     </ffimageloading:CachedImage>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

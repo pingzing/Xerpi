@@ -46,9 +46,9 @@
     <WarningLevel>4</WarningLevel>
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
-    <AotAssemblies>false</AotAssemblies>
-    <EnableLLVM>false</EnableLLVM>
-    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <AotAssemblies>true</AotAssemblies>
+    <EnableLLVM>true</EnableLLVM>
+    <AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
     <BundleAssemblies>false</BundleAssemblies>
     <AndroidSupportedAbis>armeabi-v7a;x86;arm64-v8a</AndroidSupportedAbis>
   </PropertyGroup>
@@ -69,6 +69,9 @@
       <Version>2.4.11.982</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.FFImageLoading.Forms">
+      <Version>2.4.11.982</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.FFImageLoading.Svg.Forms">
       <Version>2.4.11.982</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />

@@ -4,6 +4,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xerpi.Models.API;
@@ -19,6 +20,8 @@ namespace Xerpi.ViewModels
         private readonly IDerpiNetworkService _networkService;
         private readonly ISynchronizationContextService _syncContextService;
         private readonly SortExpressionComparer<ApiImage> _imageSorter = SortExpressionComparer<ApiImage>.Descending(x => x.Id);
+
+        private CancellationTokenSource _cts = new CancellationTokenSource();
 
         private DetailedImageViewModel? _currentImage;
         public DetailedImageViewModel CurrentImage
@@ -64,7 +67,9 @@ namespace Xerpi.ViewModels
 
         private async void CurrentImageChanged(DetailedImageViewModel newImage)
         {
-            await newImage.InitExternalData();
+            _cts.Cancel();
+            _cts = new CancellationTokenSource();
+            await newImage.InitExternalData(_cts.Token);
         }
 
         public override bool OnBack()

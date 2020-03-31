@@ -11,6 +11,7 @@ using Xerpi.Models;
 using Xerpi.Views;
 using Xerpi.ViewModels;
 using Xerpi.Models.API;
+using System.Diagnostics;
 
 namespace Xerpi.Views
 {

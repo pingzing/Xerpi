@@ -49,13 +49,11 @@
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
                     <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Medium}"
+                                                CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.MediumCacheFactory}"
                                                 DownsampleToViewSize="True">
                         <ffimageloading:CachedImage.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
                         </ffimageloading:CachedImage.GestureRecognizers>
-                        <ffimageloading:CachedImage.CacheKeyFactory>
-                            <extensions:ImageCacheKeyFactory ImageType="Medium" />
-                        </ffimageloading:CachedImage.CacheKeyFactory>
                     </ffimageloading:CachedImage>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
@@ -70,13 +68,11 @@
                         VerticalOptions="FillAndExpand">
             <controls:PanZoomImage x:Name="PanZoomImage"
                                    AbsoluteLayout.LayoutFlags="None"
+                                   CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.FullCacheFactory}"
                                    IsVisible="{Binding IsImageViewerOpen}"
-                                   HeightRequest="{Binding CurrentImage.BackingImage.Height, Converter={StaticResource PixelsToDips}}"
-                                   WidthRequest="{Binding CurrentImage.BackingImage.Width, Converter={StaticResource PixelsToDips}}"
+                                   HeightRequest="{Binding CurrentImage.BackingImage.Height}"
+                                   WidthRequest="{Binding CurrentImage.BackingImage.Width}"
                                    Source="{Binding CurrentImage.BackingImage.Representations.Full}">
-                <ffimageloading:CachedImage.CacheKeyFactory>
-                    <extensions:ImageCacheKeyFactory ImageType="Full" />
-                    </ffimageloading:CachedImage.CacheKeyFactory>
             </controls:PanZoomImage>
         </AbsoluteLayout>
         <ActivityIndicator HorizontalOptions="Center"

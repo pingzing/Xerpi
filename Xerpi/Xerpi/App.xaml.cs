@@ -9,13 +9,11 @@ namespace Xerpi
 
         public App()
         {
-#if DEBUG
-            Xamarin.Forms.Internals.Log.Listeners.Add(new DelegateLogListener((arg1, arg2) => Debug.WriteLine(arg2)));
+#if DEBUG // Dumb stupid workaround because dumb stupid framework doesn't report dumb stupid errors
+            Log.Listeners.Add(new DelegateLogListener((arg1, arg2) => Debug.WriteLine(arg2)));
 #endif
 
             InitializeComponent();
-
-
             MainPage = new AppShell();
         }
 

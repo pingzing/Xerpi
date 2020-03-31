@@ -61,7 +61,7 @@ namespace Xerpi.Services
 
         public async Task<IEnumerable<ApiTag>?> GetTags(IEnumerable<uint> ids)
         {
-            string idQueryParams = string.Join("||", ids.Select(x => $"id:{x}"));
+            string idQueryParams = string.Join(" || ", ids.Select(x => $"id:{x}"));
             string url = $"search/tags?q={idQueryParams}";
             var response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)

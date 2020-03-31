@@ -9,6 +9,8 @@ using Xerpi.Models;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using DynamicData.Binding;
+using System.Threading;
+using System.Diagnostics;
 
 namespace Xerpi.ViewModels
 {
@@ -35,7 +37,7 @@ namespace Xerpi.ViewModels
             set => Set(ref _tags, value);
         }
 
-        private ObservableCollectionExtended<CommentViewModel> _comments;
+        private ObservableCollectionExtended<CommentViewModel>? _comments;
         public ObservableCollectionExtended<CommentViewModel> Comments
         {
             get => _comments;
@@ -61,10 +63,17 @@ namespace Xerpi.ViewModels
                 .Subscribe();
         }
 
-        public async Task InitExternalData()
+        public async Task InitExternalData(CancellationToken token)
         {
             if (_externalDataLoaded)
             {
+                return;
+            }
+
+            await Task.Delay(200); // Wait a bit before we start doing expensive stuff
+            if (token.IsCancellationRequested)
+            {
+                Debug.WriteLine("Cancelling full load of image before doing anything expensive...");
                 return;
             }
 
@@ -72,6 +81,11 @@ namespace Xerpi.ViewModels
             if (BackingImage?.TagIds != null)
             {
                 await _imageService.UpdateTags(BackingImage.TagIds).ConfigureAwait(false);
+            }
+            if (token.IsCancellationRequested)
+            {
+                Debug.WriteLine("Cancelling full load of image after getting tags...");
+                return;
             }
 
             List<CommentViewModel> commentVms = new List<CommentViewModel>();
@@ -88,7 +102,15 @@ namespace Xerpi.ViewModels
                     commentVms.Add(new CommentViewModel(comment));
                 }
             }
+
+            if (token.IsCancellationRequested)
+            {
+                Debug.WriteLine("Cancelling full load of after retrieving comments, but before displaying...");
+                return;
+            }
+
             Comments = new ObservableCollectionExtended<CommentViewModel>(commentVms);
+            _externalDataLoaded = true;
         }
     }
 }

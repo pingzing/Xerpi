@@ -7,7 +7,18 @@ namespace Xerpi.Extensions
 {
     public class ImageCacheKeyFactory : ICacheKeyFactory
     {
+        public static ICacheKeyFactory ThumbnailCacheFactory { get; } = new ImageCacheKeyFactory(ImageType.Thumbnail);
+        public static ICacheKeyFactory MediumCacheFactory { get; } = new ImageCacheKeyFactory(ImageType.Medium);
+        public static ICacheKeyFactory FullCacheFactory { get; } = new ImageCacheKeyFactory(ImageType.Full);
+
         public ImageType ImageType { get; set; } = ImageType.Thumbnail;
+
+        public ImageCacheKeyFactory() { }
+
+        public ImageCacheKeyFactory(ImageType imageType)
+        {
+            ImageType = imageType;
+        }
 
         public string GetKey(ImageSource imageSource, object bindingContext)
         {

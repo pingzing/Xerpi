@@ -11,6 +11,8 @@ using Xerpi.ViewModels;
 using System.Net.Http.Headers;
 using Xerpi.Views;
 using Xamarin.Forms;
+using Xerpi.Extensions;
+using FFImageLoading.Forms;
 
 namespace Xerpi
 {
@@ -29,7 +31,7 @@ namespace Xerpi
                     c.AddJsonFile(configFilePath);
                 }).ConfigureServices((c, x) =>
                 {
-                    nativeConfigureServices(c, x);
+                    nativeConfigureServices.Invoke(c, x);
                     ConfigureServices(c, x);
                 }).ConfigureLogging(l => l.AddConsole(o =>
                 {
@@ -58,13 +60,15 @@ namespace Xerpi
                 x.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("pingzing-Xerpi", "1.0"));
             });
 
-            // ViewModel singletons
+            // Services
             services.AddSingleton<INavigationService, NavigationService>()
                 .AddSingleton<ISynchronizationContextService, SynchronizationContextService>()
                 .AddTransient<ISettingsService, SettingsService>()
                 .AddSingleton<IImageService, ImageService>()
-                .AddSingleton<IMessagingCenter, MessagingCenter>(_ => (MessagingCenter)MessagingCenter.Instance)
-                .AddSingleton<ImagesViewModel>()
+                .AddSingleton<IMessagingCenter, MessagingCenter>(_ => (MessagingCenter)MessagingCenter.Instance);
+
+            // ViewModel singletons            
+            services.AddSingleton<ImagesViewModel>()
                 .AddSingleton<ImageGalleryViewModel>()
                 .AddSingleton<AboutViewModel>()
                 .AddSingleton<SettingsViewModel>();

@@ -1,4 +1,5 @@
 ﻿using FFImageLoading.Forms;
+using FFImageLoading.Svg.Forms;
 using System.Collections.Generic;
 using System.Reflection;
 using Windows.ApplicationModel.Activation;
@@ -24,6 +25,7 @@ namespace Xerpi.UWP
                 rootFrame = new Frame();
 
                 Xamarin.Forms.Forms.SetFlags("Shell_UWP_Experimental", "CollectionView_Experimental", "CarouselView_Experimental");
+                _ = typeof(SvgCachedImage);
                 FFImageLoading.Forms.Platform.CachedImageRenderer.Init();
 
                 var assembliesToInclude = new List<Assembly>

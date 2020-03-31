@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Android.Content;
 using FFImageLoading;
+using FFImageLoading.Svg.Forms;
 
 namespace Xerpi.Droid
 {
@@ -27,6 +28,7 @@ namespace Xerpi.Droid
             Forms.SetFlags("CollectionView_Experimental", "CarouselView_Experimental");
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
+            _ = typeof(SvgCachedImage);
             Forms.Init(this, savedInstanceState);
             Startup.Init(ConfigureServices);
             LoadApplication(new App());

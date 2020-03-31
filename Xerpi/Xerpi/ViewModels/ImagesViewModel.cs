@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using DynamicData;
 using DynamicData.Binding;
+using FFImageLoading.Forms;
 using Xamarin.Forms;
+using Xerpi.Extensions;
 using Xerpi.Models.API;
 using Xerpi.Services;
 
