@@ -3,16 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             
              xmlns:api="clr-namespace:Xerpi.Models.API"
              xmlns:converters="clr-namespace:Xerpi.Converters"
              xmlns:ctls="clr-namespace:Xerpi.Controls"
-             xmlns:viewmodels="clr-namespace:Xerpi.ViewModels"
-             mc:Ignorable="d"
+             xmlns:viewmodels="clr-namespace:Xerpi.ViewModels" 
+             xmlns:ffi="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:ffiSvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"              
              x:Class="Xerpi.Controls.PostInfoBottomPanel"
              x:Name="thisPostInfoPanel"
              
              BackgroundColor="White"
              HeightRequest="{x:Static ctls:PostInfoBottomPanel.PanelHeight}">
+    
     <ContentView.GestureRecognizers>
         <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated"/>
         <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
@@ -20,12 +24,50 @@
 
     <ContentView.Resources>
         <ResourceDictionary>
+            <!--Converters-->
             <converters:TagCategoryForegroundConverter x:Key="ForegroundConverter"/>
             <converters:TagCategoryBackgroundConverter x:Key="BackgroundConverter"/>
+            <converters:DateTimeTimeAgoConverter x:Key="PostedAtConverter"/>
+            
+            <!--DataTemplates-->
+            <ControlTemplate x:Key="RegisteredUserTemplate">
+                <ffi:CachedImage BindingContext="{Binding Source={RelativeSource TemplatedParent}, Path=BindingContext}"
+                                 HeightRequest="50"
+                                 WidthRequest="50"
+                                 VerticalOptions="Start"
+                                 Source="{Binding Avatar}"/>
+            </ControlTemplate>
+
+            <ControlTemplate x:Key="AnonymousUserTemplate">
+                <ffiSvg:SvgCachedImage BindingContext="{Binding Source={RelativeSource TemplatedParent}, Path=BindingContext}" 
+                                       HeightRequest="50"
+                                       WidthRequest="50"
+                                       VerticalOptions="Start"
+                                       Source="{Binding Avatar}"/>
+            </ControlTemplate>
+
         </ResourceDictionary>
     </ContentView.Resources>
 
-    <Grid RowSpacing="0">
+    <Grid x:Name="RootGrid" RowSpacing="0">
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommentStates">
+                <VisualState x:Name="Empty">
+                    <VisualState.Setters>
+                        <Setter TargetName="EmptyCommentView" Property="IsVisible" Value="True"/>
+                        <Setter TargetName="LoadedCommentsView" Property="IsVisible" Value="False"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Loaded">
+                    <VisualState.Setters>
+                        <Setter TargetName="EmptyCommentView" Property="IsVisible" Value="False"/>
+                        <Setter TargetName="LoadedCommentsView" Property="IsVisible" Value="True"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -77,52 +119,86 @@
             </StackLayout>
         </Grid>
         
-        <!--Description, tags, and comments-->
-        <ScrollView Grid.Row="1" Scrolled="ScrollView_Scrolled">
+        <!--Description, tags, and comments-->        
+        <ScrollView Grid.Row="1"
+                    Scrolled="ScrollView_Scrolled">
             <StackLayout>
+                <!--Description and maybe a control bar showing current zoom, etc-->
+                <!--TODO-->
 
                 <!--Tags-->
                 <FlexLayout x:Name="TagsLayout" Direction="Row" 
-                            BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}"
-                            Wrap="Wrap"
-                            AlignItems="Start" 
-                            JustifyContent="SpaceAround">
+                                BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}"
+                                Wrap="Wrap"
+                                AlignItems="Start" 
+                                JustifyContent="SpaceAround">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="api:ApiTag">
                             <Frame BackgroundColor="{Binding Category, Converter={StaticResource BackgroundConverter}}" 
-                                   Padding="10, 5, 10, 5" 
-                                   Margin="0, 3, 0, 3">
+                                       Padding="10, 5, 10, 5" 
+                                       Margin="0, 3, 0, 3">
                                 <Label Text="{Binding TagString}" 
-                                       TextColor="{Binding Category, Converter={StaticResource ForegroundConverter}}"/>
+                                           TextColor="{Binding Category, Converter={StaticResource ForegroundConverter}}"/>
                             </Frame>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
-                
-                <!--Comments. Visibility controlled in code-behind.-->
-                <StackLayout x:Name="CommentsLoadingPanel" Orientation="Horizontal" IsVisible="True" HorizontalOptions="Center">
-                    <ActivityIndicator IsRunning="True" HeightRequest="25"/>
-                    <Label HorizontalOptions="Center" Text="Loading comments..." VerticalOptions="Center"/>
+
+                <!--Comments-->
+                <StackLayout x:Name="EmptyCommentView">
+                    <Label HorizontalOptions="Center" Text="Quiet in here."/>
                 </StackLayout>
-                <StackLayout x:Name="CommentsPanel"
-                             BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Comments}"
-                             IsVisible="False">
+                <StackLayout x:Name="LoadedCommentsView" Spacing="0" BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Comments}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="viewmodels:CommentViewModel">
                             <Grid RowSpacing="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <Label Grid.Row="0" FontAttributes="Bold" Text="{Binding Author}"/>
-                                <Label Grid.Row="1" Text="{Binding Body}" LineBreakMode="WordWrap"/>
+                                <!--Avatar-->
+                                <!--Conditionally switches between FFImageLoading's SvgImage and a regular CachedImage-->
+                                <ContentView Grid.Row="0" Grid.RowSpan="2" Grid.Column="0">
+                                    <ContentView.Triggers>
+                                        <DataTrigger TargetType="ContentView"
+                                                     Binding="{Binding HasSvgAvatar}"
+                                                     Value="True">
+                                            <Setter Property="ControlTemplate"
+                                                    Value="{StaticResource AnonymousUserTemplate}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="ContentView"
+                                                     Binding="{Binding HasSvgAvatar}"
+                                                     Value="False">
+                                            <Setter Property="ControlTemplate"
+                                                    Value="{StaticResource RegisteredUserTemplate}"/>
+                                        </DataTrigger>
+                                    </ContentView.Triggers>
+                                </ContentView>
+
+                                <!--Author and timestamp-->
+                                <Label Grid.Row="0" Grid.Column="1" FontAttributes="Bold" Text="{Binding Author}"/>
+                                <Label Grid.Row="0" Grid.Column="2"
+                                       Text="{Binding PostedAt, Converter={StaticResource PostedAtConverter}}"/>
+                                
+                                <!--Body-->
+                                <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Body}" LineBreakMode="WordWrap"/>
 
                             </Grid>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </StackLayout>
+                <StackLayout x:Name="LoadingCommentView">
+                    <!--TODO: make this show up whenever we're loading comments-->
+                </StackLayout>
             </StackLayout>
+
         </ScrollView>
     </Grid>
 </ContentView>

@@ -28,6 +28,7 @@ namespace Xerpi.Services
                 PropertyNameCaseInsensitive = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             };
+            _jsonOptions.Converters.Add(new UtcDateTimeOffsetConverter());
         }
 
         public async Task<ImageSearchResponse?> GetImages(uint page = 1, uint perPage = 15)

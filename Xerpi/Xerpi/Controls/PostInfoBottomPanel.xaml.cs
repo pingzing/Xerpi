@@ -99,25 +99,20 @@ namespace Xerpi.Controls
             var oldList = (IEnumerable<CommentViewModel>)oldValue;
             var newList = (IEnumerable<CommentViewModel>)newValue;
 
-            // null means "not loaded yet"
+            // Null means we're loading.
             if (newList == null)
             {
-                _this.CommentsLoadingPanel.IsVisible = true;
-                _this.CommentsPanel.IsVisible = false;
+                // The "Loaded" view will just be empty, so this is fine
+                VisualStateManager.GoToState(_this.RootGrid, "Loaded");
                 return;
             }
-
-            // Non-null, but empty, means loaded, but no comments
-            if (newList?.Any() != true)
+            if (!newList.Any())
             {
-                // TODO: Have a third state that says "No comments"?
-                _this.CommentsLoadingPanel.IsVisible = false;
-                _this.CommentsPanel.IsVisible = false;
+                VisualStateManager.GoToState(_this.RootGrid, "Empty");
                 return;
             }
 
-            _this.CommentsLoadingPanel.IsVisible = false;
-            _this.CommentsPanel.IsVisible = true;
+            VisualStateManager.GoToState(_this.RootGrid, "Loaded");
         }
 
         public PostInfoBottomPanel()
