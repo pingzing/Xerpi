@@ -12,7 +12,9 @@
              xmlns:views="clr-namespace:Xerpi.Views"
              xmlns:controls="clr-namespace:Xerpi.Controls"
              xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
-             xmlns:extensions="clr-namespace:Xerpi.Extensions">
+             xmlns:extensions="clr-namespace:Xerpi.Extensions"
+             
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ContentPage.Resources>
         <ResourceDictionary>

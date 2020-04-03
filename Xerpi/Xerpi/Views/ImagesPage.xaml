@@ -3,14 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             
+             x:Class="Xerpi.Views.ImagesPage"             
+             
              xmlns:api="clr-namespace:Xerpi.Models.API"
-             xmlns:converters="clr-namespace:Xerpi.Converters"
              xmlns:controls="clr-namespace:Xerpi.Controls"
              xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:extensions="clr-namespace:Xerpi.Extensions"
-             mc:Ignorable="d"
-             x:Class="Xerpi.Views.ImagesPage"             
-             x:Name="BrowseItemsPage">
+             
+             x:Name="BrowseItemsPage"
+             BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <Shell.TitleView>
         <controls:TitleSearchBar x:Name="TitleSearch" 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
+using Xamarin.Forms;
 using Xerpi.Models.API;
 using Xerpi.Services;
 
@@ -14,12 +16,32 @@ namespace Xerpi.ViewModels
 
         private readonly ISettingsService _settingsService;
         private readonly IDerpiNetworkService _networkService;
+        private readonly IMessagingCenter _messagingService;
 
+        // TODO: One day, this should include user-definable filters.
         private List<SettingsFilterViewModel> _filters = new List<SettingsFilterViewModel>();
         public List<SettingsFilterViewModel> Filters
         {
             get => _filters;
             set => Set(ref _filters, value);
+        }
+
+        private List<AppTheme> _themeChoices = new List<AppTheme> { AppTheme.Unspecified, AppTheme.Dark, AppTheme.Light };
+        public List<AppTheme> ThemeChoices
+        {
+            get => _themeChoices;
+            set => Set(ref _themeChoices, value);
+        }
+
+        private AppTheme _selectedTheme;
+        public AppTheme SelectedTheme
+        {
+            get => _selectedTheme;
+            set
+            {
+                Set(ref _selectedTheme, value);
+                _settingsService.SelectedTheme = value;
+            }
         }
 
         private bool _isLoading;
@@ -30,10 +52,12 @@ namespace Xerpi.ViewModels
         }
 
         public SettingsViewModel(ISettingsService settingsService,
-            IDerpiNetworkService networkService)
+            IDerpiNetworkService networkService,
+            IMessagingCenter messagingService)
         {
             _settingsService = settingsService;
             _networkService = networkService;
+            _messagingService = messagingService;
 
             Title = "Settings";
 
@@ -42,11 +66,12 @@ namespace Xerpi.ViewModels
 
         public override async Task NavigatedTo()
         {
+            SelectedTheme = _settingsService.SelectedTheme;
             var defaultFilters = await _networkService.GetDefaultFilters();
             if (defaultFilters != null)
             {
                 Filters = defaultFilters
-                    .Select(x => new SettingsFilterViewModel(x, _settingsService))
+                    .Select(x => new SettingsFilterViewModel(x, _settingsService, _messagingService))
                     .ToList();
             }
 

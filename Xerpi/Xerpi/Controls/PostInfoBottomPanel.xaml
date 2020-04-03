@@ -14,7 +14,7 @@
              x:Class="Xerpi.Controls.PostInfoBottomPanel"
              x:Name="thisPostInfoPanel"
              
-             BackgroundColor="White"
+             BackgroundColor="{DynamicResource PageBackgroundColor}"
              HeightRequest="{x:Static ctls:PostInfoBottomPanel.PanelHeight}">
     
     <ContentView.GestureRecognizers>
@@ -74,12 +74,25 @@
         </Grid.RowDefinitions>
         
         <!--Drag/Vote/Score bar-->
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource NavigationPrimary}" HeightRequest="{x:Static ctls:PostInfoBottomPanel.MinimizedHeight}">
+        <Grid x:Name="TopBar" Grid.Row="0" 
+              BackgroundColor="{DynamicResource NavigationPrimary}" 
+              HeightRequest="{x:Static ctls:PostInfoBottomPanel.MinimizedHeight}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
+            
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="TopBarStates">
+                    <VisualState x:Name="Unhighlighted"/>
+                    <VisualState x:Name="Highlighted">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="{DynamicResource NavigationPrimaryLight}"/>
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
 
             <!--Upvotes-->            
             <StackLayout Orientation="Horizontal" Spacing="4">

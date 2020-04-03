@@ -1,5 +1,5 @@
-﻿using System;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
+using Xerpi.Messages;
 using Xerpi.Models.API;
 using Xerpi.Services;
 
@@ -8,6 +8,7 @@ namespace Xerpi.ViewModels
     public class SettingsFilterViewModel : BaseViewModel
     {
         private readonly ISettingsService _settingsService;
+        private readonly IMessagingCenter _messagingService;
 
         private bool _isInUse = false;
         public bool IsInUse
@@ -26,10 +27,14 @@ namespace Xerpi.ViewModels
         public ApiFilter BackingFilter { get; set; }
         public Command UseFilterCommand { get; private set; }
 
-        public SettingsFilterViewModel(ApiFilter backingFilter, ISettingsService settingsService)
+        public SettingsFilterViewModel(ApiFilter backingFilter,
+            ISettingsService settingsService,
+            IMessagingCenter messagingService)
         {
             _settingsService = settingsService;
-            _settingsService.FilterIdChanged += _settingsService_FilterIdChanged;
+            _messagingService = messagingService;
+
+            _messagingService.Subscribe<FilterIdChangedMessage>(this, "", FilterIdChanged);
 
             BackingFilter = backingFilter;
             UseFilterCommand = new Command(UseFilter, () => !IsInUse);
@@ -37,9 +42,9 @@ namespace Xerpi.ViewModels
             IsInUse = _settingsService.FilterId == BackingFilter.Id;
         }
 
-        private void _settingsService_FilterIdChanged(object sender, uint newFilter)
+        private void FilterIdChanged(FilterIdChangedMessage message)
         {
-            IsInUse = newFilter == BackingFilter.Id;
+            IsInUse = message.NewId == BackingFilter.Id;
         }
 
         private void UseFilter()

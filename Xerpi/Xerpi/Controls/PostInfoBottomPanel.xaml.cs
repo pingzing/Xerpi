@@ -146,6 +146,9 @@ namespace Xerpi.Controls
             }
             switch (e.StatusType)
             {
+                case GestureStatus.Started:
+                    VisualStateManager.GoToState(TopBar, "Highlighted");
+                    break;
                 case GestureStatus.Running:
                     double targetTranslation = TranslationY + e.TotalY;
 
@@ -161,6 +164,7 @@ namespace Xerpi.Controls
                     TranslationY = targetTranslation;
                     break;
                 case GestureStatus.Completed:
+                    VisualStateManager.GoToState(TopBar, "Unhighlighted");
                     if (TranslationY > PanelHeight / 2) // The panel is closed or almost closed
                     {
                         _ = SetPanelState(PanelState.Minimized);
