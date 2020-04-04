@@ -34,7 +34,8 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Label Text="{Binding CurrentImage.BackingImage.Id}"
-                   Style="{StaticResource TitleStyle}"/>
+                   Style="{StaticResource TitleStyle}"
+                   TextColor="White"/>
         </Grid>
     </Shell.TitleView>
 

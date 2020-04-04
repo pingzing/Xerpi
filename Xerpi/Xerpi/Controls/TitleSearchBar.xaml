@@ -26,8 +26,11 @@
                 Clicked="ToggleSearchButton_Clicked"/>
         <SearchBar x:Name="SearchBar" 
                    Grid.Column="0" Grid.ColumnSpan="2"
+                   BackgroundColor="{DynamicResource BackgroundColor}"
+                   TextColor="{DynamicResource PrimaryTextColor}"
+                   CancelButtonColor="{DynamicResource PrimaryTextColor}"
+                   PlaceholderColor="{DynamicResource PrimaryTextColor}"
                    Margin="5"
-                   BackgroundColor="White"
                    IsVisible="False" 
                    Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
                    SearchButtonPressed="SearchBar_SearchButtonPressed"/>

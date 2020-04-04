@@ -10,7 +10,8 @@
              xmlns:converters="clr-namespace:Xerpi.Converters"
              xmlns:vms="clr-namespace:Xerpi.ViewModels"
              
-             BackgroundColor="{DynamicResource BackgroundColor}">
+             BackgroundColor="{DynamicResource BackgroundColor}"
+             Title="Settings">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -25,13 +26,18 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Frame Padding="10, 5, 10, 5">
+        <StackLayout Margin="10, 5, 10, 5">
+            <Label Text="Theme"/>
             <Picker Title="Application Theme" 
                     ItemsSource="{Binding ThemeChoices}"
-                    SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"/>
-        </Frame>
+                    SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                    TextColor="{DynamicResource PrimaryTextColor}"/>
+        </StackLayout>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding Filters}">
+            <CollectionView.Header>
+                <Label Text="Filters" Padding="10, 5, 10, 5"/>
+            </CollectionView.Header>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vms:SettingsFilterViewModel">
                     <Frame Padding="10, 5, 10, 5">

@@ -14,7 +14,17 @@
             <On Platform="Android" Value="materialdesignicons-webfont.ttf#Material Design Icons"/>
             <On Platform="UWP" Value="Assets/Fonts/materialdesignicons-webfont.ttf#Material Design Icons"/>
         </OnPlatform>
-        
+
+        <!--Default label style-->
+        <Style TargetType="Label">
+            <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+        </Style>
+
+        <!--Default Frame style-->
+        <Style TargetType="Frame">
+            <Setter Property="BackgroundColor" Value="{DynamicResource BackgroundColor}"/>
+        </Style>
+
         <Style TargetType="Label" x:Key="TitleStyle">
             <Setter Property="VerticalOptions" Value="Center"/>
             <Setter Property="VerticalTextAlignment" Value="Center"/>
@@ -32,8 +42,5 @@
             <Setter Property="TextColor" Value="{DynamicResource ContentTextColor}"/>
         </Style>
 
-        <Style TargetType="Label">
-            <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
-        </Style>
     </Application.Resources>
 </Application>
