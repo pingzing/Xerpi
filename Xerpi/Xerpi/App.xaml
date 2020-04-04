@@ -31,5 +31,9 @@
             <Setter Property="FontSize" Value="24"/>
             <Setter Property="TextColor" Value="{DynamicResource ContentTextColor}"/>
         </Style>
+
+        <Style TargetType="Label">
+            <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+        </Style>
     </Application.Resources>
 </Application>

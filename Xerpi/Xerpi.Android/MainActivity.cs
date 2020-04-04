@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
@@ -12,10 +11,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Android.Content;
 using FFImageLoading;
 using FFImageLoading.Svg.Forms;
+using Xerpi.Messages;
 
 namespace Xerpi.Droid
 {
-    [Activity(Label = "Xerpi", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "Xerpi", Icon = "@mipmap/icon",
+        Theme = "@style/MainTheme",
+        MainLauncher = true,
+        ConfigurationChanges = ConfigChanges.ScreenSize
+            | ConfigChanges.Orientation
+            | ConfigChanges.UiMode)]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)
@@ -34,6 +39,7 @@ namespace Xerpi.Droid
             LoadApplication(new App());
         }
 
+        // Configure platform-native services here for Startup's sake
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
 
@@ -52,6 +58,13 @@ namespace Xerpi.Droid
             ImageService.Instance.InvalidateMemoryCache();
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
             base.OnTrimMemory(level);
+        }
+
+        public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)
+        {
+            base.OnConfigurationChanged(newConfig);
+            var messagingService = Startup.ServiceProvider.GetRequiredService<IMessagingCenter>();
+            messagingService.Send(new object(), SimpleMessages.SystemThemeChanged);
         }
     }
 }

@@ -19,6 +19,7 @@ namespace Xerpi
     public static class Startup
     {
         public static IServiceProvider ServiceProvider { get; set; }
+        private static ThemeHandler _themeHandler;
 
         public static void Init(Action<HostBuilderContext, IServiceCollection> nativeConfigureServices)
         {
@@ -39,6 +40,7 @@ namespace Xerpi
                 })).Build();
 
             RegisterNavigationServiceRoutes(host.Services);
+            InitializeThemeHandler(host.Services);
             ServiceProvider = host.Services;
         }
 
@@ -81,6 +83,13 @@ namespace Xerpi
             navService.RegisterViewModel<ImageGalleryViewModel, ImageGalleryPage>("imagegallery");
             navService.RegisterViewModel<AboutViewModel, AboutPage>("about");
             navService.RegisterViewModel<SettingsViewModel, SettingsPage>("settings");
+        }
+
+        private static void InitializeThemeHandler(IServiceProvider services)
+        {
+            var messagingService = services.GetRequiredService<IMessagingCenter>();
+            var settingsService = services.GetRequiredService<ISettingsService>();
+            _themeHandler = new ThemeHandler(messagingService, settingsService);
         }
 
         private static string ExtractResource(string fileName, string location)

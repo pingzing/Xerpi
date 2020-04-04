@@ -10,7 +10,7 @@
              xmlns:converters="clr-namespace:Xerpi.Converters"
              xmlns:vms="clr-namespace:Xerpi.ViewModels"
              
-             BackgroundColor="{DynamicResource PageBackgroundColor}">
+             BackgroundColor="{DynamicResource BackgroundColor}">
 
     <ContentPage.Resources>
         <ResourceDictionary>

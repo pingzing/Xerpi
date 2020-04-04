@@ -2,9 +2,11 @@
 <ResourceDictionary xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"             
              x:Class="Xerpi.Theme.DarkTheme">
+    <x:String x:Key="ThemeName">Dark</x:String>
     <Color x:Key="NavigationPrimary">#FF2196F3</Color>
     <Color x:Key="NavigationPrimaryLight">#C72196F3</Color>
     <Color x:Key="PrimaryTextColor">#FFFFFFFF</Color>
     <Color x:Key="ContentTextColor">#FF000000</Color>
-    <Color x:Key="PageBackgroundColor">#FF000000</Color>
+    <Color x:Key="BackgroundColor">#FF000000</Color>
+    <Color x:Key="BackgroundColorLight">#30FFFFFF</Color>
 </ResourceDictionary>

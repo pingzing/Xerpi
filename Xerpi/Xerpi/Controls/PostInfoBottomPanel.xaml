@@ -14,7 +14,7 @@
              x:Class="Xerpi.Controls.PostInfoBottomPanel"
              x:Name="thisPostInfoPanel"
              
-             BackgroundColor="{DynamicResource PageBackgroundColor}"
+             BackgroundColor="{DynamicResource BackgroundColor}"
              HeightRequest="{x:Static ctls:PostInfoBottomPanel.PanelHeight}">
     
     <ContentView.GestureRecognizers>

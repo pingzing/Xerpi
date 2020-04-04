@@ -34,7 +34,7 @@ namespace Xerpi.ViewModels
             _settingsService = settingsService;
             _messagingService = messagingService;
 
-            _messagingService.Subscribe<FilterIdChangedMessage>(this, "", FilterIdChanged);
+            _messagingService.Subscribe<SettingsService, FilterIdChangedMessage>(this, "", FilterIdChanged);
 
             BackingFilter = backingFilter;
             UseFilterCommand = new Command(UseFilter, () => !IsInUse);
@@ -42,7 +42,7 @@ namespace Xerpi.ViewModels
             IsInUse = _settingsService.FilterId == BackingFilter.Id;
         }
 
-        private void FilterIdChanged(FilterIdChangedMessage message)
+        private void FilterIdChanged(ISettingsService sender, FilterIdChangedMessage message)
         {
             IsInUse = message.NewId == BackingFilter.Id;
         }

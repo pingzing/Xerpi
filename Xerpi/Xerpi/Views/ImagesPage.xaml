@@ -13,7 +13,7 @@
              xmlns:extensions="clr-namespace:Xerpi.Extensions"
              
              x:Name="BrowseItemsPage"
-             BackgroundColor="{DynamicResource PageBackgroundColor}">
+             BackgroundColor="{DynamicResource BackgroundColor}">
 
     <Shell.TitleView>
         <controls:TitleSearchBar x:Name="TitleSearch" 
