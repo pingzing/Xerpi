@@ -19,9 +19,9 @@
                          AnchorX="0"
                          AnchorY="0"
                          InvalidateLayoutAfterLoaded="True"
-                         Source="{Binding Source={x:Reference thisImageViewer}, Path=Source}"                         
                          HeightRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageHeight}"
-                         WidthRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageWidth}">
+                         WidthRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageWidth}"
+                         Source="{Binding Source={x:Reference thisImageViewer}, Path=Source}">
             <ffi:CachedImage.GestureRecognizers>
                 <PinchGestureRecognizer PinchUpdated="OnPinchUpdated"/>
                 <PanGestureRecognizer PanUpdated="OnPanUpdated"/>

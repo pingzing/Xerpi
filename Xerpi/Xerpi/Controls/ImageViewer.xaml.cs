@@ -16,6 +16,9 @@ namespace Xerpi.Controls
 
     public partial class ImageViewer : ContentView
     {
+        private double _maxX = 0;
+        private double _maxY = 0;
+
         private double _minScale;
         private double _maxScale = 1.5;
 
@@ -92,11 +95,60 @@ namespace Xerpi.Controls
             InitializeComponent();
         }
 
+        // Recenter and scale image to fit screen (or set to 1.0 scale, whichever is smaller)
         private void ResetTranslationAndScale()
         {
-            CachedImage.Scale = 1;
-            CachedImage.TranslationX = 0;
-            CachedImage.TranslationY = 0;
+            // Note: Properties should change in the order they're declared. 
+            // Hopefully, this means ImageHeight and ImageWidth have already been updated.
+            double widthConstaint = this.Width;
+            double heightConstraint = this.Height;
+
+            double targetScale;
+            if (ImageWidth - widthConstaint > ImageHeight - heightConstraint)
+            {
+                // Greater diff in needed vs given Width
+                targetScale = widthConstaint / ImageWidth;
+            }
+            else
+            {
+                // Greater need in needed vs given Height
+                targetScale = heightConstraint / ImageHeight;
+            }
+
+            targetScale = Math.Min(targetScale, 1.0);
+
+            CachedImage.Scale = targetScale;
+            _minScale = targetScale;
+
+            var (newX, newY) = CenterImage();
+            CachedImage.TranslationX = newX;
+            CachedImage.TranslationY = newY;
+        }
+
+        private (double newX, double newY) CenterImage()
+        {
+            double widthConstaint = Width;
+            double heightConstraint = Height;
+
+            double targetX = 0;
+            double scaledWidth = ImageWidth * CachedImage.Scale;
+            if (scaledWidth < widthConstaint)
+            {
+                double extraWidth = widthConstaint - scaledWidth;
+                targetX = extraWidth / 2;
+            }
+
+            double targetY = 0;
+            double scaledHeight = ImageHeight * CachedImage.Scale;
+            if (scaledHeight < heightConstraint)
+            {
+                double extraHeight = heightConstraint - scaledHeight;
+                targetY = extraHeight / 2;
+            }
+
+            _maxX = targetX;
+            _maxY = targetY;
+            return (_maxX, _maxY);
         }
 
         private void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
@@ -123,23 +175,21 @@ namespace Xerpi.Controls
                 double current = CachedImage.Scale + adjustedScaleDecimal * .75; // Smooth out zooming motion a bit with the .75
                 double targetScale = Clamp(current, _minScale, _maxScale);
 
-                // Skip translating if we're banging against the min or max thresholds.
-                if (!(targetScale <= _minScale || targetScale >= _maxScale))
-                {
-                    double actualWidth = CachedImage.Width * CachedImage.Scale;
-                    double projectedNextWidth = CachedImage.Width * targetScale;
-                    double changeInWidth = -(projectedNextWidth - actualWidth);
+                // TODO: If it's worth the perf gain, don't Translate if we were at the min or max scale last frame
+                // Calculate change in translation based on zoom change
+                double actualWidth = CachedImage.Width * CachedImage.Scale;
+                double projectedNextWidth = CachedImage.Width * targetScale;
+                double changeInWidth = -(projectedNextWidth - actualWidth);
 
-                    double actualHeight = CachedImage.Height * CachedImage.Scale;
-                    double projectedNextHeight = CachedImage.Height * targetScale;
-                    double changeInHeight = -(projectedNextHeight - actualHeight);
+                double actualHeight = CachedImage.Height * CachedImage.Scale;
+                double projectedNextHeight = CachedImage.Height * targetScale;
+                double changeInHeight = -(projectedNextHeight - actualHeight);
 
-                    double targetX = CachedImage.TranslationX + (changeInWidth * e.ScaleOrigin.X);
-                    double targetY = CachedImage.TranslationY + (changeInHeight * e.ScaleOrigin.Y);
-                    // Note: Translation is relative to the top-left of the image: 0,0.
-                    // Translation coordinates use container (i.e. DIP) coordinates, NOT real pixel coordinates.
-                    UpdateTranslation(targetX, targetY);
-                }
+                double targetX = CachedImage.TranslationX + (changeInWidth * e.ScaleOrigin.X);
+                double targetY = CachedImage.TranslationY + (changeInHeight * e.ScaleOrigin.Y);
+                // Note: Translation is relative to the top-left of the image: 0,0.
+                // Translation coordinates use container (i.e. DIP) coordinates, NOT real pixel coordinates.
+                UpdateTranslation(targetX, targetY);
 
                 CachedImage.Scale = targetScale;
 
@@ -170,7 +220,7 @@ namespace Xerpi.Controls
             else if (e.StatusType == GestureStatus.Running)
             {
                 UpdateTranslation(CachedImage.TranslationX + e.TotalX * CachedImage.Scale,
-                    CachedImage.TranslationY + e.TotalY * Scale);
+                    CachedImage.TranslationY + e.TotalY * CachedImage.Scale);
             }
         }
 
@@ -178,8 +228,27 @@ namespace Xerpi.Controls
         {
             double viewportWidth = Width;
             double viewportHeight = Height;
-            CachedImage.TranslationX = Clamp(x, (-CachedImage.Width * CachedImage.Scale) + viewportWidth / 2, (CachedImage.Width * _minScale / 2));
-            CachedImage.TranslationY = Clamp(y, (-CachedImage.Height * CachedImage.Scale) + viewportHeight / 2, (CachedImage.Height * _minScale / 2));
+
+            double overdrawX = Math.Max((ImageWidth * CachedImage.Scale) - viewportWidth, 0);
+            double overdrawY = Math.Max((ImageHeight * CachedImage.Scale) - viewportHeight, 0);
+
+            if (overdrawX <= 0)
+            {
+                var (newX, _) = CenterImage();
+                x = newX;
+            }
+            if (overdrawY <= 0)
+            {
+                var (_, newY) = CenterImage();
+                y = newY;
+            }
+
+            double minX = -overdrawX;
+            double minY = -overdrawY;
+
+            CachedImage.TranslationX = Clamp(x, minX, _maxX);
+            CachedImage.TranslationY = Clamp(y, minY, _maxY);
+            Debug.WriteLine($"Translating to: X: {CachedImage.TranslationX}, Y: {CachedImage.TranslationY}. Overdraw - X: {overdrawX}, y: {overdrawY}");
         }
 
         private void OnTapped(object sender, EventArgs e)
