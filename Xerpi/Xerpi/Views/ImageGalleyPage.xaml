@@ -62,28 +62,14 @@
             </CarouselView.ItemTemplate>
         </CarouselView>
 
-        <!--TODO: I should probably wrap this whole thing up into a Control. 
-        The PanZoomImage is pretty tightly bound to the AbsoluteLayout.-->
-        <AbsoluteLayout x:Name="ImageViewer" 
-                        IsVisible="{Binding IsImageViewerOpen}"
-                        BackgroundColor="#C7000000"
-                        HorizontalOptions="FillAndExpand"
-                        VerticalOptions="FillAndExpand">
-            <controls:PanZoomImage x:Name="PanZoomImage"
-                                   AbsoluteLayout.LayoutFlags="None"
-                                   CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.FullCacheFactory}"
-                                   IsVisible="{Binding IsImageViewerOpen}"
-                                   HeightRequest="{Binding CurrentImage.BackingImage.Height}"
-                                   WidthRequest="{Binding CurrentImage.BackingImage.Width}"
-                                   Source="{Binding CurrentImage.BackingImage.Representations.Full}">
-            </controls:PanZoomImage>
-        </AbsoluteLayout>
-        <ActivityIndicator HorizontalOptions="Center"
-                           VerticalOptions="Center"
-                           WidthRequest="50"
-                           HeightRequest="50"
-                           IsVisible="{Binding Source={x:Reference ImageViewer}, Path=IsVisible}"
-                           IsRunning="{Binding Source={x:Reference PanZoomImage}, Path=IsLoading}"/>
+        <controls:ImageViewer x:Name="PanZoomImage"                               
+                               IsVisible="{Binding IsImageViewerOpen}"
+                               CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.FullCacheFactory}"
+                               ImageHeight="{Binding CurrentImage.BackingImage.Height}"
+                               ImageWidth="{Binding CurrentImage.BackingImage.Width}"
+                               Source="{Binding CurrentImage.BackingImage.Representations.Full}"/>
+
+
 
         <controls:PostInfoBottomPanel x:Name="BottomPanel" 
                                       VerticalOptions="End" 

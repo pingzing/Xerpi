@@ -1,18 +1,15 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 using Xerpi.ViewModels;
 
 namespace Xerpi.Views
 {
-    // Learn more about making custom code visible in the Xamarin.Forms previewer
-    // by visiting https://aka.ms/xamarinforms-previewer
-    [DesignTimeVisible(false)]
     public partial class ImageGalleryPage : ContentPage
     {
-        private readonly IMessagingCenter _messenger;
         private ImageGalleryViewModel _viewModel;
-        private bool _bottomPanelMaximized = true;
 
         public ImageGalleryPage()
         {
@@ -32,7 +29,7 @@ namespace Xerpi.Views
             await _viewModel.NavigatedFrom();
         }
 
-        private async void TapGestureRecognizer_Tapped(object sender, System.EventArgs e)
+        private void TapGestureRecognizer_Tapped(object sender, System.EventArgs e)
         {
             if (BottomPanel.IsOpen)
             {

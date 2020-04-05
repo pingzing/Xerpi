@@ -45,6 +45,8 @@ namespace Xerpi.ViewModels
             set => Set(ref _isImageViewerOpen, value);
         }
 
+        public double TestDouble => 200.0;
+
         public Command<DetailedImageViewModel> CurrentImageChangedCommand { get; private set; }
         public Command SoftBackPressedCommand { get; private set; }
         public Command FullSizeButtonCommand { get; private set; }
