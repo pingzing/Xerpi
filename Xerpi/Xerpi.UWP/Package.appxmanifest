@@ -14,7 +14,7 @@
   <mp:PhoneIdentity PhoneProductId="085526ba-eee3-4d66-ac2d-e43d317a787c" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Xerpi.UWP</DisplayName>
+    <DisplayName>GestureSample</DisplayName>
     <PublisherDisplayName>mcali</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>

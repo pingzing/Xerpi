@@ -97,7 +97,7 @@
     <Shell.Items>
         <ShellContent Title="Browse"                       
                       Route="images"
-                      ContentTemplate="{DataTemplate local:ImagesPage}">
+                      ContentTemplate="{DataTemplate local:ImageGridPage}">
             <ShellContent.Icon>
                 <FontImageSource FontFamily="{StaticResource MaterialFontFamily}"
                                  Glyph="&#xF2EA;"

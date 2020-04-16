@@ -2,13 +2,27 @@
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="clr-namespace:Xerpi.Controls"
              mc:Ignorable="d"
              x:Class="Xerpi.Controls.TitleSearchBar"
              
              x:Name="ThisTitleSearchBar">
 
-    <Grid BackgroundColor="{StaticResource NavigationPrimary}">
+    <Grid x:Name="RootGrid" BackgroundColor="{StaticResource NavigationPrimary}">
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="Common">
+                <VisualState x:Name="Collapsed"/>
+                <VisualState x:Name="Searching">
+                    <VisualState.Setters>
+                        <Setter TargetName="TitleLabel" Property="IsVisible" Value="False"/>
+                        <Setter TargetName="ToggleSearchButton" Property="IsVisible" Value="False"/>
+                        <Setter TargetName="SearchBarContainer" Property="IsVisible" Value="True"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups> 
+            
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
@@ -24,15 +38,25 @@
                 TextColor="White"
                 Text="&#xF349;"                 
                 Clicked="ToggleSearchButton_Clicked"/>
-        <SearchBar x:Name="SearchBar" 
-                   Grid.Column="0" Grid.ColumnSpan="2"
-                   BackgroundColor="{DynamicResource BackgroundColor}"
-                   TextColor="{DynamicResource PrimaryTextColor}"
-                   CancelButtonColor="{DynamicResource PrimaryTextColor}"
-                   PlaceholderColor="{DynamicResource PrimaryTextColor}"
-                   Margin="5"
-                   IsVisible="False" 
-                   Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
-                   SearchButtonPressed="SearchBar_SearchButtonPressed"/>
+        <Grid x:Name="SearchBarContainer"
+              Grid.Column="0" Grid.ColumnSpan="2"
+              IsVisible="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <controls:BorderlessEntry x:Name="SearchBar"                             
+                                      Grid.Column="0"                   
+                                      BackgroundColor="{DynamicResource BackgroundColor}"
+                                      TextColor="{DynamicResource PrimaryTextColor}"                   
+                                      PlaceholderColor="{DynamicResource PrimaryTextColor}"
+                                      Margin="0, 5, 0, 5"                   
+                                      Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
+                                      Completed="SearchBar_Completed"/>
+
+            <Button x:Name="SearchButton" 
+                    Grid.Column="1"
+                    Clicked="SearchBar_SearchButtonPressed"/>
+        </Grid>
     </Grid>
 </ContentView>

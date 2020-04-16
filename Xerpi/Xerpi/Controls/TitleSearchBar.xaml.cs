@@ -11,6 +11,9 @@ namespace Xerpi.Controls
 {
     public partial class TitleSearchBar : ContentView
     {
+        private const string CollapsedStateName = "Collapsed";
+        private const string SearchingStateName = "Searching";
+
         private State _currentState;
 
         public static BindableProperty TitleProperty = BindableProperty.Create(
@@ -75,15 +78,11 @@ namespace Xerpi.Controls
             switch (newState)
             {
                 case State.Collapsed:
-                    TitleLabel.IsVisible = true;
-                    ToggleSearchButton.IsVisible = true;
-                    SearchBar.IsVisible = false;
+                    VisualStateManager.GoToState(RootGrid, CollapsedStateName);
                     SearchBar.Unfocused -= SearchBar_Unfocused;
                     break;
                 case State.Searching:
-                    TitleLabel.IsVisible = false;
-                    ToggleSearchButton.IsVisible = false;
-                    SearchBar.IsVisible = true;
+                    VisualStateManager.GoToState(RootGrid, SearchingStateName);
                     SearchBar.Focus();
                     SearchBar.Unfocused += SearchBar_Unfocused;
                     break;
@@ -96,6 +95,11 @@ namespace Xerpi.Controls
             UpdateState(State.Collapsed);
         }
 
+        private void SearchBar_Completed(object sender, EventArgs e)
+        {
+
+        }
+
         private void SearchBar_SearchButtonPressed(object sender, EventArgs e)
         {
             var command = SearchCommand;
@@ -104,6 +108,11 @@ namespace Xerpi.Controls
             {
                 command.Execute(commandParameter);
             }
+        }
+
+        private void TriggerSearch()
+        {
+
         }
 
         private enum State

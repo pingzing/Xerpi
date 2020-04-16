@@ -15,7 +15,8 @@ using Xerpi.Messages;
 
 namespace Xerpi.Droid
 {
-    [Activity(Label = "Xerpi", Icon = "@mipmap/icon",
+    [Activity(Label = "GestureSample",
+        Icon = "@mipmap/icon",
         Theme = "@style/MainTheme",
         MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize
@@ -34,7 +35,11 @@ namespace Xerpi.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
             _ = typeof(SvgCachedImage);
+
             Forms.Init(this, savedInstanceState);
+
+            MR.Gestures.Android.Settings.LicenseKey = "ALZ9-BPVU-XQ35-CEBG-5ZRR-URJQ-ED5U-TSY8-6THP-3GVU-JW8Z-RZGE-CQW6";
+
             Startup.Init(ConfigureServices);
             LoadApplication(new App());
         }

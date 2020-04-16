@@ -201,6 +201,78 @@ namespace Xerpi.Controls
                 _panelState = PanelState.Maximized;
             }
         }
+
+        private void TopBar_Down(object sender, MR.Gestures.DownUpEventArgs e)
+        {
+            if (_panelState == PanelState.Toggling)
+            {
+                // Ignore any user input if we're in the middle of a canned animation
+                return;
+            }
+            VisualStateManager.GoToState(TopBar, "Highlighted");
+        }
+
+        private void TopBar_Up(object sender, MR.Gestures.DownUpEventArgs e)
+        {
+            if (_panelState == PanelState.Toggling)
+            {
+                // Ignore any user input if we're in the middle of a canned animation
+                return;
+            }
+            VisualStateManager.GoToState(TopBar, "Unhighlighted");
+        }
+
+        private void TopBar_Tapping(object sender, MR.Gestures.TapEventArgs e)
+        {
+            if (_panelState == PanelState.Toggling)
+            {
+                return; // Don't do anythin if we're in the middle of animating.
+            }
+
+            var targetState = _panelState == PanelState.Maximized ? PanelState.Minimized : PanelState.Maximized;
+
+            _ = SetPanelState(targetState);
+        }
+
+        private void TopBar_Panning(object sender, MR.Gestures.PanEventArgs e)
+        {
+            if (_panelState == PanelState.Toggling)
+            {
+                // Ignore any user input if we're in the middle of a canned animation
+                return;
+            }
+
+            double targetTranslation = TranslationY + e.TotalDistance.Y;
+
+            if (targetTranslation < 0)
+            {
+                return; // Don't allow opening higher than fully-maximized
+            }
+            if (targetTranslation > PanelHeight - MinimizedHeight)
+            {
+                return; // Don't allow hiding the top-bar.
+            }
+
+            TranslationY = targetTranslation;
+        }
+
+        private void TopBar_Panned(object sender, MR.Gestures.PanEventArgs e)
+        {
+            if (_panelState == PanelState.Toggling)
+            {
+                // Ignore any user input if we're in the middle of a canned animation
+                return;
+            }
+
+            if (TranslationY > PanelHeight / 2) // The panel is closed or almost closed
+            {
+                _ = SetPanelState(PanelState.Minimized);
+            }
+            else
+            {
+                _ = SetPanelState(PanelState.Maximized);
+            }
+        }
     }
 
     public enum PanelState

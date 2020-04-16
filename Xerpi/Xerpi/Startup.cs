@@ -70,7 +70,7 @@ namespace Xerpi
                 .AddSingleton<IMessagingCenter, MessagingCenter>(_ => (MessagingCenter)MessagingCenter.Instance);
 
             // ViewModel singletons            
-            services.AddSingleton<ImagesViewModel>()
+            services.AddSingleton<ImageGridViewModel>()
                 .AddSingleton<ImageGalleryViewModel>()
                 .AddSingleton<AboutViewModel>()
                 .AddSingleton<SettingsViewModel>();
@@ -79,7 +79,7 @@ namespace Xerpi
         private static void RegisterNavigationServiceRoutes(IServiceProvider services)
         {
             var navService = services.GetRequiredService<INavigationService>();
-            navService.RegisterViewModel<ImagesViewModel, ImagesPage>("images");
+            navService.RegisterViewModel<ImageGridViewModel, ImageGridPage>("images");
             navService.RegisterViewModel<ImageGalleryViewModel, ImageGalleryPage>("imagegallery");
             navService.RegisterViewModel<AboutViewModel, AboutPage>("about");
             navService.RegisterViewModel<SettingsViewModel, SettingsPage>("settings");

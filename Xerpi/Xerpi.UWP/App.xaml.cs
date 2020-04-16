@@ -31,7 +31,8 @@ namespace Xerpi.UWP
                 var assembliesToInclude = new List<Assembly>
                 {
                     typeof(CachedImage).GetTypeInfo().Assembly,
-                    typeof(FFImageLoading.Forms.Platform.CachedImageRenderer).GetTypeInfo().Assembly
+                    typeof(FFImageLoading.Forms.Platform.CachedImageRenderer).GetTypeInfo().Assembly,
+                    typeof(MR.Gestures.ContentPage).GetTypeInfo().Assembly,
                 };
 
                 Xamarin.Forms.Forms.Init(e, assembliesToInclude);

@@ -5,12 +5,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              
+             xmlns:mr="clr-namespace:MR.Gestures;assembly=MR.Gestures"
              xmlns:api="clr-namespace:Xerpi.Models.API"
              xmlns:converters="clr-namespace:Xerpi.Converters"
              xmlns:ctls="clr-namespace:Xerpi.Controls"
              xmlns:viewmodels="clr-namespace:Xerpi.ViewModels" 
              xmlns:ffi="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
-             xmlns:ffiSvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"              
+             xmlns:ffiSvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
              x:Class="Xerpi.Controls.PostInfoBottomPanel"
              
              x:Name="thisPostInfoPanel"
@@ -18,10 +19,10 @@
              BackgroundColor="{DynamicResource BackgroundColor}"
              HeightRequest="{x:Static ctls:PostInfoBottomPanel.PanelHeight}">
     
-    <ContentView.GestureRecognizers>
+    <!--<ContentView.GestureRecognizers>
         <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated"/>
         <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-    </ContentView.GestureRecognizers>
+    </ContentView.GestureRecognizers>-->
 
     <ContentView.Resources>
         <ResourceDictionary>
@@ -75,9 +76,15 @@
         </Grid.RowDefinitions>
         
         <!--Drag/Vote/Score bar-->
-        <Grid x:Name="TopBar" Grid.Row="0" 
+        <mr:Grid x:Name="TopBar" Grid.Row="0" 
               BackgroundColor="{DynamicResource NavigationPrimary}" 
-              HeightRequest="{x:Static ctls:PostInfoBottomPanel.MinimizedHeight}">
+              HeightRequest="{x:Static ctls:PostInfoBottomPanel.MinimizedHeight}"
+              Down="TopBar_Down"
+              Up="TopBar_Up"
+              Tapping="TopBar_Tapping"
+              Panning="TopBar_Panning"
+              Panned="TopBar_Panned">
+            
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -131,7 +138,7 @@
                                FontSize="20"
                                VerticalOptions="Center"/>
             </StackLayout>
-        </Grid>
+        </mr:Grid>
         
         <!--Description, tags, and comments-->        
         <ScrollView Grid.Row="1"

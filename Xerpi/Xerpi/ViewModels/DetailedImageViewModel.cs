@@ -56,7 +56,7 @@ namespace Xerpi.ViewModels
 
             _ = _imageService.Tags.Connect()
                 .Filter(x => BackingImage.TagIds.Contains(x.Id))
-                .Sort(_tagComparer)
+                .Sort(_tagComparer, SortOptimisations.ComparesImmutableValuesOnly, resetThreshold: 30)
                 .ObserveOn(_syncContextService.UIThread)
                 .Bind(out _tags)
                 .DisposeMany()

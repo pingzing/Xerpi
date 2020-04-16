@@ -23,6 +23,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" />
+    <PackageReference Include="MR.Gestures" Version="2.1.2" />
     <PackageReference Include="Xamarin.FFImageLoading" Version="2.4.11.982" />
     <PackageReference Include="Xamarin.FFImageLoading.Forms" Version="2.4.11.982" />
     <PackageReference Include="Xamarin.FFImageLoading.Svg.Forms" Version="2.4.11.982" />
@@ -48,6 +49,9 @@
     </Compile>
     <Compile Update="Theme\DarkTheme.xaml.cs">
       <DependentUpon>DarkTheme.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ImageGridPage.xaml.cs">
+      <DependentUpon>ImageGridPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 
