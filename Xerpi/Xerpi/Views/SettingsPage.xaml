@@ -1,17 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"             
-             mc:Ignorable="d"
+<views:NavigablePage xmlns="http://xamarin.com/schemas/2014/forms"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"             
+                     mc:Ignorable="d"
+                     
+                     x:Class="Xerpi.Views.SettingsPage"
              
-             x:Class="Xerpi.Views.SettingsPage"
-             
-             xmlns:converters="clr-namespace:Xerpi.Converters"
-             xmlns:vms="clr-namespace:Xerpi.ViewModels"
-             
-             BackgroundColor="{DynamicResource BackgroundColor}"
-             Title="Settings">
+                     xmlns:views="clr-namespace:Xerpi.Views"
+                     xmlns:converters="clr-namespace:Xerpi.Converters"
+                     xmlns:vms="clr-namespace:Xerpi.ViewModels"
+                     
+                     BackgroundColor="{DynamicResource BackgroundColor}"
+                     Title="Settings">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -91,4 +92,4 @@
                            IsVisible="{Binding IsLoading}"/>
     </Grid>
 
-</ContentPage>
+</views:NavigablePage>

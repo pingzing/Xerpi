@@ -21,6 +21,7 @@ namespace Xerpi.ViewModels
         private readonly ISynchronizationContextService _syncContextService;
         private readonly SortExpressionComparer<ApiImage> _imageSorter = SortExpressionComparer<ApiImage>.Descending(x => x.Id);
 
+        private ApiImage? _navParameterImage;
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
         private DetailedImageViewModel? _currentImage;
@@ -28,7 +29,6 @@ namespace Xerpi.ViewModels
         {
             get => _currentImage;
             set => Set(ref _currentImage, value);
-
         }
 
         private ReadOnlyObservableCollection<DetailedImageViewModel> _images;
@@ -65,27 +65,30 @@ namespace Xerpi.ViewModels
             FullSizeButtonCommand = new Command(FullSizeButtonPressed);
         }
 
-        public override Task NavigatedTo()
+        protected override Task NavigatedToOverride()
         {
+            _backPayloadPrepared = false;
+            _navParameterImage = NavigationParameter as ApiImage;
+
             var operation = _imageService.CurrentImages.Connect()
-                .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle
-                .Sort(_imageSorter)
-                .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))
-                .ObserveOn(_syncContextService.UIThread)
-                .Bind(out _images, resetThreshold: 75)
-                .DisposeMany()
-                .Subscribe(x =>
-                {
-                    if (NavigationParameter is ApiImage image)
-                    {
-                        var foundImage = Images.FirstOrDefault(x => x.BackingImage.Id == image.Id);
-                        if (foundImage != null)
-                        {
-                            CurrentImage = foundImage;
-                        }
-                        NavigationParameter = null;
-                    }
-                });
+             .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle
+             .Sort(_imageSorter)
+             .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))
+             .ObserveOn(_syncContextService.UIThread)
+             .Bind(out _images, resetThreshold: 75)
+             .DisposeMany()
+             .Subscribe(x =>
+             {
+                 if (_navParameterImage != null)
+                 {
+                     var foundImage = Images.FirstOrDefault(x => x.BackingImage.Id == _navParameterImage.Id);
+                     if (foundImage != null)
+                     {
+                         CurrentImage = foundImage;
+                     }
+                     _navParameterImage = null;
+                 }
+             });
 
             OnPropertyChanged(nameof(Images));
 
@@ -106,11 +109,19 @@ namespace Xerpi.ViewModels
             }
         }
 
+        private bool _backPayloadPrepared = false;
         public override bool OnBack()
         {
             if (IsImageViewerOpen)
             {
                 IsImageViewerOpen = false;
+                return false;
+            }
+
+            if (!_backPayloadPrepared)
+            {
+                _backPayloadPrepared = true;
+                _navigationService.Back(CurrentImage.BackingImage);
                 return false;
             }
 
@@ -127,9 +138,9 @@ namespace Xerpi.ViewModels
             _navigationService.Back();
         }
 
-        public override Task NavigatedFrom()
+        public override Task NavigatedFromOverride()
         {
-            return base.NavigatedFrom();
+            return base.NavigatedFromOverride();
         }
     }
 }

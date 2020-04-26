@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DynamicData;
 using DynamicData.Binding;
 using Xamarin.Forms;
+using Xerpi.Messages;
 using Xerpi.Models.API;
 using Xerpi.Services;
 
@@ -14,6 +15,8 @@ namespace Xerpi.ViewModels
     {
         private readonly IImageService _imageService;
         private readonly INavigationService _navigationService;
+        private readonly IMessagingCenter _messagingService;
+
         private readonly SortExpressionComparer<ApiImage> _imageSorter = SortExpressionComparer<ApiImage>.Descending(x => x.Id);
 
         public override string Url => "images";
@@ -43,12 +46,14 @@ namespace Xerpi.ViewModels
         public Command GetNextPageCommand { get; }
 
         public ImageGridViewModel(IImageService imageService,
-            INavigationService navigationService)
+            INavigationService navigationService,
+            IMessagingCenter messagingService)
         {
             _imageService = imageService;
             _imageService.CurrentSearchQueryChanged += ImageService_CurrentSearchQueryChanged;
 
             _navigationService = navigationService;
+            _messagingService = messagingService;
 
             Title = "Browse";
             RefreshCommand = new Command(async () => await Refresh(""));
@@ -65,10 +70,15 @@ namespace Xerpi.ViewModels
             _imageService.Search("*", itemsPerPage: 50);
         }
 
-        public override async Task NavigatedTo()
+        protected override async Task NavigatedToOverride()
         {
             // TODO: If we're coming from the Flyout menu, clear _currentSearchQuery and set the imagelist to a front page default
             // Otherwise, do nothing
+            var image = NavigationParameter as ApiImage;
+            if (image != null)
+            {
+                _messagingService.Send(this, "", new NavigatedBackToImageGridMessage { Image = image });
+            }
         }
 
         private async Task Refresh(string query)

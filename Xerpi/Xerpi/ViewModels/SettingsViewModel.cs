@@ -64,7 +64,7 @@ namespace Xerpi.ViewModels
             IsLoading = true;
         }
 
-        public override async Task NavigatedTo()
+        protected override async Task NavigatedToOverride()
         {
             SelectedTheme = _settingsService.SelectedTheme;
             var defaultFilters = await _networkService.GetDefaultFilters();

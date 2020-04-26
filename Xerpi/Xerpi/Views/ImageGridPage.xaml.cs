@@ -2,29 +2,27 @@
 using Xamarin.Forms;
 using Xerpi.ViewModels;
 using Xerpi.Models.API;
+using Microsoft.Extensions.DependencyInjection;
+using Xerpi.Messages;
 
 namespace Xerpi.Views
 {
-    public partial class ImageGridPage : ContentPage
+    public partial class ImageGridPage : NavigablePage
     {
-        ImageGridViewModel _viewModel;
+        private readonly IMessagingCenter _messagingService;
+        private ImageGridViewModel ViewModel => (ImageGridViewModel)_viewModel;
 
-        public ImageGridPage()
+        public ImageGridPage() : base(typeof(ImageGridViewModel))
         {
             InitializeComponent();
-            BindingContext = _viewModel = (ImageGridViewModel)Startup.ServiceProvider.GetService(typeof(ImageGridViewModel));
+            BindingContext = ViewModel;
+            _messagingService = Startup.ServiceProvider.GetRequiredService<IMessagingCenter>();
+            _messagingService.Subscribe<ImageGridViewModel, NavigatedBackToImageGridMessage>(this, "", OnNavigatedFromGallery);
         }
 
-        protected override async void OnAppearing()
+        private void OnNavigatedFromGallery(ImageGridViewModel _, NavigatedBackToImageGridMessage args)
         {
-            base.OnAppearing();
-            await _viewModel.NavigatedTo();
-        }
-
-        protected override async void OnDisappearing()
-        {
-            base.OnDisappearing();
-            await _viewModel.NavigatedFrom();
+            ImageListCollectionView.ScrollTo(args.Image, position: ScrollToPosition.Start, animate: false);
         }
 
         private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -40,7 +38,7 @@ namespace Xerpi.Views
                 return;
             }
             cv.SelectedItem = null;
-            _viewModel.ImageSelected((ApiImage)e.CurrentSelection.First());
+            ViewModel.ImageSelected((ApiImage)e.CurrentSelection.First());
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Xerpi.ViewModels
 {
-    public class BasePageViewModel : BaseViewModel
+    public abstract class BasePageViewModel : BaseViewModel
     {
         public virtual string Url => throw new ArgumentException("BaseViewModel cannot be navigated to.");
 
@@ -16,11 +16,22 @@ namespace Xerpi.ViewModels
             set { Set(ref title, value); }
         }
 
-        public virtual Task NavigatedTo() { return Task.CompletedTask; }
-        public virtual Task NavigatedFrom() { return Task.CompletedTask; }
+        public async Task NavigatedTo()
+        {
+            await NavigatedToOverride();
+            NavigationParameter = null;
+        }
+        protected virtual Task NavigatedToOverride() { return Task.CompletedTask; }
+
+        public async Task NavigatedFrom()
+        {
+            await NavigatedFromOverride();
+            NavigationParameter = null;
+        }
+        public virtual Task NavigatedFromOverride() { return Task.CompletedTask; }
 
         /// <summary>
-        /// Function to return just before going back. Return false if back navigation should be suppressed.
+        /// Function to return just before going back. Return true if back navigation should be suppressed, false otherwise.
         /// </summary>
         /// <returns>True if back navigation should be suppressed, false otherwise.</returns>
         public virtual bool OnBack() { return false; }

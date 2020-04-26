@@ -1,32 +1,15 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-using Xerpi.ViewModels;
+﻿using Xerpi.ViewModels;
 
 namespace Xerpi.Views
 {
-    public partial class ImageGalleryPage : ContentPage
+    public partial class ImageGalleryPage : NavigablePage
     {
-        private ImageGalleryViewModel _viewModel;
+        private ImageGalleryViewModel ViewModel => (ImageGalleryViewModel)_viewModel;
 
-        public ImageGalleryPage()
+        public ImageGalleryPage() : base(typeof(ImageGalleryViewModel))
         {
             InitializeComponent();
-            BindingContext = _viewModel = (ImageGalleryViewModel)Startup.ServiceProvider.GetService(typeof(ImageGalleryViewModel));
-        }
-
-        protected override async void OnAppearing()
-        {
-            base.OnAppearing();
-            await _viewModel.NavigatedTo();
-        }
-
-        protected override async void OnDisappearing()
-        {
-            base.OnDisappearing();
-            await _viewModel.NavigatedFrom();
+            BindingContext = ViewModel;
         }
 
         private void TapGestureRecognizer_Tapped(object sender, System.EventArgs e)
@@ -37,9 +20,9 @@ namespace Xerpi.Views
             }
             else
             {
-                if (_viewModel?.FullSizeButtonCommand?.CanExecute(null) == true)
+                if (ViewModel?.FullSizeButtonCommand?.CanExecute(null) == true)
                 {
-                    _viewModel.FullSizeButtonCommand.Execute(null);
+                    ViewModel.FullSizeButtonCommand.Execute(null);
                 }
             }
         }

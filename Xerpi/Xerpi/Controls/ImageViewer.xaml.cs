@@ -126,15 +126,14 @@ namespace Xerpi.Controls
         private void ResetTranslationAndScale()
         {
             // Note: Properties should change in the order they're declared. 
-            // Hopefully, this means ImageHeight and ImageWidth have already been updated.
-            double widthConstaint = this.Width;
-            double heightConstraint = this.Height;
+            // Hopefully, this means ImageHeight and ImageWidth have already been updated.            
+            (double widthConstraint, double heightConstraint) = GetDimensionConstraints();
 
             double targetScale;
-            if (ImageWidth - widthConstaint > ImageHeight - heightConstraint)
+            if (ImageWidth - widthConstraint > ImageHeight - heightConstraint)
             {
                 // Greater diff in needed vs given Width
-                targetScale = widthConstaint / ImageWidth;
+                targetScale = widthConstraint / ImageWidth;
             }
             else
             {
@@ -150,6 +149,28 @@ namespace Xerpi.Controls
             var (newX, newY) = CenterImage();
             CachedImage.TranslationX = newX;
             CachedImage.TranslationY = newY;
+        }
+
+        // The very first time we open this control, Height and Width won't have been calculated yet.
+        // So we need to approximate based on the Parent's dimensions, minus our own margins.
+        // TODO: Deal with padding?
+        private (double widthConstraint, double heightConstraint) GetDimensionConstraints()
+        {
+            if (Width != -1 && Height != -1)
+            {
+                // Great, we can do the normal thing
+                return (Width, Height);
+            }
+            else
+            {
+                double parentHeight = (Parent as View)!.Height;
+                double height = parentHeight - Margin.Top - Margin.Bottom;
+
+                double parentWidth = (Parent as View)!.Width;
+                double width = parentWidth - Margin.Left - Margin.Right;
+
+                return (width, height);
+            }
         }
 
         private (double newX, double newY) CenterImage()
