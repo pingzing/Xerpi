@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,8 +44,16 @@ namespace Xerpi.Controls
         {
             ImageViewer _this = (ImageViewer)bindable;
             ImageSource newSource = (ImageSource)newValue;
-            _this.CachedImage.Source = newSource;
-            _this.ResetTranslationAndScale();
+            _this.CachedImage.Cancel();
+            _this.CachedImage.Source = null;
+
+            // If we're not visible, don't load an image. The IsVisible changed handler
+            // down below will handle setting the source once the viewer is reopened.
+            if (_this.IsVisible)
+            {
+                _this.CachedImage.Source = newSource;
+                _this.ResetTranslationAndScale();
+            }
         }
 
         public static BindableProperty CacheKeyFactoryProperty = BindableProperty.Create(
@@ -93,6 +102,24 @@ namespace Xerpi.Controls
         public ImageViewer()
         {
             InitializeComponent();
+        }
+
+        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (propertyName == nameof(IsVisible))
+            {
+                if (IsVisible)
+                {
+                    CachedImage.Source = Source;
+                    ResetTranslationAndScale();
+                }
+                else
+                {
+                    CachedImage.Cancel();
+                    CachedImage.Source = null;
+                }
+            }
+            base.OnPropertyChanged(propertyName);
         }
 
         // Recenter and scale image to fit screen (or set to 1.0 scale, whichever is smaller)

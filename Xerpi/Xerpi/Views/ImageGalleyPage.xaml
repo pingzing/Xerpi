@@ -70,8 +70,6 @@
                                ImageWidth="{Binding CurrentImage.BackingImage.Width}"
                                Source="{Binding CurrentImage.BackingImage.Representations.Full}"/>
 
-
-
         <controls:PostInfoBottomPanel x:Name="BottomPanel" 
                                       VerticalOptions="End" 
                                       Upvotes="{Binding CurrentImage.BackingImage.Upvotes}"

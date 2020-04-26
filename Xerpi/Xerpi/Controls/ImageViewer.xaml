@@ -14,14 +14,13 @@
                     BackgroundColor="#C7000000"
                     HorizontalOptions="FillAndExpand"
                     VerticalOptions="FillAndExpand">
-        <!--CacheKeyFactory set in code-behind-->
+        <!--CacheKeyFactory and Source set in code-behind so we have more control over how they behave-->
         <ffi:CachedImage x:Name="CachedImage"
                          AnchorX="0"
                          AnchorY="0"
-                         InvalidateLayoutAfterLoaded="True"
+                         InvalidateLayoutAfterLoaded="True"                         
                          HeightRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageHeight}"
-                         WidthRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageWidth}"
-                         Source="{Binding Source={x:Reference thisImageViewer}, Path=Source}">
+                         WidthRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageWidth}">
             <ffi:CachedImage.GestureRecognizers>
                 <PinchGestureRecognizer PinchUpdated="OnPinchUpdated"/>
                 <PanGestureRecognizer PanUpdated="OnPanUpdated"/>

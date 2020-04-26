@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using DynamicData;
 using DynamicData.Binding;
-using FFImageLoading.Forms;
 using Xamarin.Forms;
-using Xerpi.Extensions;
 using Xerpi.Models.API;
 using Xerpi.Services;
 
@@ -18,16 +16,7 @@ namespace Xerpi.ViewModels
         private readonly INavigationService _navigationService;
         private readonly SortExpressionComparer<ApiImage> _imageSorter = SortExpressionComparer<ApiImage>.Descending(x => x.Id);
 
-        private uint _currentPage = 1;
-
         public override string Url => "images";
-
-        private string? _currentSearchQuery = null;
-        public string? CurrentSearchQuery
-        {
-            get => _currentSearchQuery;
-            set => Set(ref _currentSearchQuery, value);
-        }
 
         private ReadOnlyObservableCollection<ApiImage> _images;
         public ReadOnlyObservableCollection<ApiImage> Images
@@ -43,6 +32,12 @@ namespace Xerpi.ViewModels
             set => Set(ref _isRefreshing, value);
         }
 
+        public string CurrentSearchQuery => _imageService.CurrentSearchQuery;
+        private void ImageService_CurrentSearchQueryChanged(object _, string __)
+        {
+            OnPropertyChanged(nameof(CurrentSearchQuery));
+        }
+
         public Command RefreshCommand { get; }
         public Command<string> SearchTriggeredCommand { get; }
         public Command GetNextPageCommand { get; }
@@ -51,10 +46,12 @@ namespace Xerpi.ViewModels
             INavigationService navigationService)
         {
             _imageService = imageService;
+            _imageService.CurrentSearchQueryChanged += ImageService_CurrentSearchQueryChanged;
+
             _navigationService = navigationService;
 
             Title = "Browse";
-            RefreshCommand = new Command(async () => await Refresh());
+            RefreshCommand = new Command(async () => await Refresh(""));
             SearchTriggeredCommand = new Command<string>(async x => await SearchTriggered(x));
             GetNextPageCommand = new Command(async x => await GetNextPage());
 
@@ -65,7 +62,7 @@ namespace Xerpi.ViewModels
                 .DisposeMany()
                 .Subscribe();
 
-            _imageService.SetImagesToFrontPage(itemsPerPage: 50);
+            _imageService.Search("*", itemsPerPage: 50);
         }
 
         public override async Task NavigatedTo()
@@ -74,33 +71,30 @@ namespace Xerpi.ViewModels
             // Otherwise, do nothing
         }
 
-        private async Task Refresh()
+        private async Task Refresh(string query)
         {
-            if (CurrentSearchQuery == null)
+            if (string.IsNullOrWhiteSpace(query))
             {
-                await _imageService.SetImagesToFrontPage();
+                await _imageService.Search("*", 1, 50);
             }
             else
             {
-                await _imageService.SetImagesToSearch(CurrentSearchQuery, 1, 50);
+                await _imageService.Search(CurrentSearchQuery, 1, 50);
             }
             IsRefreshing = false;
         }
 
         private async Task SearchTriggered(string query)
         {
-            if (String.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(query))
             {
-                CurrentSearchQuery = null;
                 Title = "Browse";
-                await Refresh();
-                return;
             }
-
-            CurrentSearchQuery = query;
-            Title = query;
-            _currentPage = 1;
-            await _imageService.SetImagesToSearch(query, 1, 50);
+            else
+            {
+                Title = query;
+            }
+            await _imageService.Search(query, 1, 50);
         }
 
         private bool _gettingNextPage = false;
@@ -112,15 +106,7 @@ namespace Xerpi.ViewModels
             }
 
             _gettingNextPage = true;
-            if (CurrentSearchQuery == null)
-            {
-                await _imageService.AddPageToFrontPage(_currentPage + 1, 50);
-            }
-            else
-            {
-                await _imageService.AddPageToSearch(CurrentSearchQuery, _currentPage + 1, 50);
-            }
-            _currentPage += 1;
+            await _imageService.AddPageToSearch(_imageService.PagesSeen.Max() + 1, 50);
             _gettingNextPage = false;
         }
 

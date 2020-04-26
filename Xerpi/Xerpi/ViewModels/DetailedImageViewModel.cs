@@ -70,7 +70,7 @@ namespace Xerpi.ViewModels
                 return;
             }
 
-            await Task.Delay(200); // Wait a bit before we start doing expensive stuff
+            await Task.Delay(500); // Wait a bit before we start doing expensive stuff
             if (token.IsCancellationRequested)
             {
                 Debug.WriteLine("Cancelling full load of image before doing anything expensive...");

@@ -45,8 +45,6 @@ namespace Xerpi.ViewModels
             set => Set(ref _isImageViewerOpen, value);
         }
 
-        public double TestDouble => 200.0;
-
         public Command<DetailedImageViewModel> CurrentImageChangedCommand { get; private set; }
         public Command SoftBackPressedCommand { get; private set; }
         public Command FullSizeButtonCommand { get; private set; }
@@ -67,29 +65,6 @@ namespace Xerpi.ViewModels
             FullSizeButtonCommand = new Command(FullSizeButtonPressed);
         }
 
-        private async void CurrentImageChanged(DetailedImageViewModel newImage)
-        {
-            _cts.Cancel();
-            _cts = new CancellationTokenSource();
-            await newImage.InitExternalData(_cts.Token);
-        }
-
-        public override bool OnBack()
-        {
-            if (IsImageViewerOpen)
-            {
-                IsImageViewerOpen = false;
-                return false;
-            }
-
-            return true;
-        }
-
-        private void FullSizeButtonPressed()
-        {
-            IsImageViewerOpen = true;
-        }
-
         public override Task NavigatedTo()
         {
             var operation = _imageService.CurrentImages.Connect()
@@ -97,7 +72,7 @@ namespace Xerpi.ViewModels
                 .Sort(_imageSorter)
                 .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))
                 .ObserveOn(_syncContextService.UIThread)
-                .Bind(out _images)
+                .Bind(out _images, resetThreshold: 75)
                 .DisposeMany()
                 .Subscribe(x =>
                 {
@@ -115,6 +90,36 @@ namespace Xerpi.ViewModels
             OnPropertyChanged(nameof(Images));
 
             return Task.CompletedTask;
+        }
+
+        private async void CurrentImageChanged(DetailedImageViewModel newImage)
+        {
+            _cts.Cancel();
+            _cts = new CancellationTokenSource();
+            await newImage.InitExternalData(_cts.Token);
+
+            // TODO: Display some kind of indicator while this is happening
+            // TODO: Prevent this from triggering more than once simultaneously
+            if (newImage.BackingImage.Id == Images.Last().BackingImage.Id)
+            {
+                _ = await _imageService.AddPageToSearch(_imageService.PagesSeen.Max() + 1, 50);
+            }
+        }
+
+        public override bool OnBack()
+        {
+            if (IsImageViewerOpen)
+            {
+                IsImageViewerOpen = false;
+                return false;
+            }
+
+            return true;
+        }
+
+        private void FullSizeButtonPressed()
+        {
+            IsImageViewerOpen = true;
         }
 
         private void SoftBackPressed()
