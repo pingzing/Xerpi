@@ -17,11 +17,13 @@ steps:
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
+  displayName: "Restore NuGet Packages"
   inputs:
     command: 'restore'
     restoreSolution: 'Xerpi.Android/Xerpi.Android-CIOnly.sln'    
 
 - task: XamarinAndroid@1
+  displayName: "Build Android project"
   inputs:
     projectFile: 'Xerpi.Android/Xerpi.Android.csproj'
     outputDirectory: '$(outputDirectory)'
