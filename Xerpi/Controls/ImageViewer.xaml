@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:ffi="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             mc:Ignorable="d"
+             
+             x:Class="Xerpi.Controls.ImageViewer"
+             
+             x:Name="thisImageViewer">
+
+
+    <AbsoluteLayout x:Name="ImageContainer"                             
+                    BackgroundColor="#C7000000"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="FillAndExpand">
+        <!--CacheKeyFactory and Source set in code-behind so we have more control over how they behave-->
+        <ffi:CachedImage x:Name="CachedImage"
+                         AnchorX="0"
+                         AnchorY="0"
+                         InvalidateLayoutAfterLoaded="True"                         
+                         HeightRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageHeight}"
+                         WidthRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageWidth}">
+            <ffi:CachedImage.GestureRecognizers>
+                <PinchGestureRecognizer PinchUpdated="OnPinchUpdated"/>
+                <PanGestureRecognizer PanUpdated="OnPanUpdated"/>
+                <TapGestureRecognizer NumberOfTapsRequired="1"
+                                      Tapped="OnTapped"/>
+            </ffi:CachedImage.GestureRecognizers>
+        </ffi:CachedImage>
+
+        <!--TODO: Replace with real loading bar-->
+        <ActivityIndicator AbsoluteLayout.LayoutBounds="0.5, 0.5, 50, 50" 
+                           AbsoluteLayout.LayoutFlags="PositionProportional"
+                           AnchorX="0.5"
+                           AnchorY="0.5"
+                           IsVisible="{Binding Source={x:Reference CachedImage}, Path=IsLoading}"
+                           IsRunning="{Binding Source={x:Reference CachedImage}, Path=IsLoading}"/>
+    </AbsoluteLayout>
+
+</ContentView>

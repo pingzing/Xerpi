@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="clr-namespace:Xerpi.Controls"
+             mc:Ignorable="d"
+             x:Class="Xerpi.Controls.TitleSearchBar"
+             
+             x:Name="ThisTitleSearchBar">
+
+    <Grid x:Name="RootGrid" BackgroundColor="{StaticResource NavigationPrimary}">
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="Common">
+                <VisualState x:Name="Collapsed"/>
+                <VisualState x:Name="Searching">
+                    <VisualState.Setters>
+                        <Setter TargetName="TitleLabel" Property="IsVisible" Value="False"/>
+                        <Setter TargetName="OpenSearchButton" Property="IsVisible" Value="False"/>
+                        <Setter TargetName="SearchBarContainer" Property="IsVisible" Value="True"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups> 
+            
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <Label x:Name="TitleLabel" 
+               Grid.Column="0" 
+               Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Title}"
+               Style="{StaticResource TitleStyle}"
+               TextColor="White"/>
+        
+        <Button x:Name="OpenSearchButton" 
+                Grid.Column="1" 
+                Style="{StaticResource IconButtonStyle}"
+                WidthRequest="50"
+                TextColor="White"
+                Text="&#xF349;"                 
+                Clicked="OpenSearchButton_Clicked"/>
+        
+        <Grid x:Name="SearchBarContainer"
+              Grid.Column="0" Grid.ColumnSpan="2"
+              ColumnSpacing="0"
+              IsVisible="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <controls:BorderlessEntry x:Name="SearchBox"                             
+                                      Grid.Column="0"                   
+                                      BackgroundColor="{DynamicResource BackgroundColor}"
+                                      TextColor="{DynamicResource PrimaryTextColor}"                   
+                                      PlaceholderColor="{DynamicResource PrimaryTextColor}"
+                                      Margin="0, 5, 0, 5"                   
+                                      Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
+                                      Completed="SearchBox_Completed"/>
+
+            <Button x:Name="ClearEntryButton"
+                    Grid.Column="1"
+                    BackgroundColor="White"                    
+                    Clicked="ClearEntryButton_Clicked"
+                    CornerRadius="0"
+                    Padding="0"
+                    Margin="0, 5, 0, 5"
+                    TextColor="Black"
+                    WidthRequest="40"
+                    Style="{StaticResource IconButtonStyle}"                    
+                    Text="&#xF156;"/>
+            <Button x:Name="SearchButton" 
+                    Grid.Column="2"
+                    BackgroundColor="{StaticResource NavigationPrimary}"
+                    Clicked="SearchBar_SearchButtonPressed"
+                    CornerRadius="0"
+                    WidthRequest="50"
+                    Style="{StaticResource IconButtonStyle}"
+                    Text="&#xF349;"/>
+        </Grid>
+    </Grid>
+</ContentView>

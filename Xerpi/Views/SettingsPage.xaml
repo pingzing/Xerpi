@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:NavigablePage xmlns="http://xamarin.com/schemas/2014/forms"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"             
+                     mc:Ignorable="d"
+                     
+                     x:Class="Xerpi.Views.SettingsPage"
+             
+                     xmlns:views="clr-namespace:Xerpi.Views"
+                     xmlns:converters="clr-namespace:Xerpi.Converters"
+                     xmlns:vms="clr-namespace:Xerpi.ViewModels"
+                     
+                     BackgroundColor="{DynamicResource BackgroundColor}"
+                     Title="Settings">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:CollectionToCountConverter x:Key="CollectionToCountConverter"/>
+            <converters:InvertBoolConverter x:Key="InvertBoolConverter"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackLayout Margin="10, 5, 10, 5">
+            <Label Text="Theme"/>
+            <Picker Title="Application Theme" 
+                    ItemsSource="{Binding ThemeChoices}"
+                    SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                    TextColor="{DynamicResource PrimaryTextColor}"/>
+        </StackLayout>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Filters}">
+            <CollectionView.Header>
+                <Label Text="Filters" Padding="10, 5, 10, 5"/>
+            </CollectionView.Header>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vms:SettingsFilterViewModel">
+                    <Frame Padding="10, 5, 10, 5">
+                        <Frame>
+                            <Grid RowSpacing="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Label Grid.Row="0" Text="{Binding BackingFilter.Name}"/>
+                                <Label Grid.Row="1">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Used by "/>
+                                            <Span Text="{Binding BackingFilter.UserCount}"/>
+                                            <Span Text=" people."/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Grid.Row="2">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Spoilers "/>
+                                            <Span Text="{Binding BackingFilter.SpoileredTagIds, Converter={StaticResource CollectionToCountConverter}}"/>
+                                            <Span Text=", and hides "/>
+                                            <Span Text="{Binding BackingFilter.HiddenTagIds, Converter={StaticResource CollectionToCountConverter}}"/>
+                                            <Span Text=" tags."/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Grid.Row="3" Text="{Binding BackingFilter.Description}"/>
+                                <StackLayout Orientation="Horizontal" Grid.Row="4" HorizontalOptions="End">
+                                    <Button HorizontalOptions="End" Text="Details"/>
+                                    <Button HorizontalOptions="End"                                             
+                                            Text="{Binding UseText}" 
+                                            Command="{Binding UseFilterCommand}"/>
+                                </StackLayout>
+                            </Grid>
+                        </Frame>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <ActivityIndicator Grid.Row="1" HorizontalOptions="Center" 
+                           VerticalOptions="Center"
+                           IsRunning="{Binding IsLoading}"
+                           IsEnabled="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"/>
+    </Grid>
+
+</views:NavigablePage>

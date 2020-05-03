@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:NavigablePage xmlns="http://xamarin.com/schemas/2014/forms"                
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             
+             x:Class="Xerpi.Views.ImageGalleryPage"
+             
+             xmlns:converters="clr-namespace:Xerpi.Converters"
+             xmlns:viewmodels="clr-namespace:Xerpi.ViewModels"
+             xmlns:views="clr-namespace:Xerpi.Views"
+             xmlns:controls="clr-namespace:Xerpi.Controls"
+             xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:extensions="clr-namespace:Xerpi.Extensions"
+             
+             BackgroundColor="{DynamicResource BackgroundColor}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InvertBoolConverter x:Key="InvertBoolConverter"/>
+            <converters:PixelsToDipsConverter x:Key="PixelsToDips"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior Command="{Binding SoftBackPressedCommand}"/>
+    </Shell.BackButtonBehavior>
+
+    <Shell.TitleView>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Text="{Binding CurrentImage.BackingImage.Id}"
+                   Style="{StaticResource TitleStyle}"
+                   TextColor="White"/>
+        </Grid>
+    </Shell.TitleView>
+
+    <Grid>
+        <CarouselView x:Name="ImagesCarousel" 
+                      Margin="0, 0, 0, 30"
+                      IsEnabled="{Binding IsImageViewerOpen, Converter={StaticResource InvertBoolConverter}}"
+                      IsScrollAnimated="False"
+                      InputTransparent="{Binding IsImageViewerOpen}"
+                      ItemsSource="{Binding Images}"
+                      CurrentItem="{Binding CurrentImage, Mode=TwoWay}"
+                      CurrentItemChangedCommand="{Binding CurrentImageChangedCommand}"
+                      CurrentItemChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=CurrentItem}">
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
+                    <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Medium}"
+                                                CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.MediumCacheFactory}"
+                                                DownsampleToViewSize="True">
+                        <ffimageloading:CachedImage.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                        </ffimageloading:CachedImage.GestureRecognizers>
+                    </ffimageloading:CachedImage>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+        <controls:ImageViewer x:Name="PanZoomImage"  
+                               Margin="0, 0, 0, 30"
+                               IsVisible="{Binding IsImageViewerOpen}"
+                               CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.FullCacheFactory}"
+                               ImageHeight="{Binding CurrentImage.BackingImage.Height}"
+                               ImageWidth="{Binding CurrentImage.BackingImage.Width}"
+                               Source="{Binding CurrentImage.BackingImage.Representations.Full}"/>
+
+        <controls:PostInfoBottomPanel x:Name="BottomPanel" 
+                                      VerticalOptions="End" 
+                                      Upvotes="{Binding CurrentImage.BackingImage.Upvotes}"
+                                      Score="{Binding CurrentImage.BackingImage.Score}"
+                                      Downvotes="{Binding CurrentImage.BackingImage.Downvotes}"
+                                      Tags="{Binding CurrentImage.Tags}"
+                                      Comments="{Binding CurrentImage.Comments}"/>
+
+    </Grid>
+
+</views:NavigablePage>

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi.Android", "Xerpi\Xerpi.Android\Xerpi.Android.csproj", "{BE58A50B-40CA-4A94-A5F3-BD23E9A8ACC5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi.Android", "Xerpi.Android\Xerpi.Android.csproj", "{BE58A50B-40CA-4A94-A5F3-BD23E9A8ACC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi", "Xerpi\Xerpi\Xerpi.csproj", "{EA79D6DE-30FC-4125-8D64-BE279E705FF2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi", "Xerpi\Xerpi.csproj", "{EA79D6DE-30FC-4125-8D64-BE279E705FF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi.UWP", "Xerpi\Xerpi.UWP\Xerpi.UWP.csproj", "{E838A485-8DA7-4BC2-8E0B-B4525B2CC8CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xerpi.UWP", "Xerpi.UWP\Xerpi.UWP.csproj", "{E838A485-8DA7-4BC2-8E0B-B4525B2CC8CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
