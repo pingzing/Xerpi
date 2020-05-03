@@ -68,12 +68,14 @@
                     Padding="0"
                     Margin="0, 5, 0, 5"
                     TextColor="Black"
-                    Style="{StaticResource IconButtonStyle}"                    
                     WidthRequest="40"
+                    Style="{StaticResource IconButtonStyle}"                    
                     Text="&#xF156;"/>
             <Button x:Name="SearchButton" 
                     Grid.Column="2"
+                    BackgroundColor="{StaticResource NavigationPrimary}"
                     Clicked="SearchBar_SearchButtonPressed"
+                    CornerRadius="0"
                     WidthRequest="50"
                     Style="{StaticResource IconButtonStyle}"
                     Text="&#xF349;"/>
