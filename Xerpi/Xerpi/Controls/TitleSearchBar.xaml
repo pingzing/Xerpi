@@ -16,7 +16,7 @@
                 <VisualState x:Name="Searching">
                     <VisualState.Setters>
                         <Setter TargetName="TitleLabel" Property="IsVisible" Value="False"/>
-                        <Setter TargetName="ToggleSearchButton" Property="IsVisible" Value="False"/>
+                        <Setter TargetName="OpenSearchButton" Property="IsVisible" Value="False"/>
                         <Setter TargetName="SearchBarContainer" Property="IsVisible" Value="True"/>
                     </VisualState.Setters>
                 </VisualState>
@@ -27,36 +27,56 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
+        
         <Label x:Name="TitleLabel" 
                Grid.Column="0" 
                Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Title}"
                Style="{StaticResource TitleStyle}"
                TextColor="White"/>
-        <Button x:Name="ToggleSearchButton" 
+        
+        <Button x:Name="OpenSearchButton" 
                 Grid.Column="1" 
                 Style="{StaticResource IconButtonStyle}"
+                WidthRequest="50"
                 TextColor="White"
                 Text="&#xF349;"                 
-                Clicked="ToggleSearchButton_Clicked"/>
+                Clicked="OpenSearchButton_Clicked"/>
+        
         <Grid x:Name="SearchBarContainer"
               Grid.Column="0" Grid.ColumnSpan="2"
+              ColumnSpacing="0"
               IsVisible="False">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <controls:BorderlessEntry x:Name="SearchBar"                             
+            <controls:BorderlessEntry x:Name="SearchBox"                             
                                       Grid.Column="0"                   
                                       BackgroundColor="{DynamicResource BackgroundColor}"
                                       TextColor="{DynamicResource PrimaryTextColor}"                   
                                       PlaceholderColor="{DynamicResource PrimaryTextColor}"
                                       Margin="0, 5, 0, 5"                   
                                       Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
-                                      Completed="SearchBar_Completed"/>
+                                      Completed="SearchBox_Completed"/>
 
-            <Button x:Name="SearchButton" 
+            <Button x:Name="ClearEntryButton"
                     Grid.Column="1"
-                    Clicked="SearchBar_SearchButtonPressed"/>
+                    BackgroundColor="White"                    
+                    Clicked="ClearEntryButton_Clicked"
+                    CornerRadius="0"
+                    Padding="0"
+                    Margin="0, 5, 0, 5"
+                    TextColor="Black"
+                    Style="{StaticResource IconButtonStyle}"                    
+                    WidthRequest="40"
+                    Text="&#xF156;"/>
+            <Button x:Name="SearchButton" 
+                    Grid.Column="2"
+                    Clicked="SearchBar_SearchButtonPressed"
+                    WidthRequest="50"
+                    Style="{StaticResource IconButtonStyle}"
+                    Text="&#xF349;"/>
         </Grid>
     </Grid>
 </ContentView>

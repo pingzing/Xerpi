@@ -68,7 +68,7 @@ namespace Xerpi.Controls
             _currentState = State.Collapsed;
         }
 
-        private void ToggleSearchButton_Clicked(object sender, EventArgs e)
+        private void OpenSearchButton_Clicked(object sender, EventArgs e)
         {
             UpdateState(State.Searching);
         }
@@ -79,28 +79,44 @@ namespace Xerpi.Controls
             {
                 case State.Collapsed:
                     VisualStateManager.GoToState(RootGrid, CollapsedStateName);
-                    SearchBar.Unfocused -= SearchBar_Unfocused;
+                    SearchBox.Unfocused -= SearchBox_Unfocused;
                     break;
                 case State.Searching:
                     VisualStateManager.GoToState(RootGrid, SearchingStateName);
-                    SearchBar.Focus();
-                    SearchBar.Unfocused += SearchBar_Unfocused;
+                    SearchBox.Focus();
+                    SearchBox.CursorPosition = 0;
+                    SearchBox.SelectionLength = SearchBox.Text.Length;
+                    SearchBox.Unfocused += SearchBox_Unfocused;
                     break;
             }
             _currentState = newState;
         }
 
-        private void SearchBar_Unfocused(object sender, FocusEventArgs e)
+        private void SearchBox_Unfocused(object sender, FocusEventArgs e)
         {
             UpdateState(State.Collapsed);
         }
 
-        private void SearchBar_Completed(object sender, EventArgs e)
+        private void SearchBox_Completed(object sender, EventArgs e)
         {
+            TriggerSearch();
+        }
 
+        private void ClearEntryButton_Clicked(object sender, EventArgs e)
+        {
+            SearchBox.Text = "";
+            // We lose focus when the user taps this button.
+            // By the time this handler fires, it's too late to suppress, so we have to just undo it.
+            // Proper solution: Custom Entry renderer that incorporates a clear button
+            UpdateState(State.Searching);
         }
 
         private void SearchBar_SearchButtonPressed(object sender, EventArgs e)
+        {
+            TriggerSearch();
+        }
+
+        private void TriggerSearch()
         {
             var command = SearchCommand;
             var commandParameter = SearchCommandParameter;
@@ -108,11 +124,6 @@ namespace Xerpi.Controls
             {
                 command.Execute(commandParameter);
             }
-        }
-
-        private void TriggerSearch()
-        {
-
         }
 
         private enum State
