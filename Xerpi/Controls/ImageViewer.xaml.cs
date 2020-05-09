@@ -1,16 +1,9 @@
 ﻿using FFImageLoading.Forms;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-using Xerpi.Extensions;
 
 namespace Xerpi.Controls
 {
@@ -20,13 +13,15 @@ namespace Xerpi.Controls
         private double _maxX = 0;
         private double _maxY = 0;
 
-        private double _minScale;
+        double _lastPanX = 0;
+        double _lastPanY = 0;
+
+        private double _minScale; // Based on image dimensions, maxes out at 1.0.
         private double _maxScale = 1.5;
 
         private DateTime _tapHeardTime;
         private DateTime _lastPinchHeard = DateTime.MinValue;
         private DateTime _lastPanStartTime;
-        private List<double> _lastThreeScaleDecimals = new List<double>(3) { 0, 0, 0 };
 
         public static BindableProperty SourceProperty = BindableProperty.Create(
             nameof(Source),
@@ -104,7 +99,7 @@ namespace Xerpi.Controls
             InitializeComponent();
         }
 
-        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected override void OnPropertyChanged([CallerMemberName]string? propertyName = null)
         {
             if (propertyName == nameof(IsVisible))
             {
@@ -125,8 +120,6 @@ namespace Xerpi.Controls
         // Recenter and scale image to fit screen (or set to 1.0 scale, whichever is smaller)
         private void ResetTranslationAndScale()
         {
-            // Note: Properties should change in the order they're declared. 
-            // Hopefully, this means ImageHeight and ImageWidth have already been updated.            
             (double widthConstraint, double heightConstraint) = GetDimensionConstraints();
 
             double targetScale;
@@ -137,7 +130,7 @@ namespace Xerpi.Controls
             }
             else
             {
-                // Greater need in needed vs given Height
+                // Greater diff in needed vs given Height
                 targetScale = heightConstraint / ImageHeight;
             }
 
@@ -146,7 +139,7 @@ namespace Xerpi.Controls
             CachedImage.Scale = targetScale;
             _minScale = targetScale;
 
-            var (newX, newY) = CenterImage();
+            var (newX, newY) = GetCenterTranslations();
             CachedImage.TranslationX = newX;
             CachedImage.TranslationY = newY;
         }
@@ -173,16 +166,15 @@ namespace Xerpi.Controls
             }
         }
 
-        private (double newX, double newY) CenterImage()
+        private (double newX, double newY) GetCenterTranslations()
         {
-            double widthConstaint = Width;
-            double heightConstraint = Height;
+            (double widthConstraint, double heightConstraint) = GetDimensionConstraints();
 
             double targetX = 0;
             double scaledWidth = ImageWidth * CachedImage.Scale;
-            if (scaledWidth < widthConstaint)
+            if (scaledWidth < widthConstraint)
             {
-                double extraWidth = widthConstaint - scaledWidth;
+                double extraWidth = widthConstraint - scaledWidth;
                 targetX = extraWidth / 2;
             }
 
@@ -203,25 +195,11 @@ namespace Xerpi.Controls
         {
             if (e.Status == GestureStatus.Running)
             {
-                double rawScaleDecimal = Clamp((e.Scale - 1), -0.15, 1.15);
-                Debug.WriteLine($"Raw scale decimal: {rawScaleDecimal}");
-                double adjustedScaleDecimal = rawScaleDecimal;
-
-                // Track the positiveness of the three most recent values. If we abruptly get something out of the ordinary,
-                // force it into the same positiveness as what we've been seeing.
-                // This is to account for what seem to be bogus values coming from the platform when zooming out slowly.
-                // TODO: Rework this--we still get really wild values, especially at the start of the gesture.
-                if (_lastThreeScaleDecimals[0] != 0 && _lastThreeScaleDecimals[1] != 0 && _lastThreeScaleDecimals[2] != 0)
-                {
-                    int negativeCount = _lastThreeScaleDecimals.Count(x => x <= 0);
-                    int positiveCount = _lastThreeScaleDecimals.Count(x => x > 0);
-                    adjustedScaleDecimal = positiveCount > negativeCount ? Math.Abs(rawScaleDecimal) : Math.Abs(rawScaleDecimal) * -1;
-                }
-                _lastThreeScaleDecimals.RemoveAt(0);
-                _lastThreeScaleDecimals.Add(rawScaleDecimal);
-
-                double current = CachedImage.Scale + adjustedScaleDecimal * .75; // Smooth out zooming motion a bit with the .75
+                double scaleDecimal = Clamp((e.Scale - 1), -0.10, 0.10); // Anything more than 10% per frame is a little much. Even 10% is a little much...
+                scaleDecimal = scaleDecimal * CachedImage.Scale; // Attempt to normalize scaling slightly
+                double current = CachedImage.Scale + scaleDecimal;
                 double targetScale = Clamp(current, _minScale, _maxScale);
+                Debug.WriteLine($"scaleDecimal: {scaleDecimal}, Target scale: {targetScale}");
 
                 // TODO: If it's worth the perf gain, don't Translate if we were at the min or max scale last frame
                 // Calculate change in translation based on zoom change
@@ -235,8 +213,7 @@ namespace Xerpi.Controls
 
                 double targetX = CachedImage.TranslationX + (changeInWidth * e.ScaleOrigin.X);
                 double targetY = CachedImage.TranslationY + (changeInHeight * e.ScaleOrigin.Y);
-                // Note: Translation is relative to the top-left of the image: 0,0.
-                // Translation coordinates use container (i.e. DIP) coordinates, NOT real pixel coordinates.
+                // Note: Translation is relative to the top-left of the image: 0,0.                
                 UpdateTranslation(targetX, targetY);
 
                 CachedImage.Scale = targetScale;
@@ -246,10 +223,6 @@ namespace Xerpi.Controls
             else
             {
                 _lastPinchHeard = DateTime.Now;
-                for (int i = 0; i < 3; i++)
-                {
-                    _lastThreeScaleDecimals[i] = 0;
-                }
             }
         }
 
@@ -267,8 +240,19 @@ namespace Xerpi.Controls
             }
             else if (e.StatusType == GestureStatus.Running)
             {
-                UpdateTranslation(CachedImage.TranslationX + e.TotalX * CachedImage.Scale,
-                    CachedImage.TranslationY + e.TotalY * CachedImage.Scale);
+                double diffX = e.TotalX - _lastPanX;
+                double diffY = e.TotalY - _lastPanY;
+
+                _lastPanX = e.TotalX;
+                _lastPanY = e.TotalY;
+
+                UpdateTranslation(CachedImage.TranslationX + diffX,
+                    CachedImage.TranslationY + diffY);
+            }
+            else if (e.StatusType == GestureStatus.Canceled || e.StatusType == GestureStatus.Completed)
+            {
+                _lastPanX = 0;
+                _lastPanY = 0;
             }
         }
 
@@ -282,12 +266,12 @@ namespace Xerpi.Controls
 
             if (overdrawX <= 0)
             {
-                var (newX, _) = CenterImage();
+                var (newX, _) = GetCenterTranslations();
                 x = newX;
             }
             if (overdrawY <= 0)
             {
-                var (_, newY) = CenterImage();
+                var (_, newY) = GetCenterTranslations();
                 y = newY;
             }
 
@@ -296,7 +280,6 @@ namespace Xerpi.Controls
 
             CachedImage.TranslationX = Clamp(x, minX, _maxX);
             CachedImage.TranslationY = Clamp(y, minY, _maxY);
-            Debug.WriteLine($"Translating to: X: {CachedImage.TranslationX}, Y: {CachedImage.TranslationY}. Overdraw - X: {overdrawX}, y: {overdrawY}");
         }
 
         private void OnTapped(object sender, EventArgs e)
@@ -344,6 +327,12 @@ namespace Xerpi.Controls
             {
                 return value;
             }
+        }
+
+        private void CachedImage_Error(object sender, CachedImageEvents.ErrorEventArgs e)
+        {
+            ErrorText.Text = e.Exception.Message;
+            ErrorText.IsVisible = true;
         }
     }
 }

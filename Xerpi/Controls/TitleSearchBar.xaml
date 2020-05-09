@@ -49,30 +49,21 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <controls:BorderlessEntry x:Name="SearchBox"                             
                                       Grid.Column="0"                   
                                       BackgroundColor="{DynamicResource BackgroundColor}"
-                                      TextColor="{DynamicResource PrimaryTextColor}"                   
-                                      PlaceholderColor="{DynamicResource PrimaryTextColor}"
+                                      ClearButtonVisibility="WhileEditing"      
+                                      IsSpellCheckEnabled="False"
                                       Margin="0, 5, 0, 5"                   
+                                      PlaceholderColor="{DynamicResource PrimaryTextColor}"
+                                      ReturnType="Search"
+                                      TextColor="{DynamicResource PrimaryTextColor}"                   
                                       Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
                                       Completed="SearchBox_Completed"/>
 
-            <Button x:Name="ClearEntryButton"
-                    Grid.Column="1"
-                    BackgroundColor="White"                    
-                    Clicked="ClearEntryButton_Clicked"
-                    CornerRadius="0"
-                    Padding="0"
-                    Margin="0, 5, 0, 5"
-                    TextColor="Black"
-                    WidthRequest="40"
-                    Style="{StaticResource IconButtonStyle}"                    
-                    Text="&#xF156;"/>
             <Button x:Name="SearchButton" 
-                    Grid.Column="2"
+                    Grid.Column="1"
                     BackgroundColor="{StaticResource NavigationPrimary}"
                     Clicked="SearchBar_SearchButtonPressed"
                     CornerRadius="0"

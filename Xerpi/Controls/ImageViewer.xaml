@@ -2,7 +2,8 @@
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:ffi="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:ffi="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              mc:Ignorable="d"
              
              x:Class="Xerpi.Controls.ImageViewer"
@@ -20,13 +21,9 @@
                          AnchorY="0"
                          InvalidateLayoutAfterLoaded="True"                         
                          HeightRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageHeight}"
-                         WidthRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageWidth}">
-            <ffi:CachedImage.GestureRecognizers>
-                <PinchGestureRecognizer PinchUpdated="OnPinchUpdated"/>
-                <PanGestureRecognizer PanUpdated="OnPanUpdated"/>
-                <TapGestureRecognizer NumberOfTapsRequired="1"
-                                      Tapped="OnTapped"/>
-            </ffi:CachedImage.GestureRecognizers>
+                         WidthRequest="{Binding Source={x:Reference thisImageViewer}, Path=ImageWidth}"                                                  
+                         
+                         Error="CachedImage_Error">
         </ffi:CachedImage>
 
         <!--TODO: Replace with real loading bar-->
@@ -36,6 +33,31 @@
                            AnchorY="0.5"
                            IsVisible="{Binding Source={x:Reference CachedImage}, Path=IsLoading}"
                            IsRunning="{Binding Source={x:Reference CachedImage}, Path=IsLoading}"/>
+
+        <!--TODO: Replace with real error.-->
+        <Label x:Name="ErrorText" Text="I AM ERROR" IsVisible="False"/>
+        
+        <!--
+        This input sink exists because if we attempt to listen to panning events directly on the image, the 
+        zoom origin point will be moving the whole time we're zooming. That actually results in a slightly
+        better zooming experience, but would require a ton of calculation to prevent the image from
+        jumping all over the place as the user's fingers appear to "move" closer to the origin as the zoom progresses.
+        
+        The effect of this is that, while zooming, we zoom in on the point in *the image* where the zoom began,
+        rather than always centering between the user's finger(s).
+        
+        We can probably revisit this, but this is Good Enough(tm) for now.
+        -->
+        <Grid x:Name="InputSink"              
+              AbsoluteLayout.LayoutBounds="0, 0, 1, 1"              
+              AbsoluteLayout.LayoutFlags="All">
+            <Grid.GestureRecognizers>
+                <PinchGestureRecognizer PinchUpdated="OnPinchUpdated"/>
+                <PanGestureRecognizer PanUpdated="OnPanUpdated"/>
+                <TapGestureRecognizer NumberOfTapsRequired="1"
+                                      Tapped="OnTapped"/>
+            </Grid.GestureRecognizers>
+        </Grid>
     </AbsoluteLayout>
 
 </ContentView>
