@@ -60,11 +60,17 @@ stages:
           filePath: 'Get-Changelog.ps1'
           pwsh: true           
 
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          artifactName: 'artifact'
+          targetPath: '$(Pipeline.Workspace)'
+
       - task: AppCenterDistribute@3
         inputs:
           serverEndpoint: 'Xerpi Android VS App Center'
           appSlug: 'mcalistern-5l49/Xerpi-Android'
-          appFile: '**/*.apk'
+          appFile: '$(Pipeline.Workspace)/**/*.apk'
           symbolsOption: 'Android'
           releaseNotesOption: 'input'
           releaseNotesInput: '$(changeLog)'
