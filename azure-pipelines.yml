@@ -4,7 +4,12 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/xamarin
 
 trigger:
-- master
+ branches:
+  include:    
+    - master
+ tags:
+  include:
+    - '*'
 
 pool:
   vmImage: 'macos-latest'
@@ -35,6 +40,8 @@ stages:
           configuration: '$(buildConfiguration)'
         
   - stage: appcenter
+  # Only send to AppCenter if this is a tagged build
+    condition: contains(variables['Build.SourceBranch'], 'refs/tags/')
     displayName: "Send to AppCenter"
     jobs:
     - job: 
