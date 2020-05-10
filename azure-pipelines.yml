@@ -41,8 +41,9 @@ stages:
       steps:
       - task: AppCenterDistribute@3
         inputs:
+          serverEndpoint: 'Xerpi Android VS App Center'
           appSlug: 'mcalistern-5l49/Xerpi-Android'
-          appFile: '$(outputDirectory)/*.apk'          
+          appFile: '$(outputDirectory)/*.apk'
           symbolsOption: 'Android'
           releaseNotesOption: 'input'
           releaseNotesInput: 'None'
