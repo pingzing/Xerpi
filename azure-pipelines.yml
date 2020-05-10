@@ -13,18 +13,37 @@ variables:
   buildConfiguration: 'Release'
   outputDirectory: '$(build.binariesDirectory)/$(buildConfiguration)'
 
-steps:
-- task: NuGetToolInstaller@1
+stages:
+  - stage: build
+    displayName: Build
+    jobs:
+    - job:
+      steps:
+      - task: NuGetToolInstaller@1
 
-- task: NuGetCommand@2
-  displayName: "Restore NuGet Packages"
-  inputs:
-    command: 'restore'
-    restoreSolution: 'Xerpi.Android/Xerpi.Android-CIOnly.sln'    
+      - task: NuGetCommand@2
+        displayName: "Restore NuGet Packages"
+        inputs:
+          command: 'restore'
+          restoreSolution: 'Xerpi.Android/Xerpi.Android-CIOnly.sln'    
 
-- task: XamarinAndroid@1
-  displayName: "Build Android project"
-  inputs:
-    projectFile: 'Xerpi.Android/Xerpi.Android.csproj'
-    outputDirectory: '$(outputDirectory)'
-    configuration: '$(buildConfiguration)'
+      - task: XamarinAndroid@1
+        displayName: "Build Android project"
+        inputs:
+          projectFile: 'Xerpi.Android/Xerpi.Android.csproj'
+          outputDirectory: '$(outputDirectory)'
+          configuration: '$(buildConfiguration)'
+        
+  - stage: appcenter
+    displayName: "Send to AppCenter"
+    jobs:
+    - job: 
+      steps:
+      - task: AppCenterDistribute@3
+        inputs:
+          appSlug: 'mcalistern-5l49/Xerpi-Android'
+          appFile: '$(outputDirectory)/*.apk'          
+          symbolsOption: 'Android'
+          releaseNotesOption: 'input'
+          releaseNotesInput: 'None'
+          destinationType: 'groups'
