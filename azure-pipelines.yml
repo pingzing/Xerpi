@@ -41,7 +41,7 @@ stages:
 
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: '$(Pipeline.Workspace)'
+          targetPath: '$(outputDirectory)'
           artifact: 'artifact'
           publishLocation: 'pipeline'
           
@@ -64,7 +64,7 @@ stages:
         inputs:
           serverEndpoint: 'Xerpi Android VS App Center'
           appSlug: 'mcalistern-5l49/Xerpi-Android'
-          appFile: '$(Pipeline.Workspace)/**/*.apk'
+          appFile: '**/*.apk'
           symbolsOption: 'Android'
           releaseNotesOption: 'input'
           releaseNotesInput: '$(changeLog)'
