@@ -38,6 +38,12 @@ stages:
           projectFile: 'Xerpi.Android/Xerpi.Android.csproj'
           outputDirectory: '$(outputDirectory)'
           configuration: '$(buildConfiguration)'
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(outputDirectory)'
+          ArtifactName: 'drop'
+          publishLocation: 'Container'
         
   - stage: appcenter
   # Only send to AppCenter if this is a tagged build
@@ -46,6 +52,13 @@ stages:
     jobs:
     - job: 
       steps:
+
+      - task: PowerShell@2
+        displayName: "Generate changelog from commits"
+        inputs:
+          filePath: 'Get-Changelog.ps1'
+          pwsh: true           
+
       - task: AppCenterDistribute@3
         inputs:
           serverEndpoint: 'Xerpi Android VS App Center'
@@ -53,5 +66,5 @@ stages:
           appFile: '$(outputDirectory)/*.apk'
           symbolsOption: 'Android'
           releaseNotesOption: 'input'
-          releaseNotesInput: 'None'
+          releaseNotesInput: '$(changeLog)'
           destinationType: 'groups'
