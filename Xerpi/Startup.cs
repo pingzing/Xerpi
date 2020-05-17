@@ -80,7 +80,7 @@ namespace Xerpi
                 .AddSingleton<SettingsViewModel>();
 
             // Popup VieWModel singletons
-            services.AddTransient<SortFilterPopupViewModel>();
+            services.AddSingleton<SortFilterPopupViewModel>();
         }
 
         private static void RegisterNavigationServiceRoutes(IServiceProvider services)

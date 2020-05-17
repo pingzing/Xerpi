@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Xerpi.Models;
 using Xerpi.Models.API;
 
 namespace Xerpi.Services
@@ -8,7 +9,7 @@ namespace Xerpi.Services
     {
         Task<ImageSearchResponse?> GetImages(uint page = 1, uint perPage = 15);
         Task<IEnumerable<ApiTag>?> GetTags(IEnumerable<uint> ids);
-        Task<ImageSearchResponse?> SearchImages(string query, uint page, uint itemsPerPage);
+        Task<ImageSearchResponse?> SearchImages(SearchParameters parameters, uint page, uint itemsPerPage);
         Task<IEnumerable<ApiFilter>?> GetDefaultFilters();
 
         /// <summary>

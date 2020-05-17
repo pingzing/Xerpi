@@ -6,6 +6,7 @@ using DynamicData;
 using DynamicData.Binding;
 using Xamarin.Forms;
 using Xerpi.Messages;
+using Xerpi.Models;
 using Xerpi.Models.API;
 using Xerpi.Services;
 
@@ -35,8 +36,8 @@ namespace Xerpi.ViewModels
             set => Set(ref _isRefreshing, value);
         }
 
-        public string CurrentSearchQuery => _imageService.CurrentSearchQuery;
-        private void ImageService_CurrentSearchQueryChanged(object _, string __)
+        public string CurrentSearchQuery => _imageService.CurrentSearchParameters.SearchQuery;
+        private void ImageService_CurrentSearchQueryChanged(object _, SearchParameters __)
         {
             OnPropertyChanged(nameof(CurrentSearchQuery));
         }
@@ -44,21 +45,23 @@ namespace Xerpi.ViewModels
         public Command RefreshCommand { get; }
         public Command<string> SearchTriggeredCommand { get; }
         public Command GetNextPageCommand { get; }
+        public Command<SearchSortOptions> SortOptionsChangedCommand { get; }
 
         public ImageGridViewModel(IImageService imageService,
             INavigationService navigationService,
             IMessagingCenter messagingService)
         {
             _imageService = imageService;
-            _imageService.CurrentSearchQueryChanged += ImageService_CurrentSearchQueryChanged;
+            _imageService.CurrentSearchParametersChanged += ImageService_CurrentSearchQueryChanged;
 
             _navigationService = navigationService;
             _messagingService = messagingService;
 
             Title = "Browse";
-            RefreshCommand = new Command(async () => await Refresh(""));
-            SearchTriggeredCommand = new Command<string>(async x => await SearchTriggered(x));
+            RefreshCommand = new Command(async () => await Refresh(CurrentSearchQuery));
+            SearchTriggeredCommand = new Command<string>(async x => await SearchQueryChanged(x));
             GetNextPageCommand = new Command(async x => await GetNextPage());
+            SortOptionsChangedCommand = new Command<SearchSortOptions>(async x => await SortOptionsChanged(x));
 
             var operation = _imageService.CurrentImages.Connect()
                 .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle
@@ -67,7 +70,7 @@ namespace Xerpi.ViewModels
                 .DisposeMany()
                 .Subscribe();
 
-            _imageService.Search("*", itemsPerPage: 50);
+            _imageService.Search(SearchParameters.Default, itemsPerPage: 50);
         }
 
         protected override async Task NavigatedToOverride()
@@ -85,16 +88,21 @@ namespace Xerpi.ViewModels
         {
             if (string.IsNullOrWhiteSpace(query))
             {
-                await _imageService.Search("*", 1, 50);
+                await _imageService.Search(new SearchParameters
+                {
+                    SearchQuery = "*",
+                    SortOrder = _imageService.CurrentSearchParameters.SortOrder,
+                    SortProperty = _imageService.CurrentSearchParameters.SortProperty,
+                }, 1, 50);
             }
             else
             {
-                await _imageService.Search(CurrentSearchQuery, 1, 50);
+                await _imageService.Search(_imageService.CurrentSearchParameters, 1, 50);
             }
             IsRefreshing = false;
         }
 
-        private async Task SearchTriggered(string query)
+        private Task SearchQueryChanged(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -104,7 +112,18 @@ namespace Xerpi.ViewModels
             {
                 Title = query;
             }
-            await _imageService.Search(query, 1, 50);
+
+            return TriggerSearch(new SearchParameters
+            {
+                SearchQuery = query,
+                SortOrder = _imageService.CurrentSearchParameters.SortOrder,
+                SortProperty = _imageService.CurrentSearchParameters.SortProperty
+            });
+        }
+
+        private Task TriggerSearch(SearchParameters parameters)
+        {
+            return _imageService.Search(parameters, 1, 50);
         }
 
         private bool _gettingNextPage = false;
@@ -123,6 +142,21 @@ namespace Xerpi.ViewModels
         public void ImageSelected(ApiImage selectedImage)
         {
             _navigationService.NavigateToViewModel<ImageGalleryViewModel, ApiImage>(selectedImage);
+        }
+
+        private async Task SortOptionsChanged(SearchSortOptions sortOptions)
+        {
+            // Only search if the sort options are actually different
+            if (sortOptions.SortByProperty != _imageService.CurrentSearchParameters.SortProperty
+                || sortOptions.SortOrder != _imageService.CurrentSearchParameters.SortOrder)
+            {
+                await TriggerSearch(new SearchParameters
+                {
+                    SearchQuery = CurrentSearchQuery,
+                    SortOrder = sortOptions.SortOrder,
+                    SortProperty = sortOptions.SortByProperty
+                });
+            }
         }
     }
 }

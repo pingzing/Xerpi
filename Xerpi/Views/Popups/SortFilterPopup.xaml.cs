@@ -16,12 +16,14 @@ namespace Xerpi.Views.Popups
             BindingContext = _viewModel;
             _popupNavigation = Startup.ServiceProvider.GetRequiredService<IPopupNavigation>();
 
-            _viewModel.Closed += _viewModel_Closed;
+            _viewModel.Closed += ViewModel_Closed;
         }
 
-        private void _viewModel_Closed(object sender, System.EventArgs e)
+        private void ViewModel_Closed(object sender, System.EventArgs e)
         {
+            _viewModel.Closed -= ViewModel_Closed;
             _popupNavigation.RemovePageAsync(this);
+
         }
     }
 }

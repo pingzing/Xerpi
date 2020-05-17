@@ -21,7 +21,8 @@
                                  Title="{Binding Title}"
                                  Query="{Binding CurrentSearchQuery}"
                                  SearchCommand="{Binding SearchTriggeredCommand}"
-                                 SearchCommandParameter="{Binding Source={x:Reference TitleSearch}, Path=Query}"/>
+                                 SearchCommandParameter="{Binding Source={x:Reference TitleSearch}, Path=Query}"
+                                 SearchSortOptionsChanged="TitleSearch_SearchSortOptionsChanged"/>
     </Shell.TitleView>
 
     <RefreshView IsRefreshing="{Binding IsRefreshing}"

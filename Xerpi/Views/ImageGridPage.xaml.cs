@@ -4,6 +4,7 @@ using Xerpi.ViewModels;
 using Xerpi.Models.API;
 using Microsoft.Extensions.DependencyInjection;
 using Xerpi.Messages;
+using Xerpi.Models;
 
 namespace Xerpi.Views
 {
@@ -39,6 +40,14 @@ namespace Xerpi.Views
             }
             cv.SelectedItem = null;
             ViewModel.ImageSelected((ApiImage)e.CurrentSelection.First());
+        }
+
+        private void TitleSearch_SearchSortOptionsChanged(object sender, SearchSortOptions newOptions)
+        {
+            if (ViewModel.SortOptionsChangedCommand.CanExecute(newOptions))
+            {
+                ViewModel.SortOptionsChangedCommand.Execute(newOptions);
+            }
         }
     }
 }

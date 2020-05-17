@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Xerpi.Models;
 using Xerpi.Models.API;
 
 namespace Xerpi.Services
@@ -13,12 +14,12 @@ namespace Xerpi.Services
     {
         IObservableCache<ApiTag, uint> Tags { get; }
         IObservableCache<ApiImage, uint> CurrentImages { get; }
-        Task<uint> Search(string query, uint page = 1, uint itemsPerPage = 15);
+        Task<uint> Search(SearchParameters searchParameters, uint page = 1, uint itemsPerPage = 15);
         Task<uint> AddPageToSearch(uint page = 1, uint itemsPerPage = 15);
         Task UpdateTags(uint[] tags);
         HashSet<uint> PagesSeen { get; }
-        string CurrentSearchQuery { get; }
-        event EventHandler<string> CurrentSearchQueryChanged;
+        SearchParameters CurrentSearchParameters { get; }
+        event EventHandler<SearchParameters>? CurrentSearchParametersChanged;
     }
 
     public class ImageService : IImageService
@@ -35,8 +36,8 @@ namespace Xerpi.Services
         public IObservableCache<ApiTag, uint> Tags { get; private set; }
 
         public HashSet<uint> PagesSeen { get; private set; }
-        public string CurrentSearchQuery { get; private set; } = "*";
-        public event EventHandler<string>? CurrentSearchQueryChanged;
+        public SearchParameters CurrentSearchParameters { get; private set; } = new SearchParameters();
+        public event EventHandler<SearchParameters>? CurrentSearchParametersChanged;
 
         public ImageService(IDerpiNetworkService networkService)
         {
@@ -48,18 +49,19 @@ namespace Xerpi.Services
             _networkService = networkService;
         }
 
-        public async Task<uint> Search(string query, uint page = 1, uint itemsPerPage = 15)
+        public async Task<uint> Search(SearchParameters parameters, uint page = 1, uint itemsPerPage = 15)
         {
             _currentImages.Clear();
 
             PagesSeen.Clear();
             PagesSeen.Add(1);
 
-            query = string.IsNullOrWhiteSpace(query) ? "*" : query; // Coerce empties or nulls to wildcard, because that's probably what the user expects
-            CurrentSearchQuery = query;
-            CurrentSearchQueryChanged?.Invoke(this, CurrentSearchQuery);
+            // Coerce empties or nulls to wildcard, because that's probably what the user expects            
+            parameters.SearchQuery = string.IsNullOrWhiteSpace(parameters.SearchQuery) ? "*" : parameters.SearchQuery;
+            CurrentSearchParameters = parameters;
+            CurrentSearchParametersChanged?.Invoke(this, CurrentSearchParameters);
 
-            return await SearchCore(query, page, itemsPerPage);
+            return await SearchCore(parameters, page, itemsPerPage);
         }
 
         public async Task<uint> AddPageToSearch(uint page, uint itemsPerPage = 15)
@@ -70,12 +72,12 @@ namespace Xerpi.Services
             }
 
             PagesSeen.Add(page);
-            return await SearchCore(CurrentSearchQuery, page, itemsPerPage);
+            return await SearchCore(CurrentSearchParameters, page, itemsPerPage);
         }
 
-        private async Task<uint> SearchCore(string query, uint page = 1, uint itemsPerPage = 15)
+        private async Task<uint> SearchCore(SearchParameters parameters, uint page = 1, uint itemsPerPage = 15)
         {
-            var searchResult = await _networkService.SearchImages(query, page, itemsPerPage);
+            var searchResult = await _networkService.SearchImages(parameters, page, itemsPerPage);
             if (searchResult?.Images == null)
             {
                 return 0;

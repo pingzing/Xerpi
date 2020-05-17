@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Xerpi.Converters;
+using Xerpi.Models;
 using Xerpi.Models.API;
 
 namespace Xerpi.Services
@@ -33,13 +34,18 @@ namespace Xerpi.Services
 
         public async Task<ImageSearchResponse?> GetImages(uint page = 1, uint perPage = 15)
         {
-            return await SearchImages("*", page, perPage);
+            return await SearchImages(SearchParameters.Default, page, perPage);
         }
 
-        // Query is a comma-separated list, with spaces transformed into plusses. Everything else seems to get url-encoded.
-        public async Task<ImageSearchResponse?> SearchImages(string query, uint page, uint itemsPerPage) // TODO: sd (sort direction), sf (sort field)
+        public async Task<ImageSearchResponse?> SearchImages(SearchParameters parameters, uint page, uint itemsPerPage)
         {
-            string requestUrl = $"search/images?q={WebUtility.UrlEncode(query)}&page={page}&per_page={itemsPerPage}&filter_id={_settingsService.FilterId}";
+            string sortPropertyFragment = parameters.SortProperty != null ? $"&sf={parameters.SortProperty}" : "";
+            string requestUrl = $"search/images?q={WebUtility.UrlEncode(parameters.SearchQuery)}" +
+                $"&sd={parameters.SortOrder}" +
+                $"{sortPropertyFragment}" +
+                $"&page={page}" +
+                $"&per_page={itemsPerPage}" +
+                $"&filter_id={_settingsService.FilterId}";
             requestUrl = requestUrl.Replace("%20", "+"); // Because spaces are replaced with plusses ¯\_(ツ)_/¯
             var response = await _httpClient.GetAsync(requestUrl);
             if (!response.IsSuccessStatusCode)
@@ -86,16 +92,6 @@ namespace Xerpi.Services
 
         public async Task<IEnumerable<ApiFilter>?> GetDefaultFilters()
         {
-            // No replacement for this in the new API. Update: Damaged is working on it
-            // Default filters are:
-            /*
-             * 37431
-             * 37429
-             * 100073
-             * 56027
-             * 37432
-             * 37430
-             */
             var response = await _httpClient.GetAsync("filters/system");
             if (!response.IsSuccessStatusCode)
             {
