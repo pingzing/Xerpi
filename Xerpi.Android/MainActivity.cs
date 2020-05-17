@@ -35,6 +35,7 @@ namespace Xerpi.Droid
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             FFImageLoading.Forms.Platform.CachedImageRenderer.Init(enableFastRenderer: true);
             _ = typeof(SvgCachedImage);
+            Rg.Plugins.Popup.Popup.Init(this, savedInstanceState);
 
             Forms.Init(this, savedInstanceState);
 
@@ -70,6 +71,18 @@ namespace Xerpi.Droid
             base.OnConfigurationChanged(newConfig);
             var messagingService = Startup.ServiceProvider.GetRequiredService<IMessagingCenter>();
             messagingService.Send(new object(), SimpleMessages.SystemThemeChanged);
+        }
+
+        public override void OnBackPressed()
+        {
+            if (Rg.Plugins.Popup.Popup.SendBackPressed(base.OnBackPressed))
+            {
+                Rg.Plugins.Popup.Services.PopupNavigation.Instance.PopAsync();
+            }
+            else
+            {
+                base.OnBackPressed();
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Rg.Plugins.Popup.Contracts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +8,9 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Xerpi.Models;
+using Xerpi.Services;
+using Xerpi.Views.Popups;
 
 namespace Xerpi.Controls
 {
@@ -14,7 +19,11 @@ namespace Xerpi.Controls
         private const string CollapsedStateName = "Collapsed";
         private const string SearchingStateName = "Searching";
 
+        private readonly IPopupService _popupService;
+
         private State _currentState;
+
+        public event EventHandler<SearchSortOptions> SearchSortOptionsChanged;
 
         public static BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -66,6 +75,7 @@ namespace Xerpi.Controls
         {
             InitializeComponent();
             _currentState = State.Collapsed;
+            _popupService = Startup.ServiceProvider.GetRequiredService<IPopupService>();
         }
 
         private void OpenSearchButton_Clicked(object sender, EventArgs e)
@@ -123,6 +133,15 @@ namespace Xerpi.Controls
             if (command != null && command.CanExecute(commandParameter))
             {
                 command.Execute(commandParameter);
+            }
+        }
+
+        private async void SortFilterButton_Clicked(object sender, EventArgs e)
+        {
+            SearchSortOptions? sortOptions = await _popupService.ShowPopup(Startup.ServiceProvider.GetRequiredService<SortFilterPopupViewModel>());
+            if (sortOptions != null)
+            {
+                SearchSortOptionsChanged?.Invoke(this, sortOptions);
             }
         }
 

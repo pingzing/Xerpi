@@ -27,6 +27,7 @@ namespace Xerpi.UWP
                 Xamarin.Forms.Forms.SetFlags("Shell_UWP_Experimental", "CollectionView_Experimental", "CarouselView_Experimental");
                 _ = typeof(SvgCachedImage);
                 FFImageLoading.Forms.Platform.CachedImageRenderer.Init();
+                Rg.Plugins.Popup.Popup.Init();
 
                 var assembliesToInclude = new List<Assembly>
                 {
@@ -34,6 +35,7 @@ namespace Xerpi.UWP
                     typeof(FFImageLoading.Forms.Platform.CachedImageRenderer).GetTypeInfo().Assembly,
                     typeof(MR.Gestures.ContentPage).GetTypeInfo().Assembly,
                 };
+                assembliesToInclude.AddRange(Rg.Plugins.Popup.Popup.GetExtraAssemblies());
 
                 Xamarin.Forms.Forms.Init(e, assembliesToInclude);
 

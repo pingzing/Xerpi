@@ -8,7 +8,7 @@ using Xerpi.Models.API;
 namespace Xerpi.Services
 {
     // TODO: At some point, if we want multiple tabs, we'll have to split this out into an 
-    // ImageService (a singleton) and a SearchService (multiple-instance)
+    // ImageService (a singleton with image caches) and a SearchService (multiple-instance, has queries and sorting)
     public interface IImageService
     {
         IObservableCache<ApiTag, uint> Tags { get; }

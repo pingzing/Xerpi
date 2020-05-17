@@ -11,15 +11,16 @@ using Xerpi.ViewModels;
 using System.Net.Http.Headers;
 using Xerpi.Views;
 using Xamarin.Forms;
-using Xerpi.Extensions;
-using FFImageLoading.Forms;
+using Rg.Plugins.Popup.Contracts;
+using Rg.Plugins.Popup.Services;
+using Xerpi.Views.Popups;
 
 namespace Xerpi
 {
     public static class Startup
     {
         public static IServiceProvider ServiceProvider { get; set; }
-        private static ThemeHandler _themeHandler;
+        private static ThemeHandler? _themeHandler;
 
         public static void Init(Action<HostBuilderContext, IServiceCollection> nativeConfigureServices)
         {
@@ -40,6 +41,7 @@ namespace Xerpi
                 })).Build();
 
             RegisterNavigationServiceRoutes(host.Services);
+            RegisterPopupViewModelAssociations(host.Services);
             InitializeThemeHandler(host.Services);
             ServiceProvider = host.Services;
         }
@@ -67,6 +69,8 @@ namespace Xerpi
                 .AddSingleton<ISynchronizationContextService, SynchronizationContextService>()
                 .AddTransient<ISettingsService, SettingsService>()
                 .AddSingleton<IImageService, ImageService>()
+                .AddSingleton<IPopupNavigation>(_ => PopupNavigation.Instance)
+                .AddSingleton<IPopupService, PopupService>()
                 .AddSingleton<IMessagingCenter, MessagingCenter>(_ => (MessagingCenter)MessagingCenter.Instance);
 
             // ViewModel singletons            
@@ -74,6 +78,9 @@ namespace Xerpi
                 .AddSingleton<ImageGalleryViewModel>()
                 .AddSingleton<AboutViewModel>()
                 .AddSingleton<SettingsViewModel>();
+
+            // Popup VieWModel singletons
+            services.AddTransient<SortFilterPopupViewModel>();
         }
 
         private static void RegisterNavigationServiceRoutes(IServiceProvider services)
@@ -83,6 +90,12 @@ namespace Xerpi
             navService.RegisterViewModel<ImageGalleryViewModel, ImageGalleryPage>("imagegallery");
             navService.RegisterViewModel<AboutViewModel, AboutPage>("about");
             navService.RegisterViewModel<SettingsViewModel, SettingsPage>("settings");
+        }
+
+        private static void RegisterPopupViewModelAssociations(IServiceProvider services)
+        {
+            var popupService = services.GetRequiredService<IPopupService>();
+            popupService.RegisterViewModel<SortFilterPopupViewModel, SortFilterPopup>();
         }
 
         private static void InitializeThemeHandler(IServiceProvider services)

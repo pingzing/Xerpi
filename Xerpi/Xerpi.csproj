@@ -24,10 +24,11 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" />
     <PackageReference Include="MR.Gestures" Version="2.1.2" />
+    <PackageReference Include="Rg.Plugins.Popup" Version="2.0.0.2" />
     <PackageReference Include="Xamarin.FFImageLoading" Version="2.4.11.982" />
     <PackageReference Include="Xamarin.FFImageLoading.Forms" Version="2.4.11.982" />
     <PackageReference Include="Xamarin.FFImageLoading.Svg.Forms" Version="2.4.11.982" />
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />  
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.725" />  
     <PackageReference Include="Xamarin.Essentials" Version="1.5.1" />
   </ItemGroup>
 
@@ -39,6 +40,9 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Theme\LightTheme.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\Popups\SortFilterPopup.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

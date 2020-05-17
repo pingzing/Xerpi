@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<popups:PopupPage xmlns="http://xamarin.com/schemas/2014/forms" 
+                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                  xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:popups="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+                  mc:Ignorable="d"
+                  x:Class="Xerpi.Views.Popups.SortFilterPopup">
+
+    <Frame BackgroundColor="{DynamicResource BackgroundColor}"
+           CornerRadius="20"
+           Padding="20"
+           Margin="20, 80, 20, 20"
+           HorizontalOptions="FillAndExpand"
+           VerticalOptions="Start">
+        <StackLayout>
+
+            <Label Text="Search Sorting" 
+                   TextColor="{DynamicResource PrimaryTextColor}" 
+                   Style="{DynamicResource TitleStyle}"
+                   Margin="0, 0, 0, 20"/>
+
+            <Label Text="Sort results by..."/>
+            <Picker x:Name="SortPicker"
+                    Title="Sort results by..."                                        
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    ItemsSource="{Binding SortOptions}"
+                    SelectedItem="{Binding SelectedSortOption, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding DisplayName}"/>
+
+
+            <Label Text="Order results by..."/>
+            <Picker x:Name="OrderPicker"
+                    Title="Order results by..."
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    ItemsSource="{Binding OrderOptions}"
+                    SelectedItem="{Binding SelectedSortOrder, Mode=TwoWay}"
+                    ItemDisplayBinding="{Binding DisplayName}"/>
+
+            <Button x:Name="ApplyButton"
+                    Text="Apply"
+                    Command="{Binding ApplyCommand}"/>
+        </StackLayout>
+    </Frame>
+
+</popups:PopupPage>

@@ -49,26 +49,38 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <controls:BorderlessEntry x:Name="SearchBox"                             
-                                      Grid.Column="0"                   
+            <controls:BorderlessEntry x:Name="SearchBox"
+                                      Grid.Column="0"
                                       BackgroundColor="{DynamicResource BackgroundColor}"
-                                      ClearButtonVisibility="WhileEditing"      
+                                      ClearButtonVisibility="WhileEditing"
                                       IsSpellCheckEnabled="False"
-                                      Margin="0, 5, 0, 5"                   
+                                      Margin="0, 5, 0, 5"
                                       PlaceholderColor="{DynamicResource PrimaryTextColor}"
                                       ReturnType="Search"
-                                      TextColor="{DynamicResource PrimaryTextColor}"                   
+                                      TextColor="{DynamicResource PrimaryTextColor}"
                                       Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
                                       Completed="SearchBox_Completed"/>
 
-            <Button x:Name="SearchButton" 
+            <Button x:Name="SortFilterButton"
                     Grid.Column="1"
+                    BackgroundColor="{StaticResource NavigationPrimary}"
+                    Clicked="SortFilterButton_Clicked"
+                    CornerRadius="0"
+                    WidthRequest="50"
+                    Style="{StaticResource IconButtonStyle}"
+                    TextColor="White"
+                    Text="&#xF4BA;"/>
+
+            <Button x:Name="SearchButton" 
+                    Grid.Column="2"
                     BackgroundColor="{StaticResource NavigationPrimary}"
                     Clicked="SearchBar_SearchButtonPressed"
                     CornerRadius="0"
                     WidthRequest="50"
                     Style="{StaticResource IconButtonStyle}"
+                    TextColor="White"
                     Text="&#xF349;"/>
         </Grid>
     </Grid>

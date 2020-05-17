@@ -139,7 +139,10 @@ namespace Xerpi.Controls
             CachedImage.Scale = targetScale;
             _minScale = targetScale;
 
-            var (newX, newY) = GetCenterTranslations();
+            (double newX, double newY) = GetMaxTranslations();
+            _maxX = newX;
+            _maxY = newY;
+
             CachedImage.TranslationX = newX;
             CachedImage.TranslationY = newY;
         }
@@ -166,7 +169,7 @@ namespace Xerpi.Controls
             }
         }
 
-        private (double newX, double newY) GetCenterTranslations()
+        private (double newX, double newY) GetMaxTranslations()
         {
             (double widthConstraint, double heightConstraint) = GetDimensionConstraints();
 
@@ -186,9 +189,7 @@ namespace Xerpi.Controls
                 targetY = extraHeight / 2;
             }
 
-            _maxX = targetX;
-            _maxY = targetY;
-            return (_maxX, _maxY);
+            return (targetX, targetY);
         }
 
         private void OnPinchUpdated(object sender, PinchGestureUpdatedEventArgs e)
@@ -202,6 +203,7 @@ namespace Xerpi.Controls
                 Debug.WriteLine($"scaleDecimal: {scaleDecimal}, Target scale: {targetScale}");
 
                 // TODO: If it's worth the perf gain, don't Translate if we were at the min or max scale last frame
+
                 // Calculate change in translation based on zoom change
                 double actualWidth = CachedImage.Width * CachedImage.Scale;
                 double projectedNextWidth = CachedImage.Width * targetScale;
@@ -266,12 +268,12 @@ namespace Xerpi.Controls
 
             if (overdrawX <= 0)
             {
-                var (newX, _) = GetCenterTranslations();
+                var (newX, _) = GetMaxTranslations();
                 x = newX;
             }
             if (overdrawY <= 0)
             {
-                var (_, newY) = GetCenterTranslations();
+                var (_, newY) = GetMaxTranslations();
                 y = newY;
             }
 
