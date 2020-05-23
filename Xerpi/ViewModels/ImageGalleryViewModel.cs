@@ -19,7 +19,6 @@ namespace Xerpi.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IDerpiNetworkService _networkService;
         private readonly ISynchronizationContextService _syncContextService;
-        private readonly SortExpressionComparer<ApiImage> _imageSorter = SortExpressionComparer<ApiImage>.Descending(x => x.Id);
 
         private ApiImage? _navParameterImage;
         private CancellationTokenSource _cts = new CancellationTokenSource();
@@ -71,8 +70,7 @@ namespace Xerpi.ViewModels
             _navParameterImage = NavigationParameter as ApiImage;
 
             var operation = _imageService.CurrentImages.Connect()
-             .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle
-             .Sort(_imageSorter)
+             .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle             
              .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))
              .ObserveOn(_syncContextService.UIThread)
              .Bind(out _images, resetThreshold: 75)

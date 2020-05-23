@@ -18,8 +18,6 @@ namespace Xerpi.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IMessagingCenter _messagingService;
 
-        private readonly SortExpressionComparer<ApiImage> _imageSorter = SortExpressionComparer<ApiImage>.Descending(x => x.Id);
-
         public override string Url => "images";
 
         private ReadOnlyObservableCollection<ApiImage> _images;
@@ -64,8 +62,7 @@ namespace Xerpi.ViewModels
             SortOptionsChangedCommand = new Command<SearchSortOptions>(async x => await SortOptionsChanged(x));
 
             var operation = _imageService.CurrentImages.Connect()
-                .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle
-                .Sort(_imageSorter)
+                .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle                
                 .Bind(out _images, resetThreshold: 75)
                 .DisposeMany()
                 .Subscribe();

@@ -81,7 +81,7 @@ namespace Xerpi.Droid
             }
             else
             {
-                base.OnBackPressed();
+                // Do nothing--the event handler over in AppShell handles our other potential scenarios.
             }
         }
     }

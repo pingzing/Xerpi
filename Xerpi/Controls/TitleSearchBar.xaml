@@ -8,7 +8,9 @@
              
              x:Name="ThisTitleSearchBar">
 
-    <Grid x:Name="RootGrid" BackgroundColor="{StaticResource NavigationPrimary}">
+    <Grid x:Name="RootGrid" 
+          BackgroundColor="{StaticResource NavigationPrimary}"
+          ColumnSpacing="0">
 
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="Common">
@@ -26,6 +28,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         
         <Label x:Name="TitleLabel" 
@@ -33,11 +36,22 @@
                Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Title}"
                Style="{StaticResource TitleStyle}"
                TextColor="White"/>
-        
+
+        <Button x:Name="SortFilterButton"
+                    Grid.Column="1"
+                    BackgroundColor="{StaticResource NavigationPrimary}"
+                    Clicked="SortFilterButton_Clicked"
+                    CornerRadius="0"
+                    WidthRequest="70"
+                    Style="{StaticResource IconButtonStyle}"
+                    TextColor="White"
+                    Text="&#xF4BA;"/>
+
         <Button x:Name="OpenSearchButton" 
-                Grid.Column="1" 
+                Grid.Column="2" 
+                BackgroundColor="{StaticResource NavigationPrimary}"
                 Style="{StaticResource IconButtonStyle}"
-                WidthRequest="50"
+                WidthRequest="70"
                 TextColor="White"
                 Text="&#xF349;"                 
                 Clicked="OpenSearchButton_Clicked"/>
@@ -48,7 +62,6 @@
               IsVisible="False">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <controls:BorderlessEntry x:Name="SearchBox"
@@ -63,18 +76,9 @@
                                       Text="{Binding Source={x:Reference ThisTitleSearchBar}, Path=Query, Mode=TwoWay}"
                                       Completed="SearchBox_Completed"/>
 
-            <Button x:Name="SortFilterButton"
-                    Grid.Column="1"
-                    BackgroundColor="{StaticResource NavigationPrimary}"
-                    Clicked="SortFilterButton_Clicked"
-                    CornerRadius="0"
-                    WidthRequest="50"
-                    Style="{StaticResource IconButtonStyle}"
-                    TextColor="White"
-                    Text="&#xF4BA;"/>
 
             <Button x:Name="SearchButton" 
-                    Grid.Column="2"
+                    Grid.Column="1"
                     BackgroundColor="{StaticResource NavigationPrimary}"
                     Clicked="SearchBar_SearchButtonPressed"
                     CornerRadius="0"
