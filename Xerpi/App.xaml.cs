@@ -14,6 +14,7 @@ namespace Xerpi
 #endif
 
             InitializeComponent();
+            Startup.ThemeHandler!.Initialize();
             MainPage = new AppShell();
         }
 

@@ -33,12 +33,19 @@ namespace Xerpi.ViewModels
             set => Set(ref _themeChoices, value);
         }
 
+        private bool ignoreOnce = true;
         private AppTheme _selectedTheme;
         public AppTheme SelectedTheme
         {
             get => _selectedTheme;
             set
             {
+                // Ignore the initial "Unspecified" from the UI control's two-way binding
+                if (ignoreOnce)
+                {
+                    ignoreOnce = !ignoreOnce;
+                    return;
+                }
                 Set(ref _selectedTheme, value);
                 _settingsService.SelectedTheme = value;
             }

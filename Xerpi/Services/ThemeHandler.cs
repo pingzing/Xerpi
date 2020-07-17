@@ -23,6 +23,18 @@ namespace Xerpi.Services
             _messagingService.Subscribe<SettingsService, AppThemeChangedMessage>(this, "", UserThemeChanged);
         }
 
+        public void Initialize()
+        {
+            if (_settingsService.SelectedTheme == AppTheme.Unspecified)
+            {
+                UseSystemTheme();
+            }
+            else
+            {
+                SwitchToTheme(_settingsService.SelectedTheme);
+            }
+        }
+
         private void SystemThemeChanged(object sender)
         {
             // Only do stuff if the user wants to use the System theme
