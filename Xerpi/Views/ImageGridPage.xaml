@@ -29,11 +29,13 @@
                  Command="{Binding RefreshCommand}">
         <CollectionView x:Name="ImageListCollectionView" 
                         ItemsSource="{Binding Images}"
-                        ItemSizingStrategy="MeasureFirstItem"                        
+                        ItemSizingStrategy="MeasureFirstItem"             
+                        ItemsUpdatingScrollMode="KeepItemsInView"
                         SelectionChanged="CollectionView_SelectionChanged"
                         SelectionMode="Single"
                         RemainingItemsThreshold="4"
                         RemainingItemsThresholdReachedCommand="{Binding GetNextPageCommand}"
+                        Scrolled="ImageListCollectionView_Scrolled"
                         VerticalScrollBarVisibility="Always">
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Orientation="Vertical" Span="2"/>

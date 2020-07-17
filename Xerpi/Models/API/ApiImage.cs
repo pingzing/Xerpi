@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace Xerpi.Models.API
 {
+    [DebuggerDisplay("ID: {Id}, Score: {Score}")]
     public class ApiImage : IEquatable<ApiImage>
     {
         public uint Id { get; set; }
@@ -60,6 +62,18 @@ namespace Xerpi.Models.API
         public ApiRepresentations Representations { get; set; } = null!;
 
         public bool Spoilered { get; set; }
+
+        /// <summary>
+        /// NOT ACTUALLY PART OF THE API RESPONSE. This is a dirty hack to add page information to each image. TODO: Remove this and add it elsewhere.
+        /// </summary>
+        public uint? SearchPage { get; set; } = null!;
+
+        /// <summary>
+        /// ALSO NOT ACTUALLY PART OF THE API RESPONSE.
+        /// A secondary dirty hack, because SearchPage handles gross sorting, but nothing
+        /// deals with per-page sorting, and we need to maintain sort-order from the website.
+        /// </summary>
+        public uint? SortIndex { get; set; }
 
         public override bool Equals(object? obj)
         {

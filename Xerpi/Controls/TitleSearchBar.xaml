@@ -38,14 +38,14 @@
                TextColor="White"/>
 
         <Button x:Name="SortFilterButton"
-                    Grid.Column="1"
-                    BackgroundColor="{StaticResource NavigationPrimary}"
-                    Clicked="SortFilterButton_Clicked"
-                    CornerRadius="0"
-                    WidthRequest="70"
-                    Style="{StaticResource IconButtonStyle}"
-                    TextColor="White"
-                    Text="&#xF4BA;"/>
+                Grid.Column="1"
+                BackgroundColor="{StaticResource NavigationPrimary}"
+                Clicked="SortFilterButton_Clicked"
+                CornerRadius="0"
+                WidthRequest="70"
+                Style="{StaticResource IconButtonStyle}"
+                TextColor="White"
+                Text="&#xF4BA;"/>
 
         <Button x:Name="OpenSearchButton" 
                 Grid.Column="2" 

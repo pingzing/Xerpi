@@ -17,6 +17,7 @@ namespace Xerpi.ViewModels
         private readonly IImageService _imageService;
         private readonly INavigationService _navigationService;
         private readonly IMessagingCenter _messagingService;
+        private readonly SearchPageComparer _pageComparer = new SearchPageComparer();
 
         public override string Url => "images";
 
@@ -43,6 +44,7 @@ namespace Xerpi.ViewModels
         public Command RefreshCommand { get; }
         public Command<string> SearchTriggeredCommand { get; }
         public Command GetNextPageCommand { get; }
+        public Command GetPreviousPageCommand { get; }
         public Command<SearchSortOptions> SortOptionsChangedCommand { get; }
 
         public ImageGridViewModel(IImageService imageService,
@@ -59,10 +61,12 @@ namespace Xerpi.ViewModels
             RefreshCommand = new Command(async () => await Refresh(CurrentSearchQuery));
             SearchTriggeredCommand = new Command<string>(async x => await SearchQueryChanged(x));
             GetNextPageCommand = new Command(async x => await GetNextPage());
+            GetPreviousPageCommand = new Command(async x => await GetPreviousPage());
             SortOptionsChangedCommand = new Command<SearchSortOptions>(async x => await SortOptionsChanged(x));
 
             var operation = _imageService.CurrentImages.Connect()
                 .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle                
+                .Sort(_pageComparer, SortOptimisations.ComparesImmutableValuesOnly)
                 .Bind(out _images, resetThreshold: 75)
                 .DisposeMany()
                 .Subscribe();
@@ -73,7 +77,8 @@ namespace Xerpi.ViewModels
         protected override async Task NavigatedToOverride()
         {
             // TODO: If we're coming from the Flyout menu, clear _currentSearchQuery and set the imagelist to a front page default
-            // Otherwise, do nothing
+
+            // If we have an ApiImage in our navParams, we're coming back from the gallery, and need to preserve our scroll location
             var image = NavigationParameter as ApiImage;
             if (image != null)
             {
@@ -123,17 +128,32 @@ namespace Xerpi.ViewModels
             return _imageService.Search(parameters, 1, 50);
         }
 
-        private bool _gettingNextPage = false;
-        private async Task GetNextPage()
+        private bool _gettingPage = false;
+        private async Task GetPreviousPage()
         {
-            if (_gettingNextPage)
+            if (_gettingPage)
             {
                 return;
             }
 
-            _gettingNextPage = true;
-            await _imageService.AddPageToSearch(_imageService.PagesSeen.Max() + 1, 50);
-            _gettingNextPage = false;
+            // Can't get anything below page 1.
+            uint pageToGet = Math.Max(1, _imageService.PagesVisible.Min() - 1);
+
+            _gettingPage = true;
+            await _imageService.AddPageToSearch(pageToGet, 50);
+            _gettingPage = false;
+        }
+
+        private async Task GetNextPage()
+        {
+            if (_gettingPage)
+            {
+                return;
+            }
+
+            _gettingPage = true;
+            await _imageService.AddPageToSearch(_imageService.PagesVisible.Max() + 1, 50);
+            _gettingPage = false;
         }
 
         public void ImageSelected(ApiImage selectedImage)

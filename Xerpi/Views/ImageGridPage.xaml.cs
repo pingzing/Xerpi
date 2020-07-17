@@ -5,6 +5,7 @@ using Xerpi.Models.API;
 using Microsoft.Extensions.DependencyInjection;
 using Xerpi.Messages;
 using Xerpi.Models;
+using System.Threading.Tasks;
 
 namespace Xerpi.Views
 {
@@ -21,8 +22,9 @@ namespace Xerpi.Views
             _messagingService.Subscribe<ImageGridViewModel, NavigatedBackToImageGridMessage>(this, "", OnNavigatedFromGallery);
         }
 
-        private void OnNavigatedFromGallery(ImageGridViewModel _, NavigatedBackToImageGridMessage args)
+        private async void OnNavigatedFromGallery(ImageGridViewModel _, NavigatedBackToImageGridMessage args)
         {
+            await Task.Delay(100); // could this make it more reliable? it fails a lot ATM
             ImageListCollectionView.ScrollTo(args.Image, position: ScrollToPosition.Start, animate: false);
         }
 
@@ -47,6 +49,15 @@ namespace Xerpi.Views
             if (ViewModel.SortOptionsChangedCommand.CanExecute(newOptions))
             {
                 ViewModel.SortOptionsChangedCommand.Execute(newOptions);
+            }
+        }
+
+        private void ImageListCollectionView_Scrolled(object sender, ItemsViewScrolledEventArgs e)
+        {
+            if (e.FirstVisibleItemIndex <= ImageListCollectionView.RemainingItemsThreshold)
+            {
+                // TODO: Manually scroll the list once it updates? hmmmm
+                ViewModel.GetPreviousPageCommand.Execute(null);
             }
         }
     }

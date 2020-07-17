@@ -1,5 +1,4 @@
 ﻿using DynamicData;
-using DynamicData.Binding;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,6 +6,8 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using Xerpi.Messages;
+using Xerpi.Models;
 using Xerpi.Models.API;
 using Xerpi.Services;
 
@@ -19,6 +20,8 @@ namespace Xerpi.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IDerpiNetworkService _networkService;
         private readonly ISynchronizationContextService _syncContextService;
+        private readonly IMessagingCenter _messagingService;
+        private readonly SearchPageComparer _pageComparer = new SearchPageComparer();
 
         private ApiImage? _navParameterImage;
         private CancellationTokenSource _cts = new CancellationTokenSource();
@@ -51,12 +54,14 @@ namespace Xerpi.ViewModels
         public ImageGalleryViewModel(IImageService imageService,
             INavigationService navigationService,
             IDerpiNetworkService networkSerivce,
-            ISynchronizationContextService syncContextService)
+            ISynchronizationContextService syncContextService,
+            IMessagingCenter messagingService)
         {
             _imageService = imageService;
             _navigationService = navigationService;
             _networkService = networkSerivce;
             _syncContextService = syncContextService;
+            _messagingService = messagingService;
             _images = new ReadOnlyObservableCollection<DetailedImageViewModel>(new ObservableCollection<DetailedImageViewModel>());
 
             CurrentImageChangedCommand = new Command<DetailedImageViewModel>(CurrentImageChanged);
@@ -70,7 +75,8 @@ namespace Xerpi.ViewModels
             _navParameterImage = NavigationParameter as ApiImage;
 
             var operation = _imageService.CurrentImages.Connect()
-             .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle             
+             .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle
+             .Sort(_pageComparer, SortOptimisations.ComparesImmutableValuesOnly)
              .Transform(x => new DetailedImageViewModel(x, _imageService, _networkService, _syncContextService))
              .ObserveOn(_syncContextService.UIThread)
              .Bind(out _images, resetThreshold: 75)
@@ -93,17 +99,34 @@ namespace Xerpi.ViewModels
             return Task.CompletedTask;
         }
 
+        private bool _gettingPage = false;
         private async void CurrentImageChanged(DetailedImageViewModel newImage)
         {
             _cts.Cancel();
             _cts = new CancellationTokenSource();
             await newImage.InitExternalData(_cts.Token);
 
+            if (_gettingPage)
+            {
+                return;
+            }
+
             // TODO: Display some kind of indicator while this is happening
-            // TODO: Prevent this from triggering more than once simultaneously
             if (newImage.BackingImage.Id == Images.Last().BackingImage.Id)
             {
-                _ = await _imageService.AddPageToSearch(_imageService.PagesSeen.Max() + 1, 50);
+                _gettingPage = true;
+                await _imageService.AddPageToSearch(_imageService.PagesVisible.Max() + 1, 50);
+                _messagingService.Send(new NewPageWorkaroundMessage { Direction = InsertMode.Append }, "");
+                _gettingPage = false;
+            }
+            if (newImage.BackingImage.Id == Images.First().BackingImage.Id)
+            {
+                _gettingPage = true;
+                uint pageToGet = Math.Max(1, _imageService.PagesVisible.Min() - 1);
+                await _imageService.AddPageToSearch(pageToGet, 50);
+                // TODO: The UI _refuses_ to acknowledge if things have been added to the beginning.
+                // Address this, somehow.
+                _gettingPage = false;
             }
         }
 
