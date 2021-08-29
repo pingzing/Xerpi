@@ -4,25 +4,20 @@
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             
-             xmlns:mr="clr-namespace:MR.Gestures;assembly=MR.Gestures"
+                          
              xmlns:api="clr-namespace:Xerpi.Models.API"
              xmlns:converters="clr-namespace:Xerpi.Converters"
              xmlns:ctls="clr-namespace:Xerpi.Controls"
              xmlns:viewmodels="clr-namespace:Xerpi.ViewModels" 
              xmlns:ffi="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:ffiSvg="clr-namespace:FFImageLoading.Svg.Forms;assembly=FFImageLoading.Svg.Forms"
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
              x:Class="Xerpi.Controls.PostInfoBottomPanel"
              
              x:Name="thisPostInfoPanel"
              
              BackgroundColor="{DynamicResource BackgroundColor}"
              HeightRequest="{x:Static ctls:PostInfoBottomPanel.PanelHeight}">
-    
-    <!--<ContentView.GestureRecognizers>
-        <PanGestureRecognizer PanUpdated="PanGestureRecognizer_PanUpdated"/>
-        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-    </ContentView.GestureRecognizers>-->
 
     <ContentView.Resources>
         <ResourceDictionary>
@@ -30,7 +25,8 @@
             <converters:TagCategoryForegroundConverter x:Key="ForegroundConverter"/>
             <converters:TagCategoryBackgroundConverter x:Key="BackgroundConverter"/>
             <converters:DateTimeTimeAgoConverter x:Key="PostedAtConverter"/>
-            
+            <converters:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
+
             <!--DataTemplates-->
             <ControlTemplate x:Key="RegisteredUserTemplate">
                 <ffi:CachedImage BindingContext="{Binding Source={RelativeSource TemplatedParent}, Path=BindingContext}"
@@ -57,14 +53,14 @@
             <VisualStateGroup x:Name="CommentStates">
                 <VisualState x:Name="Empty">
                     <VisualState.Setters>
-                        <Setter TargetName="EmptyCommentView" Property="IsVisible" Value="True"/>
-                        <Setter TargetName="LoadedCommentsView" Property="IsVisible" Value="False"/>
+                        <!--<Setter TargetName="EmptyCommentView" Property="IsVisible" Value="True"/>
+                        <Setter TargetName="LoadedCommentsView" Property="IsVisible" Value="False"/>-->
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState x:Name="Loaded">
                     <VisualState.Setters>
-                        <Setter TargetName="EmptyCommentView" Property="IsVisible" Value="False"/>
-                        <Setter TargetName="LoadedCommentsView" Property="IsVisible" Value="True"/>
+                        <!--<Setter TargetName="EmptyCommentView" Property="IsVisible" Value="False"/>
+                        <Setter TargetName="LoadedCommentsView" Property="IsVisible" Value="True"/>-->
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
@@ -76,31 +72,22 @@
         </Grid.RowDefinitions>
         
         <!--Drag/Vote/Score bar-->
-        <mr:Grid x:Name="TopBar" Grid.Row="0" 
+        <Grid x:Name="TopBar" Grid.Row="0" 
               BackgroundColor="{DynamicResource NavigationPrimary}" 
               HeightRequest="{x:Static ctls:PostInfoBottomPanel.MinimizedHeight}"
-              Down="TopBar_Down"
-              Up="TopBar_Up"
-              Tapping="TopBar_Tapping"
-              Panning="TopBar_Panning"
-              Panned="TopBar_Panned">
+              xct:TouchEffect.NormalBackgroundColor="{DynamicResource NavigationPrimary}"
+              xct:TouchEffect.PressedBackgroundColor="{DynamicResource NavigationPrimaryLight}">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="TopBar_Tapped"/>
+                <PanGestureRecognizer PanUpdated="TopBar_PanUpdated"/>
+            </Grid.GestureRecognizers>
             
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
-            <VisualStateManager.VisualStateGroups>
-                <VisualStateGroup x:Name="TopBarStates">
-                    <VisualState x:Name="Unhighlighted"/>
-                    <VisualState x:Name="Highlighted">
-                        <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="{DynamicResource NavigationPrimaryLight}"/>
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>
+           
 
             <!--Upvotes-->            
             <StackLayout Orientation="Horizontal" Spacing="4">
@@ -138,21 +125,51 @@
                                FontSize="20"
                                VerticalOptions="Center"/>
             </StackLayout>
-        </mr:Grid>
+        </Grid>
         
-        <!--Description, tags, and comments-->        
-        <ScrollView Grid.Row="1"
+        <!--Description, tags, and comments-->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}"
+                        Margin="0, 5, 0, 0">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical"
+                                 Span="2"
+                                 HorizontalItemSpacing="5"
+                                 VerticalItemSpacing="5"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.Header>
+                <Label Text="{Binding Source={x:Reference thisPostInfoPanel}, Path=Description}" 
+                       LineBreakMode="WordWrap" />
+            </CollectionView.Header>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="api:ApiTag">
+                    <Frame BackgroundColor="{Binding Category, Converter={StaticResource BackgroundConverter}}" 
+                           Padding="10, 5, 10, 5" 
+                           Margin="0, 3, 0, 3"
+                           xct:TouchEffect.PressedOpacity=".8">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TagTapped"/>
+                        </Frame.GestureRecognizers>
+                        <Label Text="{Binding TagString}" 
+                               TextColor="{Binding Category, Converter={StaticResource ForegroundConverter}}"
+                               VerticalOptions="CenterAndExpand"/>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+        <!--<ScrollView Grid.Row="1"
                     Scrolled="ScrollView_Scrolled">
             <StackLayout>
-                <!--Description and maybe a control bar showing current zoom, etc-->
-                <!--TODO-->
+                --><!--TODO-->
+                <!--maybe a control bar showing current zoom, etc-->
 
-                <!--Tags-->
-                <FlexLayout x:Name="TagsLayout" Direction="Row" 
-                                BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}"
-                                Wrap="Wrap"
-                                AlignItems="Start" 
-                                JustifyContent="SpaceAround">
+                <!--Description--><!--
+                <Label Text="{Binding Source={x:Reference thisPostInfoPanel}, Path=Description}"
+                       LineBreakMode="WordWrap"/>
+                
+                --><!--Tags--><!--
+                <StackLayout x:Name="TagsLayout" Orientation="Vertical" BindableLayout.ItemsSource="{Binding Source={x:Reference thisPostInfoPanel}, Path=Tags}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="api:ApiTag">
                             <Frame BackgroundColor="{Binding Category, Converter={StaticResource BackgroundConverter}}" 
@@ -163,9 +180,9 @@
                             </Frame>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
-                </FlexLayout>
+                </StackLayout>
 
-                <!--Comments-->
+                --><!--Comments--><!--
                 <StackLayout x:Name="EmptyCommentView">
                     <Label HorizontalOptions="Center" Text="Quiet in here."/>
                 </StackLayout>
@@ -184,8 +201,8 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!--Avatar-->
-                                <!--Conditionally switches between FFImageLoading's SvgImage and a regular CachedImage-->
+                                --><!--Avatar-->
+                                <!--Conditionally switches between FFImageLoading's SvgImage and a regular CachedImage--><!--
                                 <ContentView Grid.Row="0" Grid.RowSpan="2" Grid.Column="0">
                                     <ContentView.Triggers>
                                         <DataTrigger TargetType="ContentView"
@@ -203,12 +220,12 @@
                                     </ContentView.Triggers>
                                 </ContentView>
 
-                                <!--Author and timestamp-->
+                                --><!--Author and timestamp--><!--
                                 <Label Grid.Row="0" Grid.Column="1" FontAttributes="Bold" Text="{Binding Author}"/>
                                 <Label Grid.Row="0" Grid.Column="2"
                                        Text="{Binding PostedAt, Converter={StaticResource PostedAtConverter}}"/>
                                 
-                                <!--Body-->
+                                --><!--Body--><!--
                                 <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Body}" LineBreakMode="WordWrap"/>
 
                             </Grid>
@@ -216,10 +233,10 @@
                     </BindableLayout.ItemTemplate>
                 </StackLayout>
                 <StackLayout x:Name="LoadingCommentView">
-                    <!--TODO: make this show up whenever we're loading comments-->
+                    --><!--TODO: make this show up whenever we're loading comments--><!--
                 </StackLayout>
             </StackLayout>
 
-        </ScrollView>
+        </ScrollView>-->
     </Grid>
 </ContentView>

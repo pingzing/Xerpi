@@ -15,20 +15,17 @@ namespace Xerpi.Services
     // ImageService (a singleton with image caches) and a SearchService (multiple-instance, has queries and sorting)
     public interface IImageService
     {
-        IObservableCache<ApiTag, uint> Tags { get; }
         IObservableCache<ApiImage, uint> CurrentImages { get; }
         Task<uint> Search(SearchParameters searchParameters, uint page = 1, uint itemsPerPage = 15);
         Task<uint> AddPageToSearch(uint page = 1, uint itemsPerPage = 15);
-        Task UpdateTags(uint[] tags);
         List<uint> PagesVisible { get; }
         SearchParameters CurrentSearchParameters { get; }
         event EventHandler<SearchParameters>? CurrentSearchParametersChanged;
+        uint CurrentTotalImages { get; }
     }
 
     public class ImageService : IImageService
     {
-        private const uint VisibleImages = 200;
-
         private readonly IDerpiNetworkService _networkService;
         private readonly IEqualityComparer<ApiImage> _imageComparer = EqualityComparer<ApiImage>.Default;
         private readonly IEqualityComparer<ApiTag> _tagComparer = EqualityComparer<ApiTag>.Default;
@@ -36,21 +33,17 @@ namespace Xerpi.Services
         private SourceCache<ApiImage, uint> _currentImages = new SourceCache<ApiImage, uint>(x => x.Id);
         public IObservableCache<ApiImage, uint> CurrentImages { get; private set; }
 
-        private SourceCache<ApiTag, uint> _tags = new SourceCache<ApiTag, uint>(x => x.Id);
-
-        public IObservableCache<ApiTag, uint> Tags { get; private set; }
 
         public List<uint> PagesVisible { get; private set; }
         public SearchParameters CurrentSearchParameters { get; private set; } = new SearchParameters();
         public event EventHandler<SearchParameters>? CurrentSearchParametersChanged;
+        public uint CurrentTotalImages { get; private set; }
 
         public ImageService(IDerpiNetworkService networkService)
         {
             PagesVisible = new List<uint>() { 1 };
 
             CurrentImages = _currentImages.AsObservableCache();
-            _tags.LimitSizeTo(200).Subscribe();
-            Tags = _tags.AsObservableCache();
             _networkService = networkService;
         }
 
@@ -66,7 +59,7 @@ namespace Xerpi.Services
             CurrentSearchParameters = parameters;
             CurrentSearchParametersChanged?.Invoke(this, CurrentSearchParameters);
 
-            return await SearchCore(parameters, InsertMode.Append, page, itemsPerPage);
+            return await SearchCore(parameters, page, itemsPerPage);
         }
 
         public async Task<uint> AddPageToSearch(uint pageNumber, uint itemsPerPage = 15)
@@ -76,17 +69,11 @@ namespace Xerpi.Services
                 return 0;
             }
 
-            InsertMode insertMode = InsertMode.Append;
-            if (pageNumber < PagesVisible.Min())
-            {
-                insertMode = InsertMode.Prepend;
-            }
-
             PagesVisible.AddSorted(pageNumber);
-            return await SearchCore(CurrentSearchParameters, insertMode, pageNumber, itemsPerPage);
+            return await SearchCore(CurrentSearchParameters, pageNumber, itemsPerPage);
         }
 
-        private async Task<uint> SearchCore(SearchParameters parameters, InsertMode mode, uint page = 1, uint itemsPerPage = 15)
+        private async Task<uint> SearchCore(SearchParameters parameters, uint page = 1, uint itemsPerPage = 15)
         {
             var searchResult = await _networkService.SearchImages(parameters, page, itemsPerPage);
             if (searchResult?.Images == null)
@@ -94,47 +81,6 @@ namespace Xerpi.Services
                 return 0;
             }
 
-            _currentImages.Edit(x =>
-            {
-                uint searchPage = page;
-                if (((uint)(x.Count + searchResult.Images.Length)) > VisibleImages)
-                {
-                    uint numToRemove = (uint)(x.Count + searchResult.Images.Length) - VisibleImages;
-                    List<ApiImage> toRemove = new List<ApiImage>();
-                    int pageSearchDirection;
-                    int removePage;
-
-                    // Remove from the front, as we're adding to the end
-                    if (mode == InsertMode.Append)
-                    {
-                        pageSearchDirection = 1;
-                        removePage = (int)PagesVisible.Min();
-                    }
-                    // Remove from the end, as we're adding to the front
-                    else
-                    {
-                        pageSearchDirection = -1;
-                        removePage = (int)PagesVisible.Max();
-                    }
-
-                    while (toRemove.Count < numToRemove)
-                    {
-                        toRemove.Add(x.Items.Where(y => y.SearchPage == removePage).Take((int)numToRemove));
-                        if (!PagesVisible.Contains((uint)(removePage + pageSearchDirection)))
-                        {
-                            break;
-                        }
-                        PagesVisible.Remove((uint)removePage);
-                        removePage += pageSearchDirection;
-                    }
-
-                    // One last .Take() in case we wound up over numToRemove.
-                    x.Remove(toRemove.Take((int)numToRemove));
-                }
-            });
-
-            // Do this in a separate edit pass, so the UI updates. Otherwise, the CollectionView
-            // won't realize it needs to keep the scoll item in view.
             _currentImages.Edit(x =>
             {
                 uint searchPage = page;
@@ -148,31 +94,8 @@ namespace Xerpi.Services
                 }
             });
 
+            CurrentTotalImages = searchResult.Total;
             return searchResult.Total;
-        }
-
-        public async Task UpdateTags(uint[] tagIds)
-        {
-            IEnumerable<uint> missingTags = tagIds.Except(_tags.Keys);
-            if (!missingTags.Any())
-            {
-                return;
-            }
-
-            var newTags = await _networkService.GetTags(missingTags).ConfigureAwait(false);
-            if (newTags == null)
-            {
-                return;
-            }
-
-            // TODO: perf - can change this to EditDiff
-            _tags.Edit(x =>
-            {
-                foreach (var tag in newTags)
-                {
-                    x.AddOrUpdate(tag, _tagComparer);
-                }
-            });
         }
     }
 }

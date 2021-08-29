@@ -16,7 +16,6 @@ namespace Xerpi.UWP
         {
             InitializeComponent();
             Startup.Init(ConfigureServices);
-            MR.Gestures.UWP.Settings.LicenseKey = "ALZ9-BPVU-XQ35-CEBG-5ZRR-URJQ-ED5U-TSY8-6THP-3GVU-JW8Z-RZGE-CQW6";
             LoadApplication(new Xerpi.App());
 
             uiSettings = new UISettings();

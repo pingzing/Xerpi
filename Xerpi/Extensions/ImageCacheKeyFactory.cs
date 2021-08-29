@@ -9,6 +9,7 @@ namespace Xerpi.Extensions
     {
         public static ICacheKeyFactory ThumbnailCacheFactory { get; } = new ImageCacheKeyFactory(ImageType.Thumbnail);
         public static ICacheKeyFactory MediumCacheFactory { get; } = new ImageCacheKeyFactory(ImageType.Medium);
+        public static ICacheKeyFactory LargeCacheFactory { get; } = new ImageCacheKeyFactory(ImageType.Large);
         public static ICacheKeyFactory FullCacheFactory { get; } = new ImageCacheKeyFactory(ImageType.Full);
 
         public ImageType ImageType { get; set; } = ImageType.Thumbnail;

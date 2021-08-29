@@ -23,6 +23,7 @@ namespace Xerpi.Services
         bool Back<TArgs>(TArgs args);
         Task NavigateToViewModel<T>() where T : BasePageViewModel;
         Task NavigateToViewModel<TViewModel, TArgs>(TArgs args) where TViewModel : BasePageViewModel;
+        Task HomeToViewModel<TViewModel, TArgs>(TArgs args) where TViewModel : BasePageViewModel;
         void RegisterViewModel<TViewModel, TPage>(string routeUrl);
     }
 
@@ -75,10 +76,10 @@ namespace Xerpi.Services
             {
                 destinationPage = ((IShellContentController)Shell.Current.CurrentItem.CurrentItem.CurrentItem).Page;
             }
-            else 
+            else
             {
                 destinationPage = currentContent.Navigation.NavigationStack[destinationIndex];
-            }            
+            }
             Type destinationVmType = _pageToVmMapping[destinationPage.GetType()];
             BasePageViewModel destinationVmInstance = (BasePageViewModel)Startup.ServiceProvider.GetService(destinationVmType);
             destinationVmInstance.NavigationParameter = args;
@@ -121,6 +122,17 @@ namespace Xerpi.Services
 
             vmInstance.NavigationParameter = args;
             await Shell.Current.GoToAsync(new ShellNavigationState(vmInstance.Url));
+        }
+
+        public async Task HomeToViewModel<TViewModel, TArgs>(TArgs args) where TViewModel : BasePageViewModel
+        {
+            if (!(Startup.ServiceProvider.GetService(typeof(TViewModel)) is TViewModel vmInstance))
+            {
+                throw new ArgumentException($"Could not find a ViewModel of type {typeof(TViewModel)}");
+            }
+
+            vmInstance.NavigationParameter = args;
+            await Shell.Current.GoToAsync(new ShellNavigationState($"//{vmInstance.Url}"));
         }
 
         public void RegisterViewModel<TViewModel, TPage>(string routeUrl)

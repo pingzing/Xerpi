@@ -59,7 +59,7 @@ namespace Xerpi
 
             services.AddHttpClient<IDerpiNetworkService, DerpiNetworkService>(x =>
             {
-                x.BaseAddress = new Uri("https://derpibooru.org/api/v1/json/");
+                x.BaseAddress = new Uri("https://derpibooru.org/");
                 x.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 x.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("pingzing-Xerpi", "1.0"));
             });

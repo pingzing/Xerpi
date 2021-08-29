@@ -21,8 +21,8 @@ namespace Xerpi.ViewModels
 
         public override string Url => "images";
 
-        private ReadOnlyObservableCollection<ApiImage> _images;
-        public ReadOnlyObservableCollection<ApiImage> Images
+        private ObservableCollectionExtended<ApiImage> _images = new ObservableCollectionExtended<ApiImage>();
+        public ObservableCollectionExtended<ApiImage> Images
         {
             get => _images;
             set => Set(ref _images, value);
@@ -64,10 +64,10 @@ namespace Xerpi.ViewModels
             GetPreviousPageCommand = new Command(async x => await GetPreviousPage());
             SortOptionsChangedCommand = new Command<SearchSortOptions>(async x => await SortOptionsChanged(x));
 
-            var operation = _imageService.CurrentImages.Connect()
+            _imageService.CurrentImages.Connect()
                 .Filter(x => !x.MimeType.Contains("video")) // TODO: Make sure this only covers webm, and not other things we can actually handle                
                 .Sort(_pageComparer, SortOptimisations.ComparesImmutableValuesOnly)
-                .Bind(out _images, resetThreshold: 75)
+                .Bind(_images)
                 .DisposeMany()
                 .Subscribe();
 
@@ -82,7 +82,27 @@ namespace Xerpi.ViewModels
             var image = NavigationParameter as ApiImage;
             if (image != null)
             {
+                // Send a message to the code-behind, as it has direct access to UI stuff
                 _messagingService.Send(this, "", new NavigatedBackToImageGridMessage { Image = image });
+                return;
+            }
+
+            // If we have an ApiTag in our navParams, then the user tapped a tag in the bottomPanel and we need to start a new search
+            var apiTag = NavigationParameter as ApiTag;
+            if (apiTag != null)
+            {
+                await SearchQueryChanged(apiTag.Name);
+            }
+
+            var queryParam = NavigationParameter as ImageGridWithQuery;
+            if (queryParam != null)
+            {
+                await TriggerSearch(new SearchParameters
+                {
+                    SearchQuery = queryParam.Query,
+                    SortOrder = queryParam.SortOrder ?? SortOrderKind.Descending,
+                    SortProperty = queryParam.SortProperty ?? SortProperties.InitialPostDate
+                });
             }
         }
 
@@ -106,15 +126,6 @@ namespace Xerpi.ViewModels
 
         private Task SearchQueryChanged(string query)
         {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                Title = "Browse";
-            }
-            else
-            {
-                Title = query;
-            }
-
             return TriggerSearch(new SearchParameters
             {
                 SearchQuery = query,
@@ -125,6 +136,15 @@ namespace Xerpi.ViewModels
 
         private Task TriggerSearch(SearchParameters parameters)
         {
+            if (string.IsNullOrWhiteSpace(parameters.SearchQuery) || parameters.SearchQuery == "*")
+            {
+                Title = "Browse";
+            }
+            else
+            {
+                Title = parameters.SearchQuery;
+            }
+
             return _imageService.Search(parameters, 1, 50);
         }
 

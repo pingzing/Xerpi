@@ -29,7 +29,7 @@ namespace Xerpi.Controls
             typeof(ImageViewer),
             propertyChanged: SourceChanged);
 
-        [Xamarin.Forms.TypeConverter(typeof(FFImageLoading.Forms.ImageSourceConverter))]
+        [TypeConverter(typeof(FFImageLoading.Forms.ImageSourceConverter))]
         public ImageSource Source
         {
             get => (ImageSource)GetValue(SourceProperty);
@@ -99,7 +99,7 @@ namespace Xerpi.Controls
             InitializeComponent();
         }
 
-        protected override void OnPropertyChanged([CallerMemberName]string? propertyName = null)
+        protected override void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             if (propertyName == nameof(IsVisible))
             {
@@ -329,12 +329,6 @@ namespace Xerpi.Controls
             {
                 return value;
             }
-        }
-
-        private void CachedImage_Error(object sender, CachedImageEvents.ErrorEventArgs e)
-        {
-            ErrorText.Text = e.Exception.Message;
-            ErrorText.IsVisible = true;
         }
     }
 }

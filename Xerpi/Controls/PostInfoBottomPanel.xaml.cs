@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Xamarin.Forms;
 using Xerpi.Models.API;
 using Xerpi.ViewModels;
@@ -85,6 +86,17 @@ namespace Xerpi.Controls
             set => SetValue(DownvotesProperty, value);
         }
 
+        public static BindableProperty DescriptionProperty = BindableProperty.Create(
+            nameof(Description),
+            typeof(string),
+            typeof(PostInfoBottomPanel),
+            defaultValue: null);
+        public string Description
+        {
+            get => (string)GetValue(DescriptionProperty);
+            set => SetValue(DescriptionProperty, value);
+        }
+
         public static BindableProperty CommentsProperty = BindableProperty.Create(
             nameof(Comments),
             typeof(IEnumerable<CommentViewModel>),
@@ -115,6 +127,16 @@ namespace Xerpi.Controls
             }
 
             VisualStateManager.GoToState(_this.RootGrid, "Loaded");
+        }
+
+        public static BindableProperty TagTappedCommandProperty = BindableProperty.Create(
+            nameof(TagTappedCommand),
+            typeof(ICommand),
+            typeof(PostInfoBottomPanel));
+        public ICommand TagTappedCommand
+        {
+            get => (ICommand)GetValue(TagTappedCommandProperty);
+            set => SetValue(TagTappedCommandProperty, value);
         }
 
         public PostInfoBottomPanel()
@@ -202,75 +224,64 @@ namespace Xerpi.Controls
             }
         }
 
-        private void TopBar_Down(object sender, MR.Gestures.DownUpEventArgs e)
+        private void TopBar_PanUpdated(object sender, PanUpdatedEventArgs e)
         {
             if (_panelState == PanelState.Toggling)
             {
-                // Ignore any user input if we're in the middle of a canned animation
-                return;
+                return; // Don't do anything if we're in the middle of animating
             }
-            VisualStateManager.GoToState(TopBar, "Highlighted");
+
+            switch (e.StatusType)
+            {
+                case GestureStatus.Running:
+                    double targetTranslation = TranslationY + e.TotalY;
+                    if (targetTranslation < 0)
+                    {
+                        return; // No opening higher than fully-maximied
+                    }
+                    if (targetTranslation > PanelHeight - MinimizedHeight)
+                    {
+                        return; // No going below the bottom of the screen.
+                    }
+
+                    TranslationY = targetTranslation;
+                    break;
+                case GestureStatus.Canceled:
+                case GestureStatus.Completed:
+                    if (TranslationY > PanelHeight / 2) // The panel is closed or almost closed
+                    {
+                        _ = SetPanelState(PanelState.Minimized);
+                    }
+                    else
+                    {
+                        _ = SetPanelState(PanelState.Maximized);
+                    }
+                    break;
+            }
         }
 
-        private void TopBar_Up(object sender, MR.Gestures.DownUpEventArgs e)
+        private async void TopBar_Tapped(object sender, EventArgs e)
         {
             if (_panelState == PanelState.Toggling)
             {
-                // Ignore any user input if we're in the middle of a canned animation
-                return;
-            }
-            VisualStateManager.GoToState(TopBar, "Unhighlighted");
-        }
-
-        private void TopBar_Tapping(object sender, MR.Gestures.TapEventArgs e)
-        {
-            if (_panelState == PanelState.Toggling)
-            {
-                return; // Don't do anythin if we're in the middle of animating.
+                return; // Don't do anything if we're in the middle of animating
             }
 
             var targetState = _panelState == PanelState.Maximized ? PanelState.Minimized : PanelState.Maximized;
 
-            _ = SetPanelState(targetState);
+            await SetPanelState(targetState);
         }
 
-        private void TopBar_Panning(object sender, MR.Gestures.PanEventArgs e)
+        private void TagTapped(object sender, EventArgs e)
         {
-            if (_panelState == PanelState.Toggling)
+            Frame thisFrame = (Frame)sender;
+            ApiTag? apiTag = thisFrame.BindingContext as ApiTag;
+            if (apiTag != null && TagTappedCommand != null)
             {
-                // Ignore any user input if we're in the middle of a canned animation
-                return;
-            }
-
-            double targetTranslation = TranslationY + e.TotalDistance.Y;
-
-            if (targetTranslation < 0)
-            {
-                return; // Don't allow opening higher than fully-maximized
-            }
-            if (targetTranslation > PanelHeight - MinimizedHeight)
-            {
-                return; // Don't allow hiding the top-bar.
-            }
-
-            TranslationY = targetTranslation;
-        }
-
-        private void TopBar_Panned(object sender, MR.Gestures.PanEventArgs e)
-        {
-            if (_panelState == PanelState.Toggling)
-            {
-                // Ignore any user input if we're in the middle of a canned animation
-                return;
-            }
-
-            if (TranslationY > PanelHeight / 2) // The panel is closed or almost closed
-            {
-                _ = SetPanelState(PanelState.Minimized);
-            }
-            else
-            {
-                _ = SetPanelState(PanelState.Maximized);
+                if (TagTappedCommand.CanExecute(apiTag))
+                {
+                    TagTappedCommand.Execute(apiTag);
+                }
             }
         }
     }

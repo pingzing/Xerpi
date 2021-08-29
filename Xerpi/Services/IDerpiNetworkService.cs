@@ -21,5 +21,6 @@ namespace Xerpi.Services
         Task<CommentsResponse?> GetComments(uint imageId, uint page = 1);
 
         Task<ApiUser?> GetUserProfile(uint userId);
+        string BaseUri { get; }
     }
 }

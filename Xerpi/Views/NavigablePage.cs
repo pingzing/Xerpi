@@ -1,6 +1,6 @@
-﻿using MR.Gestures;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 using Xerpi.ViewModels;
 
 namespace Xerpi.Views

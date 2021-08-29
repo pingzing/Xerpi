@@ -31,9 +31,9 @@ namespace Xerpi.ViewModels
         public virtual Task NavigatedFromOverride() { return Task.CompletedTask; }
 
         /// <summary>
-        /// Function to return just before going back. Return true if back navigation should be suppressed, false otherwise.
+        /// Function to return just before going back. Return true if back navigation should continue, false if it should be suppressed.
         /// </summary>
-        /// <returns>True if back navigation should be suppressed, false otherwise.</returns>
+        /// <returns>True if back navigation should be continued, false if it should be suppressed.</returns>
         public virtual bool OnBack() { return false; }
     }
 }

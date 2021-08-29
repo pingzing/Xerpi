@@ -95,26 +95,24 @@
     </Shell.Resources>
 
     <Shell.Items>
-        <ShellContent Title="Browse"                       
+        <ShellContent Title="Browse"
                       Route="images"
                       ContentTemplate="{DataTemplate local:ImageGridPage}">
             <ShellContent.Icon>
                 <FontImageSource FontFamily="{StaticResource MaterialFontFamily}"
-                                 Glyph="&#xF2EA;"
+                                 Glyph="&#xF2DC;"
                                  Color="{DynamicResource PrimaryTextColor}"
                                  Size="25"/>
             </ShellContent.Icon>
         </ShellContent>
-        <ShellContent Title="About"                       
-                      Route="about"
-                      ContentTemplate="{DataTemplate local:AboutPage}">
-            <ShellContent.Icon>
+        <MenuItem Text="Popular" Clicked="Popular_Clicked">
+            <MenuItem.IconImageSource>
                 <FontImageSource FontFamily="{StaticResource MaterialFontFamily}"
-                                 Glyph="&#xF2FD;"
+                                 Glyph="&#xF2D1;"
                                  Color="{DynamicResource PrimaryTextColor}"
                                  Size="25"/>
-            </ShellContent.Icon>
-        </ShellContent>
+            </MenuItem.IconImageSource>
+        </MenuItem>
         <ShellContent Title="Settings"                      
                       Route="settings"
                       ContentTemplate="{DataTemplate local:SettingsPage}">
@@ -125,7 +123,6 @@
                                  Size="25"/>
             </ShellContent.Icon>
         </ShellContent>
-        <MenuItem Text="Clear image cache" Clicked="MenuItem_Clicked"/>
     </Shell.Items>
         
 

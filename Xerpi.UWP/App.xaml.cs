@@ -33,7 +33,6 @@ namespace Xerpi.UWP
                 {
                     typeof(CachedImage).GetTypeInfo().Assembly,
                     typeof(FFImageLoading.Forms.Platform.CachedImageRenderer).GetTypeInfo().Assembly,
-                    typeof(MR.Gestures.ContentPage).GetTypeInfo().Assembly,
                 };
                 assembliesToInclude.AddRange(Rg.Plugins.Popup.Popup.GetExtraAssemblies());
 

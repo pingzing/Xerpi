@@ -15,9 +15,12 @@ namespace Xerpi.Services
 {
     public class DerpiNetworkService : IDerpiNetworkService
     {
+        private const string Api = "api/v1/json";
         private readonly JsonSerializerOptions _jsonOptions;
         private readonly HttpClient _httpClient;
         private readonly ISettingsService _settingsService;
+
+        public string BaseUri { get; private set; }
 
         // TODO: Handle exceptions when network adapters kerplode.
         public DerpiNetworkService(HttpClient httpClient, ISettingsService settingsService)
@@ -30,6 +33,7 @@ namespace Xerpi.Services
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             };
             _jsonOptions.Converters.Add(new UtcDateTimeOffsetConverter());
+            BaseUri = _httpClient.BaseAddress.ToString();
         }
 
         public async Task<ImageSearchResponse?> GetImages(uint page = 1, uint perPage = 15)
@@ -40,7 +44,7 @@ namespace Xerpi.Services
         public async Task<ImageSearchResponse?> SearchImages(SearchParameters parameters, uint page, uint itemsPerPage)
         {
             string sortPropertyFragment = parameters.SortProperty != null ? $"&sf={parameters.SortProperty}" : "";
-            string requestUrl = $"search/images?q={WebUtility.UrlEncode(parameters.SearchQuery)}" +
+            string requestUrl = $"{Api}/search/images?q={WebUtility.UrlEncode(parameters.SearchQuery)}" +
                 $"&sd={parameters.SortOrder}" +
                 $"{sortPropertyFragment}" +
                 $"&page={page}" +
@@ -69,7 +73,7 @@ namespace Xerpi.Services
         public async Task<IEnumerable<ApiTag>?> GetTags(IEnumerable<uint> ids)
         {
             string idQueryParams = string.Join(" || ", ids.Select(x => $"id:{x}"));
-            string url = $"search/tags?q={idQueryParams}";
+            string url = $"{Api}/search/tags?q={idQueryParams}";
             var response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
             {
@@ -92,7 +96,7 @@ namespace Xerpi.Services
 
         public async Task<IEnumerable<ApiFilter>?> GetDefaultFilters()
         {
-            var response = await _httpClient.GetAsync("filters/system");
+            var response = await _httpClient.GetAsync($"{Api}/filters/system");
             if (!response.IsSuccessStatusCode)
             {
                 Debug.WriteLine($"GetDefaultFilters failed. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
@@ -105,7 +109,7 @@ namespace Xerpi.Services
 
         public async Task<CommentsResponse?> GetComments(uint imageId, uint page = 1)
         {
-            var response = await _httpClient.GetAsync($"search/comments?q=image_id:{imageId}&page={page}");
+            var response = await _httpClient.GetAsync($"{Api}/search/comments?q=image_id:{imageId}&page={page}");
             if (!response.IsSuccessStatusCode)
             {
                 Debug.WriteLine($"GetComments failed for image ID {imageId}. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");
@@ -117,7 +121,7 @@ namespace Xerpi.Services
 
         public async Task<ApiUser?> GetUserProfile(uint userId)
         {
-            var response = await _httpClient.GetAsync($"profiles/{userId}");
+            var response = await _httpClient.GetAsync($"{Api}/profiles/{userId}");
             if (!response.IsSuccessStatusCode)
             {
                 Debug.WriteLine($"GetUserProfile failed for user ID: {userId}. HTTP {response.StatusCode}, {await response.Content.ReadAsStringAsync()}");

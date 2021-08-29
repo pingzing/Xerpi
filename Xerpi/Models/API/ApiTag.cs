@@ -49,7 +49,7 @@ namespace Xerpi.Models.API
             return Equals(obj as ApiTag);
         }
 
-        public bool Equals(ApiTag other)
+        public bool Equals(ApiTag? other)
         {
             return other != null &&
                    Id == other.Id &&
@@ -64,12 +64,12 @@ namespace Xerpi.Models.API
             return hashCode;
         }
 
-        public static bool operator ==(ApiTag left, ApiTag right)
+        public static bool operator ==(ApiTag? left, ApiTag? right)
         {
             return EqualityComparer<ApiTag>.Default.Equals(left, right);
         }
 
-        public static bool operator !=(ApiTag left, ApiTag right)
+        public static bool operator !=(ApiTag? left, ApiTag? right)
         {
             return !(left == right);
         }

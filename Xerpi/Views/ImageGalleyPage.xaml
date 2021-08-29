@@ -7,14 +7,21 @@
              
              x:Class="Xerpi.Views.ImageGalleryPage"
              
+             x:DataType="viewmodels:ImageGalleryViewModel"
+                     
              xmlns:converters="clr-namespace:Xerpi.Converters"
              xmlns:viewmodels="clr-namespace:Xerpi.ViewModels"
              xmlns:views="clr-namespace:Xerpi.Views"
              xmlns:controls="clr-namespace:Xerpi.Controls"
              xmlns:ffimageloading="clr-namespace:FFImageLoading.Forms;assembly=FFImageLoading.Forms"
              xmlns:extensions="clr-namespace:Xerpi.Extensions"
-             
-             BackgroundColor="{DynamicResource BackgroundColor}">
+                     BackgroundColor="{DynamicResource BackgroundColor}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Open in browser"
+                     Order="Secondary"
+                     Command="{Binding OpenInBrowserCommand}"/>
+    </ContentPage.ToolbarItems>
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -28,14 +35,23 @@
     </Shell.BackButtonBehavior>
 
     <Shell.TitleView>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Label Text="{Binding CurrentImage.BackingImage.Id}"
+        <Grid RowSpacing="0" VerticalOptions="CenterAndExpand">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label Text="{Binding Title, StringFormat='#{0}'}"
                    Style="{StaticResource TitleStyle}"
                    TextColor="White"/>
+            <Label Grid.Row="1" FontSize="Small">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{Binding CurrentImageNumber}"/>
+                        <Span Text=" / "/>
+                        <Span Text="{Binding CurrentTotalImages}"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
         </Grid>
     </Shell.TitleView>
 
@@ -46,18 +62,45 @@
                       IsScrollAnimated="False"
                       InputTransparent="{Binding IsImageViewerOpen}"
                       ItemsSource="{Binding Images}"
+                      Loop="False"
                       CurrentItem="{Binding CurrentImage, Mode=TwoWay}"
                       CurrentItemChangedCommand="{Binding CurrentImageChangedCommand}"
-                      CurrentItemChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=CurrentItem}">
+                      CurrentItemChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=CurrentItem}"
+                      RemainingItemsThreshold="2"
+                      RemainingItemsThresholdReachedCommand="{Binding ThresholdReachedCommand}">
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:DetailedImageViewModel">
-                    <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Medium}"
-                                                CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.MediumCacheFactory}"
-                                                DownsampleToViewSize="True">
-                        <ffimageloading:CachedImage.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-                        </ffimageloading:CachedImage.GestureRecognizers>
-                    </ffimageloading:CachedImage>
+                    <Grid>
+                        <!--Image-->
+                        <ffimageloading:CachedImage Source="{Binding BackingImage.Representations.Medium}"
+                                                    CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.MediumCacheFactory}"
+                                                    DownsampleToViewSize="True"
+                                                    DownloadStartedCommand="{Binding DownloadStartedCommand}"
+                                                    DownloadProgressCommand="{Binding DownloadProgressCommand}"
+                                                    
+                                                    FinishCommand="{Binding FinishCommand}">
+                            <ffimageloading:CachedImage.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                            </ffimageloading:CachedImage.GestureRecognizers>
+                        </ffimageloading:CachedImage>
+                        <!--Loading indicator-->
+                        <Grid RowDefinitions="*, Auto"
+                              BackgroundColor="{DynamicResource BackgroundColor}"
+                              IsVisible="{Binding IsImageLoading}"
+                              VerticalOptions="FillAndExpand"
+                              HorizontalOptions="FillAndExpand">
+                            <ActivityIndicator Grid.Row="1"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="End"
+                                               WidthRequest="50"
+                                               IsRunning="{Binding IsImageLoading}"/>
+                            <Label Grid.Row="2"
+                                   HorizontalOptions="CenterAndExpand" 
+                                   VerticalOptions="Start"
+                                   HorizontalTextAlignment="Center"
+                                   Text="{Binding ImageProgressMesssage}"/>
+                        </Grid>
+                    </Grid>
                 </DataTemplate>
             </CarouselView.ItemTemplate>
         </CarouselView>
@@ -65,10 +108,10 @@
         <controls:ImageViewer x:Name="PanZoomImage"  
                                Margin="0, 0, 0, 30"
                                IsVisible="{Binding IsImageViewerOpen}"
-                               CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.FullCacheFactory}"
+                               CacheKeyFactory="{x:Static extensions:ImageCacheKeyFactory.LargeCacheFactory}"
                                ImageHeight="{Binding CurrentImage.BackingImage.Height}"
                                ImageWidth="{Binding CurrentImage.BackingImage.Width}"
-                               Source="{Binding CurrentImage.BackingImage.Representations.Full}"/>
+                               Source="{Binding CurrentImage.BackingImage.Representations.Large}"/>
 
         <controls:PostInfoBottomPanel x:Name="BottomPanel" 
                                       VerticalOptions="End" 
@@ -76,7 +119,8 @@
                                       Score="{Binding CurrentImage.BackingImage.Score}"
                                       Downvotes="{Binding CurrentImage.BackingImage.Downvotes}"
                                       Tags="{Binding CurrentImage.Tags}"
-                                      Comments="{Binding CurrentImage.Comments}"/>
+                                      Comments="{Binding CurrentImage.Comments}"
+                                      TagTappedCommand="{Binding TagTappedCommand}"/>
 
     </Grid>
 

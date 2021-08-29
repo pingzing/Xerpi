@@ -1,9 +1,4 @@
-﻿using System;
-using System.Windows.Input;
-
-using Xamarin.Forms;
-
-namespace Xerpi.ViewModels
+﻿namespace Xerpi.ViewModels
 {
     public class AboutViewModel : BasePageViewModel
     {
@@ -12,10 +7,6 @@ namespace Xerpi.ViewModels
         public AboutViewModel()
         {
             Title = "About";
-
-            OpenWebCommand = new Command(() => Device.OpenUri(new Uri("https://xamarin.com/platform")));
         }
-
-        public ICommand OpenWebCommand { get; }
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Xamarin.Forms;
+using Xerpi.Messages;
+using Xerpi.Models;
 using Xerpi.Services;
+using Xerpi.ViewModels;
 
 namespace Xerpi
 {
@@ -24,10 +23,15 @@ namespace Xerpi
             return true; // Lie to the Shell--Nav service does all the work now.
         }
 
-        private void MenuItem_Clicked(object sender, EventArgs e)
+        private async void Popular_Clicked(object sender, EventArgs e)
         {
-            FFImageLoading.ImageService.Instance.InvalidateMemoryCache();
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+            await _navigationService.HomeToViewModel<ImageGridViewModel, ImageGridWithQuery>(new ImageGridWithQuery
+            {
+                Query = "first_seen_at.gte: 3 days ago",
+                SortProperty = SortProperties.WilsonScore,
+                SortOrder = SortOrderKind.Descending,
+            });
+            this.FlyoutIsPresented = false;
         }
     }
 }
